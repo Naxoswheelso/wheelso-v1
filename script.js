@@ -732,12 +732,236 @@ if (protectionBack) {
 
 if (protectionContinue) {
   protectionContinue.addEventListener('click', () => {
-    alert(`Demo: Booking confirmed!\n\nVehicle: ${currentProtection.vehicle.name}\nRate: ${currentProtection.rate}\nProtection: ${currentProtection.selected}\nTotal: ${protectionTotal.textContent}`);
+    openExtrasPage();
   });
 }
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && protectionPage && !protectionPage.hidden) closeProtectionPage();
+});
+
+// ============================================
+// EXTRAS PAGE (Step 3)
+// ============================================
+const EXTRAS = [
+  {
+    id: 'additional-driver',
+    name: 'Additional driver',
+    priceLabel: '€6.66 / day per driver',
+    pricePerDay: 6.66,
+    perUnit: false,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
+    summary: 'Share the wheel with a friend or partner.',
+    details: 'Planning to swap drivers during the trip? Add anyone you trust behind the wheel. They\'ll just need to bring a valid driving licence to the desk when you collect the car.'
+  },
+  {
+    id: 'gps',
+    name: 'GPS navigation',
+    priceLabel: '€8 / day',
+    pricePerDay: 8,
+    perUnit: false,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>',
+    summary: 'Pre-loaded with Greek maps and points of interest.',
+    details: 'Stay on track even without mobile data. Our portable GPS unit comes pre-loaded with detailed maps of Greece and the Cyclades, plus suggested routes to beaches, viewpoints, and tavernas.'
+  },
+  {
+    id: 'child-seat',
+    name: 'Child seat (4-7 years)',
+    priceLabel: '€5 / day',
+    pricePerDay: 5,
+    perUnit: true,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>',
+    summary: 'Forward-facing seat for kids 4-7 years old (15-25kg).',
+    details: 'Approved booster-style seat that meets all EU safety standards. Installed by our team at pick-up, ready to go. Choose the quantity if you need more than one.'
+  },
+  {
+    id: 'baby-seat',
+    name: 'Baby seat (0-3 years)',
+    priceLabel: '€5 / day',
+    pricePerDay: 5,
+    perUnit: true,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 11h.01M15 11h.01M8 16s1.5 2 4 2 4-2 4-2"/></svg>',
+    summary: 'Rear-facing seat for infants and toddlers (0-13kg).',
+    details: 'A secure, comfortable rear-facing seat for your little one. Side-impact protection and adjustable harness included. Choose the quantity if you\'re travelling with more than one baby.'
+  },
+  {
+    id: 'wifi',
+    name: 'Portable WiFi hotspot',
+    priceLabel: '€7 / day',
+    pricePerDay: 7,
+    perUnit: false,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>',
+    summary: 'Unlimited 4G data for up to 10 devices.',
+    details: 'Stay connected wherever you go. Our pocket-sized hotspot delivers fast 4G across Greece and supports up to 10 devices at once — perfect for groups travelling between islands.'
+  },
+  {
+    id: 'roof-rack',
+    name: 'Roof rack',
+    priceLabel: '€4 / day',
+    pricePerDay: 4,
+    perUnit: false,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="2"/><line x1="6" y1="6" x2="6" y2="14"/><line x1="18" y1="6" x2="18" y2="14"/><path d="M3 14h18v6H3z"/></svg>',
+    summary: 'Extra cargo space for surf boards, bikes, or luggage.',
+    details: 'Bringing surf gear, bikes, or extra suitcases? Our roof rack adds carrying capacity without crowding the cabin. Includes safety straps — installed by our team before you drive off.'
+  }
+];
+
+const extrasPage = document.getElementById('extrasPage');
+const extrasList = document.getElementById('extrasList');
+const extrasBack = document.getElementById('extrasBack');
+const extrasContinue = document.getElementById('extrasContinue');
+const extrasTotal = document.getElementById('extrasTotal');
+const extrasOverviewProtection = document.getElementById('extrasOverviewProtection');
+const extrasOverviewCancellation = document.getElementById('extrasOverviewCancellation');
+
+let selectedExtras = {}; // {extraId: quantity}
+
+function renderExtrasList() {
+  if (!extrasList) return;
+  extrasList.innerHTML = EXTRAS.map(extra => {
+    const qty = selectedExtras[extra.id] || 0;
+    const isOn = qty > 0;
+    return `
+      <div class="extra-card ${isOn ? 'selected' : ''}" data-extra="${extra.id}">
+        <div class="extra-row">
+          <div class="extra-icon">${extra.icon}</div>
+          <div class="extra-info">
+            <h3 class="extra-name">${extra.name}</h3>
+            <p class="extra-summary">${extra.summary}</p>
+            <span class="extra-price">${extra.priceLabel}</span>
+          </div>
+          <div class="extra-controls">
+            ${extra.perUnit && isOn ? `
+              <div class="extra-qty">
+                <button type="button" class="qty-btn" data-action="dec" aria-label="Decrease">−</button>
+                <span class="qty-value">${qty}</span>
+                <button type="button" class="qty-btn" data-action="inc" aria-label="Increase">+</button>
+              </div>
+            ` : `
+              <button type="button" class="extra-toggle ${isOn ? 'on' : ''}" data-action="toggle" aria-pressed="${isOn}">
+                <span class="extra-toggle-thumb"></span>
+              </button>
+            `}
+          </div>
+        </div>
+        <button type="button" class="extra-details-toggle" data-action="details" aria-expanded="false">
+          What's included
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="extra-details" hidden>
+          <p>${extra.details}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function calculateExtrasTotal() {
+  return Object.entries(selectedExtras).reduce((sum, [id, qty]) => {
+    const extra = EXTRAS.find(e => e.id === id);
+    if (!extra || qty === 0) return sum;
+    return sum + (extra.pricePerDay * qty * currentProtection.days);
+  }, 0);
+}
+
+function updateExtrasTotal() {
+  const v = currentProtection.vehicle;
+  const days = currentProtection.days;
+  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
+  const baseTotal = (v.price + rateExtra + protectionDaily) * days;
+  const extrasCost = calculateExtrasTotal();
+  extrasTotal.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
+}
+
+function openExtrasPage() {
+  if (!extrasPage) return;
+  selectedExtras = {};
+  renderExtrasList();
+  updateExtrasTotal();
+
+  // Update overview info
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  if (extrasOverviewProtection && pkg) {
+    extrasOverviewProtection.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${pkg.name}`;
+  }
+  if (extrasOverviewCancellation) {
+    const cancelText = currentProtection.rate === 'flex'
+      ? 'Free cancellation any time'
+      : 'Free cancellation up to 48h before';
+    extrasOverviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
+  }
+
+  // Hide protection page, show extras
+  if (protectionPage) protectionPage.hidden = true;
+  extrasPage.hidden = false;
+  document.body.classList.add('protection-open');
+  extrasPage.scrollTop = 0;
+}
+
+function closeExtrasPage() {
+  extrasPage.hidden = true;
+  // Re-open protection page
+  if (protectionPage) {
+    protectionPage.hidden = false;
+    document.body.classList.add('protection-open');
+  } else {
+    document.body.classList.remove('protection-open');
+  }
+}
+
+if (extrasList) {
+  extrasList.addEventListener('click', (e) => {
+    const card = e.target.closest('.extra-card');
+    if (!card) return;
+    const extraId = card.dataset.extra;
+    const extra = EXTRAS.find(x => x.id === extraId);
+    if (!extra) return;
+    const actionBtn = e.target.closest('[data-action]');
+    if (!actionBtn) return;
+    const action = actionBtn.dataset.action;
+
+    if (action === 'toggle') {
+      if (selectedExtras[extraId]) {
+        delete selectedExtras[extraId];
+      } else {
+        selectedExtras[extraId] = 1;
+      }
+    } else if (action === 'inc') {
+      selectedExtras[extraId] = Math.min((selectedExtras[extraId] || 0) + 1, 4);
+    } else if (action === 'dec') {
+      const newQty = (selectedExtras[extraId] || 0) - 1;
+      if (newQty <= 0) delete selectedExtras[extraId];
+      else selectedExtras[extraId] = newQty;
+    } else if (action === 'details') {
+      const detailsEl = card.querySelector('.extra-details');
+      const isExpanded = !detailsEl.hidden;
+      detailsEl.hidden = isExpanded;
+      actionBtn.setAttribute('aria-expanded', String(!isExpanded));
+      actionBtn.classList.toggle('expanded', !isExpanded);
+      return; // don't re-render, just toggle
+    }
+
+    renderExtrasList();
+    updateExtrasTotal();
+  });
+}
+
+if (extrasBack) extrasBack.addEventListener('click', closeExtrasPage);
+
+if (extrasContinue) {
+  extrasContinue.addEventListener('click', () => {
+    const extrasList = Object.entries(selectedExtras).map(([id, qty]) => {
+      const e = EXTRAS.find(x => x.id === id);
+      return qty > 1 ? `${e.name} (×${qty})` : e.name;
+    }).join(', ') || 'None';
+    alert(`Demo: Booking confirmed!\n\nVehicle: ${currentProtection.vehicle.name}\nRate: ${currentProtection.rate}\nProtection: ${currentProtection.selected}\nExtras: ${extrasList}\nTotal: ${extrasTotal.textContent}`);
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && extrasPage && !extrasPage.hidden) closeExtrasPage();
 });
 
 // Language switcher (demo)

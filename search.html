@@ -253,6 +253,55 @@
     </main>
   </div>
 
+  <!-- ============ EXTRAS PAGE (Step 3) ============ -->
+  <div class="extras-page" id="extrasPage" hidden>
+    <header class="protection-header">
+      <div class="container protection-header-inner">
+        <button type="button" class="protection-back" id="extrasBack" aria-label="Back">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h1 class="protection-title">Add extras to your trip</h1>
+        <div class="protection-summary">
+          <div class="protection-total">
+            <span class="protection-total-label">Total</span>
+            <span class="protection-total-amount" id="extrasTotal">€0</span>
+            <a href="#" class="protection-breakdown">Price breakdown</a>
+          </div>
+          <button type="button" class="btn btn-primary protection-continue" id="extrasContinue">Continue</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="protection-main">
+      <div class="container">
+        <div class="extras-layout">
+          <div class="extras-list" id="extrasList"></div>
+          <aside class="extras-sidebar">
+            <h2 class="extras-sidebar-title">Your booking</h2>
+            <ul class="extras-overview">
+              <li>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Third party insurance
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Unlimited mileage
+              </li>
+              <li id="extrasOverviewProtection">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Protection package
+              </li>
+              <li id="extrasOverviewCancellation">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Free cancellation
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
   <script src="search.js"></script>
 </body>
 </html>
