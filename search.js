@@ -602,11 +602,29 @@ if (extrasBack) extrasBack.addEventListener('click', closeExtrasPage);
 
 if (extrasContinue) {
   extrasContinue.addEventListener('click', () => {
-    const extrasListStr = Object.entries(selectedExtras).map(([id, qty]) => {
+    const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+    const extras = Object.entries(selectedExtras).filter(([, qty]) => qty > 0).map(([id, qty]) => {
       const e = EXTRAS.find(x => x.id === id);
-      return qty > 1 ? `${e.name} (×${qty})` : e.name;
-    }).join(', ') || 'None';
-    alert(`Demo: Booking confirmed!\n\nVehicle: ${currentProtection.vehicle.name}\nDates: ${searchCtx.from} → ${searchCtx.to}\nRate: ${currentProtection.rate}\nProtection: ${currentProtection.selected}\nExtras: ${extrasListStr}\nTotal: ${extrasTotal.textContent}`);
+      return { id, name: e.name, qty, pricePerDay: e.pricePerDay };
+    });
+    localStorage.setItem('wheelsoCheckout', JSON.stringify({
+      vehicle: currentProtection.vehicle,
+      days: currentProtection.days,
+      rate: currentProtection.rate,
+      protection: selectedPkg,
+      extras,
+      search: {
+        pickup: LOCATION_LABELS[searchCtx.pickup] || searchCtx.pickup || 'Naxos',
+        return: LOCATION_LABELS[searchCtx.return] || searchCtx.return || LOCATION_LABELS[searchCtx.pickup] || 'Naxos',
+        from: searchCtx.from,
+        fromTime: searchCtx.fromTime,
+        to: searchCtx.to,
+        toTime: searchCtx.toTime,
+        age: searchCtx.age,
+        promo: searchCtx.promo
+      }
+    }));
+    window.location.href = 'checkout.html';
   });
 }
 

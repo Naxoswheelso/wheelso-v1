@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete your booking — Wheelso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="checkout-body">
+  <div class="summary-overlay" id="summaryOverlay" hidden></div>
+  <header class="site-header checkout-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Wheelso Home"><img src="assets/logo.png" alt="Wheelso" /></a>
+      <div class="header-actions">
+        <div class="lang-switcher" role="group" aria-label="Language"><button class="lang-btn active">EN</button><span class="lang-divider">|</span><button class="lang-btn">GR</button></div>
+        <a href="#" class="btn btn-ghost">My Booking</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="checkout-main">
+    <div class="container checkout-grid">
+      <section class="checkout-left">
+        <a href="search.html" class="checkout-back" id="backToResults">‹ Back to results</a>
+        <h1 class="checkout-title">Complete your booking</h1>
+
+        <form class="checkout-form" id="checkoutForm" novalidate>
+          <section class="checkout-section">
+            <h2>Driver details</h2>
+            <label class="field full"><span>Email address</span><input type="email" id="email" placeholder="Enter your email" required><small class="error">Please enter a valid email address</small></label>
+            <div class="two-cols">
+              <label class="field"><span>First name</span><input type="text" id="firstName" placeholder="First name" required><small class="error">Required field</small></label>
+              <label class="field"><span>Last name</span><input type="text" id="lastName" placeholder="Last name" required><small class="error">Required field</small></label>
+            </div>
+            <div class="phone-row">
+              <label class="field country"><span>Country code</span><select id="countryCode"><option value="+30">🇬🇷 +30</option><option value="+44">🇬🇧 +44</option><option value="+49">🇩🇪 +49</option><option value="+33">🇫🇷 +33</option><option value="+39">🇮🇹 +39</option></select></label>
+              <label class="field phone"><span>Phone number</span><input type="tel" id="phone" placeholder="Enter your phone number" required><small class="error">Please enter a valid phone number</small></label>
+            </div>
+            <label class="field full"><span>Driving license country <em>(optional)</em></span><select id="licenseCountry"><option value="">Select country</option><option>Greece</option><option>United Kingdom</option><option>Germany</option><option>France</option><option>Italy</option><option>United States</option></select></label>
+            <label class="check-row"><input type="checkbox" id="ageConfirm" checked required><span>I am 23 years or older</span></label>
+            <div class="info-note"><strong>i</strong><span>Drivers must hold a valid driving license for at least 1 year.</span></div>
+          </section>
+
+          <section class="checkout-section">
+            <h2>Discount codes & bonuses</h2>
+            <button type="button" class="discount-box" id="discountToggle"><span>⚙︎ Add discount code or bonus</span><span>→</span></button>
+            <div class="discount-input" id="discountInput" hidden><input type="text" id="promoCode" placeholder="Enter promo code"><button type="button" id="applyPromo">Apply</button></div>
+          </section>
+
+          <section class="checkout-total-bar">
+            <div><h2>Total</h2><p>VAT included</p></div><strong id="bottomTotal">€0.00</strong>
+          </section>
+          <label class="terms-row"><input type="checkbox" id="terms" required><span>By continuing, you confirm that you have read and accept our <a href="#">Terms and Conditions</a>, <a href="#">Rental Terms</a>, and <a href="#">Privacy Policy</a>.</span></label>
+          <button class="complete-booking" type="submit">Complete booking</button>
+        </form>
+      </section>
+
+      <aside class="checkout-summary-card" id="bookingSummary" aria-label="Booking summary">
+        <button type="button" class="summary-close" id="summaryClose" aria-label="Close booking summary">×</button>
+        <div class="summary-car"><div class="summary-car-img" id="summaryCarImg"></div><div><h3 id="summaryCarName">Vehicle</h3><p id="summaryCarMeta">or similar</p></div></div>
+        <div class="summary-block"><h4>Pickup & return</h4><div class="timeline"><div><span class="timeline-icon">▣</span><small>Pickup</small><strong id="summaryPickup">—</strong><p id="summaryPickupDate">—</p></div><div><span class="timeline-icon">▣</span><small>Return</small><strong id="summaryReturn">—</strong><p id="summaryReturnDate">—</p></div></div></div>
+        <div class="summary-block"><div class="summary-head"><h4>Your selection</h4><button type="button" id="editSelection">Edit</button></div><ul class="tick-list" id="summarySelection"></ul></div>
+        <div class="summary-block"><h4>Included</h4><ul class="tick-list"><li>Third party insurance</li><li>Unlimited kilometers</li><li>24/7 roadside assistance</li></ul></div>
+        <div class="summary-block"><h4>Price summary</h4><div id="priceLines"></div></div>
+        <div class="summary-total"><span>Total</span><strong id="summaryTotal">€0.00</strong></div>
+        <div class="secure-line">🔒 Secure booking. No hidden fees.</div>
+        <div class="payment-logos"><span>VISA</span><span>●●</span><span>AMEX</span><span>Apple Pay</span><span>G Pay</span></div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="confirmation-modal" id="confirmationModal" hidden>
+    <div class="confirmation-box">
+      <div class="confirmation-check">✓</div><h2>Booking confirmed</h2><p>Your demo reservation has been created.</p><strong id="bookingNumber">WHE-000000</strong><a href="index.html" class="complete-booking">Back to home</a>
+    </div>
+  </div>
+
+  <div class="mobile-checkout-cta" aria-label="Mobile booking action">
+    <button type="button" class="mobile-summary-button" id="mobileSummaryButton">View summary</button>
+    <div><span>Total</span><strong id="mobileTotal">€0.00</strong></div>
+    <button type="submit" form="checkoutForm" class="mobile-complete-button">Complete</button>
+  </div>
+
+  <footer class="checkout-footer"><div class="container checkout-footer-grid"><div>☑ <strong>Free cancellation</strong><span>Up to 48h before pick-up</span></div><div>⚙ <strong>Amendments</strong><span>Quick and easy</span></div><div>☎ <strong>24/7 Customer support</strong><span>We're here to help</span></div></div></footer>
+  <script src="checkout.js"></script>
+</body>
+</html>
