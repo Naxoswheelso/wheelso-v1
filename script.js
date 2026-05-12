@@ -880,24 +880,70 @@ function openExtrasPage() {
   selectedExtras = {};
   renderExtrasList();
   updateExtrasTotal();
+  populateSummarySidebar();
 
-  // Update overview info
-  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
-  if (extrasOverviewProtection && pkg) {
-    extrasOverviewProtection.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${pkg.name}`;
-  }
-  if (extrasOverviewCancellation) {
-    const cancelText = currentProtection.rate === 'flex'
-      ? 'Free cancellation any time'
-      : 'Free cancellation up to 48h before';
-    extrasOverviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
-  }
-
-  // Hide protection page, show extras
   if (protectionPage) protectionPage.hidden = true;
   extrasPage.hidden = false;
   document.body.classList.add('protection-open');
   extrasPage.scrollTop = 0;
+}
+
+function populateSummarySidebar() {
+  const v = currentProtection.vehicle;
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  if (!v) return;
+
+  // Vehicle card
+  const sv = document.getElementById('summaryVehicle');
+  if (sv) {
+    sv.innerHTML = `
+      <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
+      <div class="summary-vehicle-info">
+        <span class="summary-vehicle-cat">${CATEGORY_LABELS[v.category]}</span>
+        <span class="summary-vehicle-name">${v.name}</span>
+        <span class="summary-vehicle-similar">${v.similar}</span>
+      </div>
+    `;
+  }
+
+  // Use the booking form values from homepage (or defaults)
+  const pickupLocSel = document.getElementById('pickupLocation');
+  const pickupLocText = pickupLocSel && pickupLocSel.selectedIndex >= 0 && pickupLocSel.value
+    ? pickupLocSel.options[pickupLocSel.selectedIndex].text.trim()
+    : 'Athens Airport';
+  const pickupDateValue = pickupDateInput?.value || formatISO(pickupDate || new Date());
+  const returnDateValue = returnDateInput?.value || formatISO(returnDate || new Date());
+  const pickupTimeValue = document.getElementById('pickupTime')?.value || '10:00';
+  const returnTimeValue = document.getElementById('returnTime')?.value || '10:00';
+  const returnLocSel = document.getElementById('returnLocation');
+  const useReturn = document.getElementById('diffReturn')?.checked;
+  const returnLocText = useReturn && returnLocSel?.value
+    ? returnLocSel.options[returnLocSel.selectedIndex].text.trim()
+    : pickupLocText;
+
+  const sPickLoc = document.getElementById('summaryPickupLocation');
+  const sPickDate = document.getElementById('summaryPickupDate');
+  const sRetLoc = document.getElementById('summaryReturnLocation');
+  const sRetDate = document.getElementById('summaryReturnDate');
+  if (sPickLoc) sPickLoc.textContent = pickupLocText;
+  if (sPickDate) sPickDate.textContent = `${formatDateDisplay(pickupDateValue)} · ${pickupTimeValue}`;
+  if (sRetLoc) sRetLoc.textContent = returnLocText;
+  if (sRetDate) sRetDate.textContent = `${formatDateDisplay(returnDateValue)} · ${returnTimeValue}`;
+
+  // Rate + protection
+  const sRate = document.getElementById('summaryRate');
+  const sProt = document.getElementById('summaryProtection');
+  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Total flexibility · Free cancellation anytime' : 'Best price · Free cancellation up to 48h before';
+  if (sProt) sProt.textContent = pkg ? pkg.name : 'Protection package';
+}
+
+function formatDateDisplay(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${dow} ${d.getDate()} ${months[d.getMonth()]}`;
 }
 
 function closeExtrasPage() {
@@ -963,6 +1009,110 @@ if (extrasContinue) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && extrasPage && !extrasPage.hidden) closeExtrasPage();
 });
+
+// ============================================
+// PRICE BREAKDOWN MODAL
+// ============================================
+const breakdownModal = document.getElementById('breakdownModal');
+const breakdownContent = document.getElementById('breakdownContent');
+const breakdownTotalEl = document.getElementById('breakdownTotal');
+
+function buildBreakdown() {
+  if (!currentProtection.vehicle) return;
+  const v = currentProtection.vehicle;
+  const days = currentProtection.days;
+  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  const protectionDaily = pkg ? pkg.pricePerDay : 0;
+
+  let html = '';
+
+  // VEHICLE
+  html += `<div class="breakdown-section-title">Vehicle</div>`;
+  html += `<div class="breakdown-line">
+    <span>${v.name}<span class="breakdown-line-meta">€${v.price}/day × ${days} ${days===1?'day':'days'}</span></span>
+    <strong>€${(v.price * days).toFixed(2)}</strong>
+  </div>`;
+
+  if (rateExtra > 0) {
+    html += `<div class="breakdown-line">
+      <span>Total flexibility upgrade<span class="breakdown-line-meta">+€${rateExtra}/day × ${days} ${days===1?'day':'days'}</span></span>
+      <strong>€${(rateExtra * days).toFixed(2)}</strong>
+    </div>`;
+  }
+
+  // PROTECTION
+  if (pkg) {
+    html += `<div class="breakdown-divider"></div>`;
+    html += `<div class="breakdown-section-title">Protection</div>`;
+    if (pkg.pricePerDay > 0) {
+      html += `<div class="breakdown-line">
+        <span>${pkg.name}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+        <strong>€${(pkg.pricePerDay * days).toFixed(2)}</strong>
+      </div>`;
+    } else {
+      html += `<div class="breakdown-line">
+        <span>${pkg.name}</span>
+        <strong>Included</strong>
+      </div>`;
+    }
+  }
+
+  // EXTRAS
+  const extrasEntries = Object.entries(selectedExtras).filter(([, qty]) => qty > 0);
+  if (extrasEntries.length > 0) {
+    html += `<div class="breakdown-divider"></div>`;
+    html += `<div class="breakdown-section-title">Extras</div>`;
+    extrasEntries.forEach(([id, qty]) => {
+      const e = EXTRAS.find(x => x.id === id);
+      if (!e) return;
+      const lineTotal = e.pricePerDay * qty * days;
+      const qtyLabel = qty > 1 ? ` × ${qty}` : '';
+      html += `<div class="breakdown-line">
+        <span>${e.name}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}/day${qty > 1 ? ` × ${qty}` : ''} × ${days} ${days===1?'day':'days'}</span></span>
+        <strong>€${lineTotal.toFixed(2)}</strong>
+      </div>`;
+    });
+  }
+
+  breakdownContent.innerHTML = html;
+
+  // Total
+  const baseTotal = (v.price + rateExtra + protectionDaily) * days;
+  const extrasCost = calculateExtrasTotal();
+  breakdownTotalEl.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
+}
+
+function openBreakdown() {
+  if (!breakdownModal) return;
+  buildBreakdown();
+  breakdownModal.hidden = false;
+  document.body.classList.add('breakdown-open');
+  requestAnimationFrame(() => breakdownModal.classList.add('open'));
+}
+
+function closeBreakdown() {
+  if (!breakdownModal) return;
+  breakdownModal.classList.remove('open');
+  document.body.classList.remove('breakdown-open');
+  setTimeout(() => { breakdownModal.hidden = true; }, 220);
+}
+
+if (breakdownModal) {
+  breakdownModal.addEventListener('click', (e) => {
+    if (e.target.closest('[data-close-breakdown]')) closeBreakdown();
+  });
+  // Open from any "Price breakdown" link
+  document.querySelectorAll('.protection-breakdown').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openBreakdown();
+    });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !breakdownModal.hidden) closeBreakdown();
+  });
+}
 
 // Language switcher (demo)
 document.querySelectorAll('.lang-btn').forEach(btn => {

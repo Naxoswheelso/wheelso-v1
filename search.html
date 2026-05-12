@@ -278,28 +278,55 @@
           <div class="extras-list" id="extrasList"></div>
           <aside class="extras-sidebar">
             <h2 class="extras-sidebar-title">Your booking</h2>
-            <ul class="extras-overview">
-              <li>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Third party insurance
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Unlimited mileage
-              </li>
-              <li id="extrasOverviewProtection">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Protection package
-              </li>
-              <li id="extrasOverviewCancellation">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Free cancellation
-              </li>
-            </ul>
+            <div class="summary-vehicle" id="summaryVehicle"></div>
+            <div class="summary-section">
+              <span class="summary-label">Pick-up</span>
+              <span class="summary-value-line" id="summaryPickupLocation">—</span>
+              <span class="summary-meta" id="summaryPickupDate">—</span>
+            </div>
+            <div class="summary-section">
+              <span class="summary-label">Return</span>
+              <span class="summary-value-line" id="summaryReturnLocation">—</span>
+              <span class="summary-meta" id="summaryReturnDate">—</span>
+            </div>
+            <div class="summary-section summary-options">
+              <div class="summary-option-row">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="summaryRate">Best price rate</span>
+              </div>
+              <div class="summary-option-row">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="summaryProtection">Basic Protection</span>
+              </div>
+              <div class="summary-option-row">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Unlimited mileage</span>
+              </div>
+              <div class="summary-option-row">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Third party insurance</span>
+              </div>
+            </div>
           </aside>
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- ============ PRICE BREAKDOWN MODAL ============ -->
+  <div class="breakdown-modal" id="breakdownModal" hidden role="dialog" aria-modal="true" aria-labelledby="breakdownTitle">
+    <div class="breakdown-backdrop" data-close-breakdown></div>
+    <div class="breakdown-panel" role="document">
+      <button type="button" class="breakdown-close" data-close-breakdown aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2 class="breakdown-title" id="breakdownTitle">Price breakdown</h2>
+      <div class="breakdown-content" id="breakdownContent"></div>
+      <div class="breakdown-total">
+        <span>Total</span>
+        <span class="breakdown-total-amount" id="breakdownTotal">€0</span>
+      </div>
+    </div>
   </div>
 
   <script src="search.js"></script>
