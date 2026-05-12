@@ -3131,3 +3131,91 @@ body.breakdown-open { overflow: hidden; }
   .mobile-complete-button{min-width:112px;}
   .mobile-checkout-cta strong{font-size:18px;}
 }
+/* ========================================
+   LOCATION INPUT FIX
+======================================== */
+
+.location-input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.location-input-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    font-size: 18px;
+    color: #666;
+    pointer-events: none;
+}
+
+.location-input-wrapper select,
+.location-input-wrapper input {
+    width: 100%;
+    height: 58px;
+    padding-left: 50px;
+    padding-right: 45px;
+    border: 1px solid #d9d9d9;
+    border-radius: 18px;
+    font-size: 18px;
+    background: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.location-input-wrapper select:focus,
+.location-input-wrapper input:focus {
+    border-color: #ff5f00;
+    box-shadow: 0 0 0 3px rgba(255,95,0,0.1);
+}
+
+.location-input-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #222;
+    border-bottom: 2px solid #222;
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+    .location-input-wrapper select,
+    .location-input-wrapper input {
+        height: 56px;
+        font-size: 17px;
+        padding-left: 48px;
+    }
+
+    .location-input-wrapper i {
+        left: 15px;
+        font-size: 17px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .location-input-wrapper select,
+    .location-input-wrapper input {
+        height: 54px;
+        font-size: 16px;
+        border-radius: 16px;
+        padding-left: 46px;
+    }
+
+    .location-input-wrapper i {
+        left: 14px;
+        font-size: 16px;
+    }
+}
