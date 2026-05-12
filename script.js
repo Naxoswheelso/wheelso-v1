@@ -464,18 +464,31 @@ function openVehicleModal(v) {
   const isAuto = v.transmission === 'auto';
   const days = 3;
   const basePrice = v.price;
-  // Calculate dynamic total based on selected options
+  let currentStep = 1;
+
   function recalc() {
     let dailyExtra = 0;
     const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
     const insOpt = vehicleModal.querySelector('input[name="insuranceOption"]:checked')?.value;
-    if (bookingOpt === 'flex') dailyExtra += 0.75;
+    if (bookingOpt === 'flex') dailyExtra += 1;
     if (insOpt === 'scdw') dailyExtra += 8;
     if (insOpt === 'fdw') dailyExtra += 18;
     const daily = basePrice + dailyExtra;
     const total = (daily * days).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
     document.getElementById('modalPriceTotal').textContent = `€${total} total for ${days} days`;
+  }
+
+  function showStep(n) {
+    currentStep = n;
+    vehicleModal.querySelectorAll('.modal-step').forEach(s => {
+      s.hidden = String(s.dataset.step) !== String(n);
+    });
+    const label = document.getElementById('modalContinueLabel');
+    if (label) label.textContent = n === 1 ? 'Continue' : 'Confirm booking';
+    // Scroll modal back to top on step change
+    const sc = vehicleModal.querySelector('.modal-scroll-area');
+    if (sc) sc.scrollTop = 0;
   }
 
   // Populate content
@@ -506,16 +519,32 @@ function openVehicleModal(v) {
     };
   });
 
+  // Continue button handler — advances steps
+  const continueBtn = document.getElementById('modalContinue');
+  continueBtn.onclick = () => {
+    if (currentStep === 1) {
+      showStep(2);
+    } else {
+      closeVehicleModal();
+      document.querySelector('.booking-widget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  // Back button
+  const backBtn = document.getElementById('stepBack');
+  if (backBtn) backBtn.onclick = () => showStep(1);
+
+  showStep(1);
   recalc();
   vehicleModal.hidden = false;
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('vehicle-modal-open');
   requestAnimationFrame(() => vehicleModal.classList.add('open'));
 }
 
 function closeVehicleModal() {
   if (!vehicleModal) return;
   vehicleModal.classList.remove('open');
-  document.body.style.overflow = '';
+  document.body.classList.remove('vehicle-modal-open');
   setTimeout(() => { vehicleModal.hidden = true; }, 220);
 }
 
@@ -525,10 +554,6 @@ if (vehicleModal) {
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !vehicleModal.hidden) closeVehicleModal();
-  });
-  document.getElementById('modalContinue')?.addEventListener('click', () => {
-    closeVehicleModal();
-    document.querySelector('.booking-widget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 }
 

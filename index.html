@@ -259,15 +259,6 @@
         <div class="trust-divider"></div>
 
         <div class="trust-item">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          <div>
-            <strong>No Deposit</strong>
-            <span>Required</span>
-          </div>
-        </div>
-        <div class="trust-divider"></div>
-
-        <div class="trust-item">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <div>
             <strong>Free Cancellation</strong>
@@ -353,9 +344,14 @@
         </div>
       </div>
 
-      <!-- Right: booking options -->
-      <div class="modal-options">
-        <h3 class="modal-section-title">Booking options</h3>
+      <!-- STEP 1: Rate -->
+      <div class="modal-options modal-step" data-step="1">
+        <div class="modal-step-indicator">
+          <span class="step-badge">Step 1 of 2</span>
+          <h3 class="modal-section-title">Choose your rate</h3>
+          <p class="modal-section-sub">Pick the flexibility that fits your trip. You'll choose insurance next.</p>
+        </div>
+
         <div class="modal-option-group">
           <label class="modal-option selected">
             <input type="radio" name="bookingOption" value="best" checked />
@@ -365,7 +361,7 @@
                 <span class="modal-option-name">Best price</span>
                 <span class="modal-included">Included</span>
               </span>
-              <span class="modal-option-desc">Free cancellation & rebooking within 24h</span>
+              <span class="modal-option-desc">Free cancellation up to 48h before pick-up. Best value for confirmed trips.</span>
             </span>
           </label>
           <label class="modal-option">
@@ -373,53 +369,13 @@
             <span class="modal-option-radio"></span>
             <span class="modal-option-content">
               <span class="modal-option-row">
-                <span class="modal-option-name">Stay flexible</span>
+                <span class="modal-option-name">Total flexibility</span>
                 <span class="modal-option-right">
                   <span class="modal-tag">Popular</span>
-                  <span class="modal-option-price">+ €0.75/day</span>
+                  <span class="modal-option-price">+ €1/day</span>
                 </span>
               </span>
-              <span class="modal-option-desc">Free cancellation anytime before pick-up</span>
-            </span>
-          </label>
-        </div>
-
-        <h3 class="modal-section-title">Insurance</h3>
-        <div class="modal-option-group">
-          <label class="modal-option selected">
-            <input type="radio" name="insuranceOption" value="cdw" checked />
-            <span class="modal-option-radio"></span>
-            <span class="modal-option-content">
-              <span class="modal-option-row">
-                <span class="modal-option-name">CDW · Basic</span>
-                <span class="modal-included">Included</span>
-              </span>
-              <span class="modal-option-desc">Collision damage waiver with excess</span>
-            </span>
-          </label>
-          <label class="modal-option">
-            <input type="radio" name="insuranceOption" value="scdw" />
-            <span class="modal-option-radio"></span>
-            <span class="modal-option-content">
-              <span class="modal-option-row">
-                <span class="modal-option-name">SCDW · Reduced excess</span>
-                <span class="modal-option-price">+ €8/day</span>
-              </span>
-              <span class="modal-option-desc">Lower excess up to €300</span>
-            </span>
-          </label>
-          <label class="modal-option">
-            <input type="radio" name="insuranceOption" value="fdw" />
-            <span class="modal-option-radio"></span>
-            <span class="modal-option-content">
-              <span class="modal-option-row">
-                <span class="modal-option-name">FDW · Zero excess</span>
-                <span class="modal-option-right">
-                  <span class="modal-tag tag-lime">Recommended</span>
-                  <span class="modal-option-price">+ €18/day</span>
-                </span>
-              </span>
-              <span class="modal-option-desc">Full damage waiver, glass coverage included</span>
+              <span class="modal-option-desc">Cancel or change your booking any time — even an hour before pick-up.</span>
             </span>
           </label>
         </div>
@@ -427,8 +383,59 @@
         <div class="modal-features">
           <span class="modal-feature">✓ Unlimited mileage</span>
           <span class="modal-feature">✓ 24/7 roadside</span>
-          <span class="modal-feature">✓ No deposit</span>
-          <span class="modal-feature">✓ Free cancellation</span>
+          <span class="modal-feature">✓ CDW insurance included</span>
+        </div>
+      </div>
+
+      <!-- STEP 2: Insurance -->
+      <div class="modal-options modal-step" data-step="2" hidden>
+        <div class="modal-step-indicator">
+          <button type="button" class="step-back" id="stepBack">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+          <span class="step-badge">Step 2 of 2</span>
+          <h3 class="modal-section-title">Protect your trip</h3>
+          <p class="modal-section-sub">Drive worry-free. Choose the protection level that suits you.</p>
+        </div>
+
+        <div class="modal-option-group">
+          <label class="modal-option selected">
+            <input type="radio" name="insuranceOption" value="cdw" checked />
+            <span class="modal-option-radio"></span>
+            <span class="modal-option-content">
+              <span class="modal-option-row">
+                <span class="modal-option-name">Standard cover (CDW)</span>
+                <span class="modal-included">Included</span>
+              </span>
+              <span class="modal-option-desc">Collision damage waiver — you pay only up to the excess if something happens.</span>
+            </span>
+          </label>
+          <label class="modal-option">
+            <input type="radio" name="insuranceOption" value="scdw" />
+            <span class="modal-option-radio"></span>
+            <span class="modal-option-content">
+              <span class="modal-option-row">
+                <span class="modal-option-name">Reduced excess (SCDW)</span>
+                <span class="modal-option-price">+ €8/day</span>
+              </span>
+              <span class="modal-option-desc">Cuts your maximum out-of-pocket liability down to €300.</span>
+            </span>
+          </label>
+          <label class="modal-option">
+            <input type="radio" name="insuranceOption" value="fdw" />
+            <span class="modal-option-radio"></span>
+            <span class="modal-option-content">
+              <span class="modal-option-row">
+                <span class="modal-option-name">Zero excess + No deposit (FDW)</span>
+                <span class="modal-option-right">
+                  <span class="modal-tag tag-lime">Recommended</span>
+                  <span class="modal-option-price">+ €18/day</span>
+                </span>
+              </span>
+              <span class="modal-option-desc">Full damage waiver, glass and tyres included, and we skip the security deposit.</span>
+            </span>
+          </label>
         </div>
       </div>
       </div><!-- /.modal-scroll-area -->
@@ -440,7 +447,7 @@
           <span class="modal-price-total" id="modalPriceTotal"></span>
         </div>
         <button type="button" class="modal-cta" id="modalContinue">
-          Continue
+          <span id="modalContinueLabel">Continue</span>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </div>
