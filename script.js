@@ -464,31 +464,17 @@ function openVehicleModal(v) {
   const isAuto = v.transmission === 'auto';
   const days = 3;
   const basePrice = v.price;
-  let currentStep = 1;
+
+  function getRateExtra() {
+    const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
+    return bookingOpt === 'flex' ? 1 : 0;
+  }
 
   function recalc() {
-    let dailyExtra = 0;
-    const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
-    const insOpt = vehicleModal.querySelector('input[name="insuranceOption"]:checked')?.value;
-    if (bookingOpt === 'flex') dailyExtra += 1;
-    if (insOpt === 'scdw') dailyExtra += 8;
-    if (insOpt === 'fdw') dailyExtra += 18;
-    const daily = basePrice + dailyExtra;
+    const daily = basePrice + getRateExtra();
     const total = (daily * days).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
     document.getElementById('modalPriceTotal').textContent = `€${total} total for ${days} days`;
-  }
-
-  function showStep(n) {
-    currentStep = n;
-    vehicleModal.querySelectorAll('.modal-step').forEach(s => {
-      s.hidden = String(s.dataset.step) !== String(n);
-    });
-    const label = document.getElementById('modalContinueLabel');
-    if (label) label.textContent = n === 1 ? 'Continue' : 'Confirm booking';
-    // Scroll modal back to top on step change
-    const sc = vehicleModal.querySelector('.modal-scroll-area');
-    if (sc) sc.scrollTop = 0;
   }
 
   // Populate content
@@ -519,22 +505,14 @@ function openVehicleModal(v) {
     };
   });
 
-  // Continue button handler — advances steps
+  // Continue button → open Protection page
   const continueBtn = document.getElementById('modalContinue');
   continueBtn.onclick = () => {
-    if (currentStep === 1) {
-      showStep(2);
-    } else {
-      closeVehicleModal();
-      document.querySelector('.booking-widget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    const rateChoice = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value || 'best';
+    closeVehicleModal();
+    openProtectionPage(v, days, rateChoice);
   };
 
-  // Back button
-  const backBtn = document.getElementById('stepBack');
-  if (backBtn) backBtn.onclick = () => showStep(1);
-
-  showStep(1);
   recalc();
   vehicleModal.hidden = false;
   document.body.classList.add('vehicle-modal-open');
@@ -556,6 +534,197 @@ if (vehicleModal) {
     if (e.key === 'Escape' && !vehicleModal.hidden) closeVehicleModal();
   });
 }
+
+// ============================================
+// PROTECTION SELECTION PAGE
+// ============================================
+const PROTECTION_PACKAGES = [
+  {
+    id: 'none',
+    name: 'No extra protection',
+    stars: 0,
+    excessLabel: 'Liability:',
+    excess: 'Up to full vehicle value',
+    excessClass: 'danger',
+    pricePerDay: 0,
+    discount: null,
+    features: {
+      'Loss Damage Waiver (including theft protection)': false,
+      'Tire & Windshield Protection': false,
+      'Personal Accident Protection': false,
+      'Roadside Protection': false,
+      'Interior Protection': false
+    }
+  },
+  {
+    id: 'basic',
+    name: 'Basic Protection',
+    stars: 1,
+    excessLabel: 'Excess:',
+    excess: 'Up to €800',
+    excessClass: 'warning',
+    pricePerDay: 1.65,
+    discount: null,
+    features: {
+      'Loss Damage Waiver (including theft protection)': true,
+      'Tire & Windshield Protection': false,
+      'Personal Accident Protection': false,
+      'Roadside Protection': false,
+      'Interior Protection': false
+    }
+  },
+  {
+    id: 'smart',
+    name: 'Smart Protection',
+    stars: 2,
+    excessLabel: 'Excess:',
+    excess: 'Zero excess',
+    excessClass: 'good',
+    pricePerDay: 14.02,
+    oldPrice: 20.03,
+    discount: '−30% online',
+    features: {
+      'Loss Damage Waiver (including theft protection)': true,
+      'Tire & Windshield Protection': true,
+      'Personal Accident Protection': false,
+      'Roadside Protection': false,
+      'Interior Protection': false
+    }
+  },
+  {
+    id: 'all',
+    name: 'All Inclusive Protection',
+    stars: 3,
+    excessLabel: 'Excess:',
+    excess: 'Zero excess',
+    excessClass: 'good',
+    pricePerDay: 27.11,
+    oldPrice: 41.71,
+    discount: '−35% online',
+    recommended: true,
+    features: {
+      'Loss Damage Waiver (including theft protection)': true,
+      'Tire & Windshield Protection': true,
+      'Personal Accident Protection': true,
+      'Roadside Protection': true,
+      'Interior Protection': true
+    }
+  }
+];
+
+const ICON_CHECK = '<svg class="protection-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const ICON_X = '<svg class="protection-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+function renderStars(filled, total = 3) {
+  let html = '<div class="protection-stars">';
+  for (let i = 0; i < total; i++) {
+    html += `<svg class="protection-star ${i < filled ? 'filled' : ''}" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderProtectionCard(pkg, selectedId) {
+  const featuresHTML = Object.entries(pkg.features).map(([name, included]) => `
+    <div class="protection-feature ${included ? 'included' : 'excluded'}">
+      ${included ? ICON_CHECK : ICON_X}
+      <span>${name}</span>
+    </div>
+  `).join('');
+
+  let priceHTML;
+  if (pkg.pricePerDay === 0) {
+    priceHTML = `<div class="protection-price">Included <span>in rate</span></div>`;
+  } else {
+    priceHTML = `<div class="protection-price">€${pkg.pricePerDay.toFixed(2)} <span>/day</span>${pkg.oldPrice ? `<span class="protection-price-old">€${pkg.oldPrice.toFixed(2)}/day</span>` : ''}</div>`;
+  }
+
+  return `
+    <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${pkg.id}">
+      <div class="protection-card-radio"></div>
+      <h3 class="protection-card-name">${pkg.name}</h3>
+      ${renderStars(pkg.stars)}
+      ${pkg.discount ? `<span class="protection-discount">${pkg.discount}</span>` : ''}
+      <div class="protection-excess ${pkg.excessClass}">
+        <strong>${pkg.excessLabel}</strong>
+        ${pkg.excess}
+      </div>
+      <div class="protection-features">${featuresHTML}</div>
+      ${priceHTML}
+    </div>
+  `;
+}
+
+const protectionPage = document.getElementById('protectionPage');
+const protectionGrid = document.getElementById('protectionGrid');
+const protectionBack = document.getElementById('protectionBack');
+const protectionContinue = document.getElementById('protectionContinue');
+const protectionTotal = document.getElementById('protectionTotal');
+const overviewCancellation = document.getElementById('overviewCancellation');
+
+let currentProtection = { vehicle: null, days: 3, rate: 'best', selected: 'basic' };
+
+function openProtectionPage(v, days, rate) {
+  currentProtection = { vehicle: v, days, rate, selected: 'basic' };
+  renderProtectionGrid();
+  updateProtectionTotal();
+
+  // Update cancellation overview based on rate choice
+  if (overviewCancellation) {
+    const cancelText = rate === 'flex'
+      ? 'Total flexibility — Free cancellation any time before pick-up'
+      : 'Best price — Free cancellation up to 48h before pick-up';
+    overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
+  }
+
+  protectionPage.hidden = false;
+  document.body.classList.add('protection-open');
+  protectionPage.scrollTop = 0;
+}
+
+function closeProtectionPage() {
+  protectionPage.hidden = true;
+  document.body.classList.remove('protection-open');
+}
+
+function renderProtectionGrid() {
+  protectionGrid.innerHTML = PROTECTION_PACKAGES.map(p => renderProtectionCard(p, currentProtection.selected)).join('');
+}
+
+function updateProtectionTotal() {
+  const v = currentProtection.vehicle;
+  const days = currentProtection.days;
+  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
+  const daily = v.price + rateExtra + protectionDaily;
+  const total = (daily * days).toFixed(2);
+  protectionTotal.textContent = `€${total}`;
+}
+
+if (protectionGrid) {
+  protectionGrid.addEventListener('click', (e) => {
+    const card = e.target.closest('.protection-card');
+    if (!card) return;
+    currentProtection.selected = card.dataset.pkg;
+    renderProtectionGrid();
+    updateProtectionTotal();
+  });
+}
+
+if (protectionBack) {
+  protectionBack.addEventListener('click', closeProtectionPage);
+}
+
+if (protectionContinue) {
+  protectionContinue.addEventListener('click', () => {
+    alert(`Demo: Booking confirmed!\n\nVehicle: ${currentProtection.vehicle.name}\nRate: ${currentProtection.rate}\nProtection: ${currentProtection.selected}\nTotal: ${protectionTotal.textContent}`);
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && protectionPage && !protectionPage.hidden) closeProtectionPage();
+});
 
 // Language switcher (demo)
 document.querySelectorAll('.lang-btn').forEach(btn => {
