@@ -423,6 +423,7 @@ img { display: block; max-width: 100%; height: auto; }
 .field-select,
 .field-input {
   width: 100%;
+  flex: 1;
   padding: 14px 40px 14px 4px;
   border: none;
   background: transparent;
@@ -433,6 +434,7 @@ img { display: block; max-width: 100%; height: auto; }
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
+  min-width: 0;
 }
 .field-select:focus,
 .field-input:focus { outline: none; }
