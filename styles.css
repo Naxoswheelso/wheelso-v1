@@ -400,6 +400,7 @@ img { display: block; max-width: 100%; height: auto; }
   border: 1.5px solid var(--wh-gray-100);
   border-radius: var(--radius-md);
   transition: all 0.2s;
+  padding-left: 40px;
 }
 .select-wrap:focus-within,
 .datetime-wrap:focus-within,
@@ -416,12 +417,13 @@ img { display: block; max-width: 100%; height: auto; }
   transform: translateY(-50%);
   color: var(--wh-blue-mid);
   pointer-events: none;
+  z-index: 1;
 }
 
 .field-select,
 .field-input {
   width: 100%;
-  padding: 14px 40px 14px 42px;
+  padding: 14px 40px 14px 4px;
   border: none;
   background: transparent;
   font: inherit;
