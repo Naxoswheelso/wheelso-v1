@@ -602,34 +602,155 @@ if (extrasBack) extrasBack.addEventListener('click', closeExtrasPage);
 
 if (extrasContinue) {
   extrasContinue.addEventListener('click', () => {
-    const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
-    const extras = Object.entries(selectedExtras).filter(([, qty]) => qty > 0).map(([id, qty]) => {
-      const e = EXTRAS.find(x => x.id === id);
-      return { id, name: e.name, qty, pricePerDay: e.pricePerDay };
-    });
-    localStorage.setItem('wheelsoCheckout', JSON.stringify({
-      vehicle: currentProtection.vehicle,
-      days: currentProtection.days,
-      rate: currentProtection.rate,
-      protection: selectedPkg,
-      extras,
-      search: {
-        pickup: LOCATION_LABELS[searchCtx.pickup] || searchCtx.pickup || 'Naxos',
-        return: LOCATION_LABELS[searchCtx.return] || searchCtx.return || LOCATION_LABELS[searchCtx.pickup] || 'Naxos',
-        from: searchCtx.from,
-        fromTime: searchCtx.fromTime,
-        to: searchCtx.to,
-        toTime: searchCtx.toTime,
-        age: searchCtx.age,
-        promo: searchCtx.promo
-      }
-    }));
-    window.location.href = 'checkout.html';
+    openDriverPage();
   });
 }
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && extrasPage && !extrasPage.hidden) closeExtrasPage();
+});
+
+// ============================================
+// DRIVER DETAILS PAGE (Step 4)
+// ============================================
+const driverPage = document.getElementById('driverPage');
+const driverBack = document.getElementById('driverBack');
+const driverContinueBtn = document.getElementById('driverContinue');
+const driverTotalEl = document.getElementById('driverTotal');
+const driverForm = document.getElementById('driverForm');
+
+function openDriverPage() {
+  if (!driverPage) return;
+  populateDriverSummary();
+  if (extrasPage) extrasPage.hidden = true;
+  driverPage.hidden = false;
+  document.body.classList.add('protection-open');
+  driverPage.scrollTop = 0;
+}
+
+function closeDriverPage() {
+  driverPage.hidden = true;
+  if (extrasPage) {
+    extrasPage.hidden = false;
+    document.body.classList.add('protection-open');
+  } else {
+    document.body.classList.remove('protection-open');
+  }
+}
+
+function populateDriverSummary() {
+  const v = currentProtection.vehicle;
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  if (!v) return;
+
+  const sv = document.getElementById('driverSummaryVehicle');
+  if (sv) {
+    sv.innerHTML = `
+      <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
+      <div class="summary-vehicle-info">
+        <span class="summary-vehicle-cat">${CATEGORY_LABELS[v.category]}</span>
+        <span class="summary-vehicle-name">${v.name}</span>
+        <span class="summary-vehicle-similar">${v.similar}</span>
+      </div>
+    `;
+  }
+
+  const pickupLocText = LOCATION_LABELS[searchCtx.pickup] || 'Athens Airport';
+  const returnLocText = searchCtx.return ? (LOCATION_LABELS[searchCtx.return] || pickupLocText) : pickupLocText;
+
+  function fmt(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${dow} ${d.getDate()} ${months[d.getMonth()]}`;
+  }
+
+  document.getElementById('driverSummaryPickupLoc').textContent = pickupLocText;
+  document.getElementById('driverSummaryPickupDate').textContent = `${fmt(searchCtx.from)} · ${searchCtx.fromTime}`;
+  document.getElementById('driverSummaryReturnLoc').textContent = returnLocText;
+  document.getElementById('driverSummaryReturnDate').textContent = `${fmt(searchCtx.to)} · ${searchCtx.toTime}`;
+
+  document.getElementById('driverSummaryRate').textContent = currentProtection.rate === 'flex'
+    ? 'Total flexibility'
+    : 'Best price · Free cancellation up to 48h before';
+  document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : 'Protection package';
+
+  const extrasEntries = Object.entries(selectedExtras).filter(([, qty]) => qty > 0);
+  const extrasRow = document.getElementById('driverSummaryExtras');
+  if (extrasEntries.length > 0 && extrasRow) {
+    const txt = extrasEntries.map(([id, qty]) => {
+      const e = EXTRAS.find(x => x.id === id);
+      return qty > 1 ? `${e.name} (×${qty})` : e.name;
+    }).join(', ');
+    document.getElementById('driverSummaryExtrasText').textContent = txt;
+    extrasRow.hidden = false;
+  } else if (extrasRow) {
+    extrasRow.hidden = true;
+  }
+
+  const days = currentProtection.days;
+  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const protectionDaily = pkg ? pkg.pricePerDay : 0;
+  const baseTotal = (v.price + rateExtra + protectionDaily) * days;
+  const extrasCost = calculateExtrasTotal();
+  driverTotalEl.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
+}
+
+if (driverBack) driverBack.addEventListener('click', closeDriverPage);
+
+if (driverContinueBtn) {
+  driverContinueBtn.addEventListener('click', () => {
+    if (!validateDriverForm()) return;
+    const data = new FormData(driverForm);
+    const obj = Object.fromEntries(data);
+    alert(`Demo: Booking confirmed!\n\n${obj.firstName} ${obj.lastName}\nEmail: ${obj.email}\nPhone: ${obj.country} ${obj.phone}\nTotal: ${driverTotalEl.textContent}\n\nNext step in production: redirect to payment provider (Viva Wallet / Stripe / Bank ePOS).`);
+  });
+}
+
+function validateDriverForm() {
+  let valid = true;
+  const required = ['firstName', 'lastName', 'email', 'phone'];
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = el.value.trim();
+    if (!v) {
+      el.classList.add('invalid');
+      valid = false;
+    } else if (id === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) {
+      el.classList.add('invalid');
+      valid = false;
+    } else {
+      el.classList.remove('invalid');
+    }
+  });
+  const ageOK = document.getElementById('ageConfirm')?.checked;
+  const termsOK = document.getElementById('termsAgree')?.checked;
+  if (!ageOK || !termsOK) {
+    valid = false;
+    if (!ageOK) document.getElementById('ageConfirm')?.focus();
+    else document.getElementById('termsAgree')?.focus();
+  }
+  if (!valid) {
+    const firstInvalid = driverForm.querySelector('.invalid');
+    firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    firstInvalid?.focus();
+  }
+  return valid;
+}
+
+if (driverForm) {
+  driverForm.addEventListener('input', (e) => {
+    if (e.target.classList.contains('invalid')) {
+      e.target.classList.remove('invalid');
+    }
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && driverPage && !driverPage.hidden) closeDriverPage();
 });
 
 // ============================================

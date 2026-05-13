@@ -313,6 +313,128 @@
     </main>
   </div>
 
+  <!-- ============ DRIVER DETAILS PAGE (Step 4) ============ -->
+  <div class="driver-page" id="driverPage" hidden>
+    <header class="protection-header">
+      <div class="container protection-header-inner">
+        <button type="button" class="protection-back" id="driverBack" aria-label="Back">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h1 class="protection-title">Complete your booking</h1>
+        <div class="protection-summary">
+          <div class="protection-total">
+            <span class="protection-total-label">Total</span>
+            <span class="protection-total-amount" id="driverTotal">€0</span>
+            <a href="#" class="protection-breakdown">Price breakdown</a>
+          </div>
+          <button type="button" class="btn btn-primary protection-continue" id="driverContinue">Confirm & Pay</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="protection-main">
+      <div class="container">
+        <div class="driver-layout">
+          <div class="driver-form-card">
+            <h2 class="driver-section-title">Driver details</h2>
+            <p class="driver-section-sub">We'll send your booking confirmation here. Please make sure everything matches the driver's licence.</p>
+
+            <form id="driverForm" class="driver-form" novalidate>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="firstName">First name <span class="req">*</span></label>
+                  <input type="text" id="firstName" name="firstName" required autocomplete="given-name" />
+                </div>
+                <div class="form-field">
+                  <label for="lastName">Last name <span class="req">*</span></label>
+                  <input type="text" id="lastName" name="lastName" required autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="email">Email <span class="req">*</span></label>
+                <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" />
+                <span class="form-hint">We'll send the confirmation and receipt to this email.</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field form-field-country">
+                  <label for="country">Country code</label>
+                  <select id="country" name="country">
+                    <option value="+30" selected>🇬🇷 +30</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+34">🇪🇸 +34</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+31">🇳🇱 +31</option>
+                    <option value="+43">🇦🇹 +43</option>
+                    <option value="+41">🇨🇭 +41</option>
+                  </select>
+                </div>
+                <div class="form-field form-field-phone">
+                  <label for="phone">Phone <span class="req">*</span></label>
+                  <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="6912345678" />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="flight">Flight or ferry number <span class="optional">(optional)</span></label>
+                <input type="text" id="flight" name="flight" placeholder="e.g. A3 612 or Blue Star 12:30" />
+                <span class="form-hint">If you're flying or arriving by ferry, we'll know when to expect you.</span>
+              </div>
+
+              <div class="form-field">
+                <label for="notes">Notes for the team <span class="optional">(optional)</span></label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Travelling with kids? Need help with luggage? Tell us anything that helps make pick-up smooth."></textarea>
+              </div>
+
+              <div class="form-checkbox">
+                <input type="checkbox" id="ageConfirm" required />
+                <label for="ageConfirm">I confirm I'm 21 or older and hold a valid driving licence for at least 1 year.</label>
+              </div>
+
+              <div class="form-checkbox">
+                <input type="checkbox" id="termsAgree" required />
+                <label for="termsAgree">I've read and agree to the <a href="#" class="link-inline">rental terms</a> and <a href="#" class="link-inline">privacy policy</a>.</label>
+              </div>
+            </form>
+          </div>
+
+          <aside class="extras-sidebar">
+            <h2 class="extras-sidebar-title">Your booking</h2>
+            <div class="summary-vehicle" id="driverSummaryVehicle"></div>
+            <div class="summary-section">
+              <span class="summary-label">Pick-up</span>
+              <span class="summary-value-line" id="driverSummaryPickupLoc">—</span>
+              <span class="summary-meta" id="driverSummaryPickupDate">—</span>
+            </div>
+            <div class="summary-section">
+              <span class="summary-label">Return</span>
+              <span class="summary-value-line" id="driverSummaryReturnLoc">—</span>
+              <span class="summary-meta" id="driverSummaryReturnDate">—</span>
+            </div>
+            <div class="summary-section summary-options">
+              <div class="summary-option-row">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="driverSummaryRate">—</span>
+              </div>
+              <div class="summary-option-row">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="driverSummaryProtection">—</span>
+              </div>
+              <div class="summary-option-row" id="driverSummaryExtras" hidden>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="driverSummaryExtrasText">—</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
   <!-- ============ PRICE BREAKDOWN MODAL ============ -->
   <div class="breakdown-modal" id="breakdownModal" hidden role="dialog" aria-modal="true" aria-labelledby="breakdownTitle">
     <div class="breakdown-backdrop" data-close-breakdown></div>
