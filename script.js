@@ -43,7 +43,7 @@ function frontendValueToStationCode(v) {
 // ============================================
 // STATIONS — load from API + populate dropdowns
 // ============================================
-const STATION_TYPE_ICON = { airport: '✈️', port: '⚓', downtown: '🏙️' };
+const STATION_TYPE_ICON = { airport: '️', port: '', downtown: '' };
 const STATION_TYPE_LABEL = { airport: 'Airport', port: 'Port', downtown: 'Downtown' };
 
 function buildStationOptions(stations, includeDefault = true) {
@@ -90,19 +90,19 @@ async function loadStationsFromAPI() {
     console.warn('[Wheelso] Could not load stations, using fallback:', err.message);
     const fallback = `
       <optgroup label="📍 Athens · Αθήνα">
-        <option value="ath-airport">✈️  Athens Airport (ATH)</option>
-        <option value="ath-downtown">🏙️  Athens Downtown — Syngrou Ave. 22</option>
+        <option value="ath-airport">️  Athens Airport (ATH)</option>
+        <option value="ath-downtown">  Athens Downtown — Syngrou Ave. 22</option>
       </optgroup>
       <optgroup label="📍 Mykonos · Μύκονος">
-        <option value="myk-airport">✈️  Mykonos Airport (JMK)</option>
+        <option value="myk-airport">️  Mykonos Airport (JMK)</option>
         <option value="myk-port">⚓  Mykonos Port (Tourlos)</option>
       </optgroup>
       <optgroup label="📍 Paros · Πάρος">
-        <option value="par-airport">✈️  Paros Airport (PAS)</option>
+        <option value="par-airport">️  Paros Airport (PAS)</option>
         <option value="par-port">⚓  Paros Port (Parikia)</option>
       </optgroup>
       <optgroup label="📍 Naxos · Νάξος">
-        <option value="nax-airport">✈️  Naxos Airport (JNX)</option>
+        <option value="nax-airport">️  Naxos Airport (JNX)</option>
         <option value="nax-port">⚓  Naxos Port (Chora)</option>
       </optgroup>`;
     const pickupEl = document.getElementById('pickupLocation');
