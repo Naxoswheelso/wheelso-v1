@@ -1552,7 +1552,7 @@ img { display: block; max-width: 100%; height: auto; }
     max-height: 100vh;
     height: 100vh;
     border-radius: 0;
-    overflow: hidden;
+    overflow-y: auto;
   }
 
   /* Scrollable container wraps preview + options */
