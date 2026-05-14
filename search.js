@@ -50,7 +50,7 @@ const searchCtx = {
   fromTime: urlParams.get('fromTime') || '10:00',
   to: urlParams.get('to') || '',
   toTime: urlParams.get('toTime') || '10:00',
-  age: urlParams.get('age') || '25+',
+  age: urlParams.get('age') || '26-69',
   promo: urlParams.get('promo') || ''
 };
 
@@ -778,6 +778,33 @@ function openDriverPage() {
   // Show after-hours warning if applicable
   const timing = checkPickupTiming();
   showAfterHoursWarning(timing.warning);
+
+  // Show young/senior driver warning if applicable
+  const youngDriverBannerId = 'youngDriverBanner';
+  let youngBanner = document.getElementById(youngDriverBannerId);
+  if (searchCtx.age === '21-25') {
+    if (!youngBanner) {
+      youngBanner = document.createElement('div');
+      youngBanner.id = youngDriverBannerId;
+      youngBanner.style.cssText = 'background:#fff8e1;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-size:14px;color:#92400e;';
+      const ageConfirm = document.getElementById('ageConfirm');
+      if (ageConfirm) ageConfirm.closest('div')?.before(youngBanner);
+    }
+    youngBanner.innerHTML = '⚠️ <strong>Young Driver Fee applies</strong> — drivers aged 21–25 are subject to an additional fee, payable at pick-up.';
+    youngBanner.style.display = 'block';
+  } else if (searchCtx.age === '70-75') {
+    if (!youngBanner) {
+      youngBanner = document.createElement('div');
+      youngBanner.id = youngDriverBannerId;
+      youngBanner.style.cssText = 'background:#fff8e1;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-size:14px;color:#92400e;';
+      const ageConfirm = document.getElementById('ageConfirm');
+      if (ageConfirm) ageConfirm.closest('div')?.before(youngBanner);
+    }
+    youngBanner.innerHTML = '⚠️ <strong>Senior Driver Fee applies</strong> — drivers aged 70–75 are subject to an additional fee, payable at pick-up.';
+    youngBanner.style.display = 'block';
+  } else if (youngBanner) {
+    youngBanner.style.display = 'none';
+  }
 
   // Update total with after-hours fee
   updateDriverTotal(timing.afterHoursFee);
