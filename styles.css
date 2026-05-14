@@ -1553,6 +1553,24 @@ img { display: block; max-width: 100%; height: auto; }
     height: 100vh;
     border-radius: 0;
     overflow: hidden;
+    overflow-x: hidden;
+  }
+  .modal-option {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .modal-option-content {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .modal-option-row {
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  .modal-option-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Scrollable container wraps preview + options */
