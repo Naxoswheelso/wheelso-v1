@@ -210,6 +210,9 @@ img { display: block; max-width: 100%; height: auto; }
   background: var(--wh-blue-dark);
   overflow: visible;
   padding-bottom: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 .hero::after {
   display: none;
@@ -268,9 +271,9 @@ img { display: block; max-width: 100%; height: auto; }
   grid-template-columns: 1fr 1fr;
   gap: 80px;
   align-items: center;
-  min-height: 620px;
+  flex: 1;
   padding-top: 80px;
-  padding-bottom: 100px;
+  padding-bottom: 80px;
 }
 
 .hero-copy {
@@ -987,9 +990,9 @@ img { display: block; max-width: 100%; height: auto; }
 .trust-strip {
   position: relative;
   z-index: 1;
-  background: var(--wh-white);
-  border-top: 1px solid var(--wh-gray-100);
-  border-bottom: 1px solid var(--wh-gray-100);
+  background: rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-top: auto;
 }
 .trust-inner {
   display: flex;
@@ -1002,14 +1005,14 @@ img { display: block; max-width: 100%; height: auto; }
   display: flex;
   align-items: center;
   gap: 14px;
-  color: var(--wh-blue-dark);
+  color: var(--wh-white);
   flex: 1;
   min-width: 0;
 }
 .trust-item svg {
   flex-shrink: 0;
-  color: var(--wh-blue-mid);
-  background: var(--wh-blue-soft);
+  color: var(--wh-lime);
+  background: rgba(207, 221, 40, 0.12);
   padding: 9px;
   border-radius: 10px;
   width: 40px;
@@ -1019,29 +1022,25 @@ img { display: block; max-width: 100%; height: auto; }
   display: block;
   font-size: 14px;
   font-weight: 700;
-  color: var(--wh-blue-dark);
+  color: var(--wh-white);
   letter-spacing: -0.01em;
   margin-bottom: 1px;
 }
 .trust-item span {
   font-size: 12.5px;
-  color: var(--wh-gray-500);
+  color: rgba(255,255,255,0.6);
   font-weight: 500;
 }
 .trust-divider {
   width: 1px;
   height: 36px;
-  background: var(--wh-gray-200);
+  background: rgba(255,255,255,0.15);
   flex-shrink: 0;
 }
 
-/* ============================================
-   FLEET SECTION
-   ============================================ */
-.fleet {
-  padding: 100px 0 80px;
-  background: var(--wh-white);
-}
+/* Fleet section removed from homepage — see search.html */
+.fleet { display: none; }
+.next-section-placeholder { display: none; }
 
 .section-head {
   text-align: center;
@@ -1841,10 +1840,9 @@ img { display: block; max-width: 100%; height: auto; }
 @media (max-width: 980px) {
   .hero-content {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 36px;
     padding-top: 50px;
-    padding-bottom: 60px;
-    min-height: auto;
+    padding-bottom: 50px;
   }
   .hero-copy { max-width: 100%; }
   .hero-title { font-size: clamp(36px, 8vw, 52px); }
@@ -1913,6 +1911,24 @@ img { display: block; max-width: 100%; height: auto; }
   align-items: center;
   gap: 20px;
   padding: 16px 24px;
+}
+.protection-home-logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--wh-blue-dark);
+  padding: 6px 10px;
+  border-radius: 8px;
+  opacity: 0.9;
+  transition: opacity 0.15s;
+}
+.protection-home-logo:hover { opacity: 1; }
+.protection-home-logo img {
+  height: 28px;
+  width: auto;
+}
+@media (max-width: 500px) {
+  .protection-home-logo img { height: 22px; }
 }
 .protection-back {
   width: 40px;

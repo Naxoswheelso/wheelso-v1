@@ -2,6 +2,116 @@
 // WHEELSO — Interactivity
 // ============================================
 
+// ============================================
+// API CONFIG
+// ============================================
+// Change this single line when deploying to Railway.
+// e.g. const API_BASE = 'https://api.wheelso.gr';
+const API_BASE = 'https://wheelso-backend-production.up.railway.app';
+
+async function apiGet(path) {
+  const res = await fetch(`${API_BASE}${path}`);
+  if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || `POST ${path} failed: ${res.status}`);
+    err.data = data;
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+// Mapping: backend station code → frontend category for SVG fallback
+// (use car category from backend; frontend HTML select values are lowercase station codes)
+function stationCodeToFrontendValue(code) {
+  return (code || '').toLowerCase();
+}
+function frontendValueToStationCode(v) {
+  return (v || '').toUpperCase();
+}
+
+// ============================================
+// STATIONS — load from API + populate dropdowns
+// ============================================
+const STATION_TYPE_ICON = { airport: '✈️', port: '⚓', downtown: '🏙️' };
+const STATION_TYPE_LABEL = { airport: 'Airport', port: 'Port', downtown: 'Downtown' };
+
+function buildStationOptions(stations, includeDefault = true) {
+  // Group by region
+  const regions = {};
+  stations.forEach(s => {
+    const region = s.region || s.name.split(' ')[0];
+    if (!regions[region]) regions[region] = [];
+    regions[region].push(s);
+  });
+
+  let html = includeDefault
+    ? '<option value="" disabled selected>Select location...</option>'
+    : '<option value="">Same as pick-up</option>';
+
+  Object.entries(regions).forEach(([region, stns]) => {
+    html += `<optgroup label="📍 ${region}">`;
+    stns.forEach(s => {
+      const val = s.code.toLowerCase().replace(/-/g, '-');
+      const icon = STATION_TYPE_ICON[s.type] || '📍';
+      html += `<option value="${val}">${icon} ${s.name}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  return html;
+}
+
+async function loadStationsFromAPI() {
+  try {
+    const res = await apiGet('/api/stations');
+    // Backend returns { stations: [...] } or directly [...]
+    const stations = Array.isArray(res) ? res : (res.stations || []);
+    if (stations.length === 0) return;
+
+    const pickupEl = document.getElementById('pickupLocation');
+    const returnEl = document.getElementById('returnLocation');
+
+    if (pickupEl) pickupEl.innerHTML = buildStationOptions(stations, true);
+    if (returnEl) returnEl.innerHTML = buildStationOptions(stations, false);
+
+    console.log('[Wheelso] Stations loaded:', stations.length);
+  } catch (err) {
+    // Fallback: restore hardcoded options
+    console.warn('[Wheelso] Could not load stations, using fallback:', err.message);
+    const fallback = `
+      <optgroup label="📍 Athens · Αθήνα">
+        <option value="ath-airport">✈️  Athens Airport (ATH)</option>
+        <option value="ath-downtown">🏙️  Athens Downtown — Syngrou Ave. 22</option>
+      </optgroup>
+      <optgroup label="📍 Mykonos · Μύκονος">
+        <option value="myk-airport">✈️  Mykonos Airport (JMK)</option>
+        <option value="myk-port">⚓  Mykonos Port (Tourlos)</option>
+      </optgroup>
+      <optgroup label="📍 Paros · Πάρος">
+        <option value="par-airport">✈️  Paros Airport (PAS)</option>
+        <option value="par-port">⚓  Paros Port (Parikia)</option>
+      </optgroup>
+      <optgroup label="📍 Naxos · Νάξος">
+        <option value="nax-airport">✈️  Naxos Airport (JNX)</option>
+        <option value="nax-port">⚓  Naxos Port (Chora)</option>
+      </optgroup>`;
+    const pickupEl = document.getElementById('pickupLocation');
+    const returnEl = document.getElementById('returnLocation');
+    if (pickupEl) pickupEl.innerHTML = '<option value="" disabled selected>Select location...</option>' + fallback;
+    if (returnEl) returnEl.innerHTML = '<option value="">Same as pick-up</option>' + fallback;
+  }
+}
+
 // Sticky header shadow on scroll
 const header = document.getElementById('siteHeader');
 window.addEventListener('scroll', () => {
@@ -301,19 +411,42 @@ renderCalendar();
 // FORM SUBMIT
 // ============================================
 const bookingForm = document.getElementById('bookingWidget');
+
+// Inject error message div under the location field
+(function injectSearchErrors() {
+  const locationField = document.querySelector('.field-location');
+  if (locationField && !document.getElementById('locationError')) {
+    const err = document.createElement('p');
+    err.id = 'locationError';
+    err.hidden = true;
+    err.style.cssText = 'color:#e03c3c;font-size:13px;font-weight:600;margin:6px 0 0;padding:8px 12px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
+    err.textContent = 'Please select a pick-up location.';
+    locationField.after(err);
+  }
+})();
+
 bookingForm.addEventListener('submit', (e) => {
   e.preventDefault();
+
+  const locationEl = document.getElementById('pickupLocation');
+  const locationError = document.getElementById('locationError');
+
+  // Validate location
+  if (!locationEl?.value) {
+    if (locationError) locationError.hidden = false;
+    locationEl?.focus();
+    return;
+  }
+  if (locationError) locationError.hidden = true;
+
+  // Validate dates
   if (!pickupDate || !returnDate) {
     openPopover();
     return;
   }
+
   const data = new FormData(bookingForm);
   const obj = Object.fromEntries(data);
-
-  if (!obj.pickupLocation) {
-    document.getElementById('pickupLocation').focus();
-    return;
-  }
 
   const btn = bookingForm.querySelector('.btn-search');
   const originalContent = btn.innerHTML;
@@ -338,10 +471,17 @@ bookingForm.addEventListener('submit', (e) => {
   }, 400);
 });
 
+// Hide location error when user selects
+document.getElementById('pickupLocation')?.addEventListener('change', () => {
+  const err = document.getElementById('locationError');
+  if (err) err.hidden = true;
+});
+
 // ============================================
 // FLEET DATA & RENDERING
 // ============================================
-const VEHICLES = [
+// VEHICLES is loaded from backend on init. Fallback to hardcoded if API fails.
+let VEHICLES = [
   // ECONOMY
   { code: 'MCMR', category: 'economy', name: 'Toyota Aygo', similar: 'or similar', seats: 4, bags: 2, doors: 3, transmission: 'manual', price: 22 },
   { code: 'MDMR', category: 'economy', name: 'Toyota Aygo', similar: 'or similar', seats: 4, bags: 2, doors: 5, transmission: 'manual', price: 24 },
@@ -369,6 +509,42 @@ const VEHICLES = [
   // 7-SEATER
   { code: 'FVMR', category: 'van', name: '7-Seater Van', similar: 'or similar', seats: 7, bags: 5, doors: 5, transmission: 'manual', price: 65 }
 ];
+
+// Map backend car_groups row → frontend vehicle shape
+// Backend fields: code, category, name, transmission, seats, doors, image_url, sort_order, active, upon_request
+function mapBackendCarToVehicle(c) {
+  const cat = (c.category || '').toLowerCase();
+  // Normalize known categories; default to 'compact' if unknown
+  const knownCats = ['economy', 'compact', 'intermediate', 'suv', 'premium', 'van'];
+  const category = knownCats.includes(cat) ? cat : 'compact';
+  return {
+    code: c.code,
+    category,
+    name: c.name || c.code,
+    similar: c.similar || 'or similar',
+    seats: c.seats ?? 5,
+    bags: c.bags ?? 2,
+    doors: c.doors ?? 5,
+    transmission: (c.transmission || 'manual').toLowerCase(),
+    // price is filled later by availability call; default 0 means "ask backend"
+    price: c.price ?? 0,
+    image_url: c.image_url || null,
+    upon_request: !!c.upon_request
+  };
+}
+
+async function loadVehiclesFromAPI() {
+  try {
+    const res = await apiGet('/api/cars');
+    const cars = Array.isArray(res) ? res : (res.cars || []);
+    if (cars.length > 0) {
+      VEHICLES = cars.map(mapBackendCarToVehicle);
+    }
+  } catch (err) {
+    console.warn('[Wheelso] Could not load cars from API, using fallback:', err.message);
+  }
+}
+
 
 // SVG car silhouettes by category — simple, branded
 const CAR_SVGS = {
@@ -431,7 +607,9 @@ function renderVehicleCard(v) {
 }
 
 const fleetGrid = document.getElementById('fleetGrid');
-if (fleetGrid) {
+
+function renderFleetGrid() {
+  if (!fleetGrid) return;
   fleetGrid.innerHTML = VEHICLES.map(renderVehicleCard).join('');
 
   // Update chip counts
@@ -440,8 +618,12 @@ if (fleetGrid) {
     const count = cat === 'all' ? VEHICLES.length : VEHICLES.filter(v => v.category === cat).length;
     el.textContent = count;
   });
+}
 
-  // Filter behavior
+if (fleetGrid) {
+  renderFleetGrid();
+
+  // Filter behavior (bind once, works after re-render too)
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.filter-chip').forEach(c => {
@@ -552,7 +734,9 @@ if (vehicleModal) {
 // ============================================
 // PROTECTION SELECTION PAGE
 // ============================================
-const PROTECTION_PACKAGES = [
+// Default hardcoded packages (fallback if API fails).
+// Loaded per car category from /api/protection?category=X
+const DEFAULT_PROTECTION_PACKAGES = [
   {
     id: 'none',
     name: 'No extra protection',
@@ -626,6 +810,73 @@ const PROTECTION_PACKAGES = [
   }
 ];
 
+let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
+
+// Backend protection_packages row → frontend shape
+// Backend fields: code, car_category, price_per_day, excess, online_discount, features (JSON), active
+function mapBackendProtectionToPackage(p) {
+  const code = (p.code || '').toLowerCase();
+  // Try to match a default for layout hints (stars, recommended, excessLabel/class)
+  const def = DEFAULT_PROTECTION_PACKAGES.find(d => d.id === code) || {};
+
+  // Price + discount handling
+  const price = Number(p.price_per_day) || 0;
+  const discount = Number(p.online_discount) || 0; // assumed % e.g. 30
+  let pricePerDay = price;
+  let oldPrice = null;
+  let discountLabel = null;
+  if (discount > 0 && price > 0) {
+    oldPrice = +(price / (1 - discount / 100)).toFixed(2);
+    discountLabel = `−${discount}% online`;
+  }
+
+  // Features
+  let features = def.features || {};
+  if (p.features) {
+    try {
+      features = typeof p.features === 'string' ? JSON.parse(p.features) : p.features;
+    } catch (e) {
+      features = def.features || {};
+    }
+  }
+
+  // Excess label/class
+  let excessLabel = def.excessLabel || 'Excess:';
+  let excess = p.excess != null ? `Up to €${p.excess}` : (def.excess || '—');
+  let excessClass = def.excessClass || 'warning';
+  if (Number(p.excess) === 0) { excess = 'Zero excess'; excessClass = 'good'; }
+  if (price === 0) { excessLabel = 'Liability:'; excess = def.excess || 'Up to full vehicle value'; excessClass = 'danger'; }
+
+  return {
+    id: code,
+    name: p.name || def.name || code,
+    stars: def.stars ?? 1,
+    excessLabel,
+    excess,
+    excessClass,
+    pricePerDay,
+    oldPrice,
+    discount: discountLabel,
+    recommended: def.recommended || false,
+    features
+  };
+}
+
+async function loadProtectionForCategory(category) {
+  try {
+    const res = await apiGet(`/api/protection?category=${encodeURIComponent(category)}`);
+    const data = Array.isArray(res) ? res : (res.packages || []);
+    if (data.length > 0) {
+      PROTECTION_PACKAGES = data.map(mapBackendProtectionToPackage);
+      return;
+    }
+  } catch (err) {
+    console.warn('[Wheelso] Could not load protection from API, using defaults:', err.message);
+  }
+  PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
+}
+
+
 const ICON_CHECK = '<svg class="protection-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 const ICON_X = '<svg class="protection-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
@@ -678,8 +929,13 @@ const overviewCancellation = document.getElementById('overviewCancellation');
 
 let currentProtection = { vehicle: null, days: 3, rate: 'best', selected: 'basic' };
 
-function openProtectionPage(v, days, rate) {
+async function openProtectionPage(v, days, rate) {
   currentProtection = { vehicle: v, days, rate, selected: 'basic' };
+
+  // Show page immediately with current packages so UI feels snappy
+  protectionPage.hidden = false;
+  document.body.classList.add('protection-open');
+  protectionPage.scrollTop = 0;
   renderProtectionGrid();
   updateProtectionTotal();
 
@@ -691,9 +947,14 @@ function openProtectionPage(v, days, rate) {
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
-  protectionPage.hidden = false;
-  document.body.classList.add('protection-open');
-  protectionPage.scrollTop = 0;
+  // Load category-specific packages from backend, then re-render
+  await loadProtectionForCategory(v.category);
+  // Ensure selected still exists in new packages
+  if (!PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected)) {
+    currentProtection.selected = PROTECTION_PACKAGES[0]?.id || 'basic';
+  }
+  renderProtectionGrid();
+  updateProtectionTotal();
 }
 
 function closeProtectionPage() {
@@ -743,7 +1004,11 @@ document.addEventListener('keydown', (e) => {
 // ============================================
 // EXTRAS PAGE (Step 3)
 // ============================================
-const EXTRAS = [
+// Default icon used when an API-loaded extra has no matching icon
+const ICON_EXTRA_DEFAULT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+
+// Default hardcoded extras (fallback if API fails).
+const DEFAULT_EXTRAS = [
   {
     id: 'additional-driver',
     name: 'Additional driver',
@@ -805,6 +1070,44 @@ const EXTRAS = [
     details: 'Bringing surf gear, bikes, or extra suitcases? Our roof rack adds carrying capacity without crowding the cabin. Includes safety straps — installed by our team before you drive off.'
   }
 ];
+
+let EXTRAS = DEFAULT_EXTRAS.slice();
+
+// Backend extras row → frontend shape
+// Backend fields: code, name, price_per_day, per_unit, max_qty, description, active
+function mapBackendExtraToFrontend(e) {
+  const id = (e.code || '').toLowerCase().replace(/_/g, '-');
+  // Try to match a default for icon + nice summary/details
+  const def = DEFAULT_EXTRAS.find(d => d.id === id) || {};
+  const price = Number(e.price_per_day) || 0;
+  const perUnit = !!e.per_unit;
+  return {
+    id,
+    name: e.name || def.name || id,
+    priceLabel: perUnit
+      ? `€${price.toFixed(2)} / day per item`
+      : `€${price.toFixed(2)} / day`,
+    pricePerDay: price,
+    perUnit,
+    maxQty: e.max_qty || 4,
+    icon: def.icon || ICON_EXTRA_DEFAULT,
+    summary: e.description || def.summary || '',
+    details: def.details || e.description || ''
+  };
+}
+
+async function loadExtrasFromAPI() {
+  try {
+    const res = await apiGet('/api/extras');
+    const data = Array.isArray(res) ? res : (res.extras || []);
+    if (data.length > 0) {
+      EXTRAS = data.map(mapBackendExtraToFrontend);
+    }
+  } catch (err) {
+    console.warn('[Wheelso] Could not load extras from API, using defaults:', err.message);
+  }
+}
+
 
 const extrasPage = document.getElementById('extrasPage');
 const extrasList = document.getElementById('extrasList');
@@ -975,7 +1278,8 @@ if (extrasList) {
         selectedExtras[extraId] = 1;
       }
     } else if (action === 'inc') {
-      selectedExtras[extraId] = Math.min((selectedExtras[extraId] || 0) + 1, 4);
+      const maxQ = extra.maxQty || 4;
+      selectedExtras[extraId] = Math.min((selectedExtras[extraId] || 0) + 1, maxQ);
     } else if (action === 'dec') {
       const newQty = (selectedExtras[extraId] || 0) - 1;
       if (newQty <= 0) delete selectedExtras[extraId];
@@ -1102,17 +1406,139 @@ function populateDriverSummary() {
 
 if (driverBack) driverBack.addEventListener('click', closeDriverPage);
 
+// Build booking payload from current state + driver form
+function buildBookingPayload(formObj) {
+  const v = currentProtection.vehicle;
+  const days = currentProtection.days;
+  const rate = currentProtection.rate;
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+
+  // Locations + datetimes from homepage booking widget
+  const pickupLocValue = document.getElementById('pickupLocation')?.value || '';
+  const returnLocValue = document.getElementById('returnLocation')?.value || '';
+  const useReturn = document.getElementById('diffReturn')?.checked;
+  const pickupDateValue = pickupDateInput?.value || (pickupDate ? formatISO(pickupDate) : '');
+  const returnDateValue = returnDateInput?.value || (returnDate ? formatISO(returnDate) : '');
+  const pickupTimeValue = document.getElementById('pickupTime')?.value || '10:00';
+  const returnTimeValue = document.getElementById('returnTime')?.value || '10:00';
+
+  const pickupStation = frontendValueToStationCode(pickupLocValue);
+  const returnStation = useReturn && returnLocValue
+    ? frontendValueToStationCode(returnLocValue)
+    : pickupStation;
+
+  // Pricing — totals (όχι per day), όπως τα θέλει το backend
+  const rateExtra = rate === 'flex' ? 1 : 0;
+  const protectionDaily = pkg ? pkg.pricePerDay : 0;
+  const carPriceTotal = +((v.price + rateExtra) * days).toFixed(2);
+  const protectionPriceTotal = +(protectionDaily * days).toFixed(2);
+  const extrasPriceTotal = +calculateExtrasTotal().toFixed(2);
+  const totalPrice = +(carPriceTotal + protectionPriceTotal + extrasPriceTotal).toFixed(2);
+
+  // Extras as JSON array (backend stores as extras_json)
+  const extrasArr = Object.entries(selectedExtras)
+    .filter(([, qty]) => qty > 0)
+    .map(([id, qty]) => {
+      const e = EXTRAS.find(x => x.id === id);
+      return {
+        code: id,
+        name: e?.name || id,
+        quantity: qty,
+        price_per_day: e?.pricePerDay || 0,
+        total: +((e?.pricePerDay || 0) * qty * days).toFixed(2)
+      };
+    });
+
+  // Driver age from homepage dropdown (e.g. "25+", "21-24")
+  const driverAge = document.getElementById('driverAge')?.value || null;
+
+  // Promo code from homepage booking widget
+  const promoCode = document.getElementById('promoCode')?.value?.trim() || null;
+
+  // Rate type — backend expects 'best_price' / 'flex'
+  const rateTypeBackend = rate === 'flex' ? 'flex' : 'best_price';
+
+  // Protection code — backend default is 'no_extra' for none
+  const protectionCodeBackend = pkg
+    ? (pkg.id === 'none' ? 'no_extra' : pkg.id)
+    : 'no_extra';
+
+  return {
+    // Customer
+    first_name: formObj.firstName || '',
+    last_name: formObj.lastName || '',
+    email: formObj.email || '',
+    phone: formObj.phone || '',
+    country_code: formObj.country || null,
+
+    // Rental
+    pickup_station: pickupStation,
+    return_station: returnStation,
+    pickup_datetime: `${pickupDateValue}T${pickupTimeValue}:00`,
+    return_datetime: `${returnDateValue}T${returnTimeValue}:00`,
+    car_code: v.code,
+
+    // Pricing
+    rate_type: rateTypeBackend,
+    protection_code: protectionCodeBackend,
+    car_price: carPriceTotal,
+    protection_price: protectionPriceTotal,
+    extras_price: extrasPriceTotal,
+    total_price: totalPrice,
+    discount_amount: 0,
+    promo_code: promoCode,
+
+    // Extra info
+    driver_age: driverAge,
+    flight_ferry: formObj.flight || null,
+    notes: formObj.notes || null,
+    extras_json: extrasArr
+  };
+}
+
 if (driverContinueBtn) {
-  driverContinueBtn.addEventListener('click', () => {
+  driverContinueBtn.addEventListener('click', async () => {
     if (!validateDriverForm()) return;
     const data = new FormData(driverForm);
     const obj = Object.fromEntries(data);
-    alert(`Demo: Booking confirmed!\n\n${obj.firstName} ${obj.lastName}\nEmail: ${obj.email}\nPhone: ${obj.country} ${obj.phone}\nTotal: ${driverTotalEl.textContent}\n\nNext step in production: redirect to payment provider (Viva Wallet / Stripe / Bank ePOS).`);
+
+    // Lock button to prevent double-submit
+    const originalText = driverContinueBtn.textContent;
+    driverContinueBtn.disabled = true;
+    driverContinueBtn.textContent = 'Processing…';
+
+    try {
+      const payload = buildBookingPayload(obj);
+      const result = await apiPost('/api/bookings', payload);
+
+      const ref = result.reference || 'WLS-???';
+      alert(
+        `Booking confirmed! ✓\n\n` +
+        `Reference: ${ref}\n` +
+        `${obj.firstName} ${obj.lastName}\n` +
+        `Email: ${obj.email}\n` +
+        `Total: ${driverTotalEl.textContent}\n\n` +
+        `${result.message || 'A confirmation email has been sent.'}\n\n` +
+        `Next step in production: redirect to payment provider (Viva Wallet / Stripe / Bank ePOS).`
+      );
+    } catch (err) {
+      console.error('[Wheelso] Booking failed:', err);
+      alert(`Sorry, we couldn't complete your booking:\n\n${err.message}\n\nPlease try again or contact us.`);
+    } finally {
+      driverContinueBtn.disabled = false;
+      driverContinueBtn.textContent = originalText;
+    }
   });
 }
 
 function validateDriverForm() {
   let valid = true;
+
+  // Clear previous checkbox error
+  const checkboxError = document.getElementById('checkboxError');
+  if (checkboxError) checkboxError.hidden = true;
+
+  // Text fields
   const required = ['firstName', 'lastName', 'email', 'phone'];
   required.forEach(id => {
     const el = document.getElementById(id);
@@ -1128,13 +1554,28 @@ function validateDriverForm() {
       el.classList.remove('invalid');
     }
   });
+
+  // Checkboxes
   const ageOK = document.getElementById('ageConfirm')?.checked;
   const termsOK = document.getElementById('termsAgree')?.checked;
   if (!ageOK || !termsOK) {
     valid = false;
-    if (!ageOK) document.getElementById('ageConfirm')?.focus();
-    else document.getElementById('termsAgree')?.focus();
+    // Show error message near checkboxes
+    if (checkboxError) {
+      checkboxError.hidden = false;
+      checkboxError.textContent = !ageOK
+        ? 'Please confirm you are 21 or older and hold a valid driving licence.'
+        : 'Please read and agree to the rental terms and privacy policy.';
+      checkboxError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Fallback: scroll to the unchecked checkbox
+      const el = document.getElementById(!ageOK ? 'ageConfirm' : 'termsAgree');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return false;
   }
+
+  // Scroll to first invalid text field
   if (!valid) {
     const firstInvalid = driverForm.querySelector('.invalid');
     firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1144,10 +1585,31 @@ function validateDriverForm() {
 }
 
 if (driverForm) {
+  // Inject error message div after the checkboxes if not already in HTML
+  if (!document.getElementById('checkboxError')) {
+    const errDiv = document.createElement('p');
+    errDiv.id = 'checkboxError';
+    errDiv.hidden = true;
+    errDiv.style.cssText = 'color:#e03c3c;font-size:14px;font-weight:600;margin:8px 0 0;padding:10px 14px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
+    // Insert after the last checkbox label or before the submit button
+    const ageEl = document.getElementById('ageConfirm');
+    const termsEl = document.getElementById('termsAgree');
+    const anchor = termsEl?.closest('label') || termsEl?.parentElement || driverForm.lastElementChild;
+    anchor?.insertAdjacentElement('afterend', errDiv);
+  }
+
   driverForm.addEventListener('input', (e) => {
     if (e.target.classList.contains('invalid')) {
       e.target.classList.remove('invalid');
     }
+  });
+
+  // Hide checkbox error when user checks a box
+  ['ageConfirm', 'termsAgree'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      const err = document.getElementById('checkboxError');
+      if (err) err.hidden = true;
+    });
   });
 }
 
@@ -1266,3 +1728,21 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.add('active');
   });
 });
+
+// ============================================
+// INIT — load all data from backend in parallel
+// ============================================
+(async function initFromAPI() {
+  try {
+    await Promise.all([
+      loadStationsFromAPI(),
+      loadVehiclesFromAPI(),
+      loadExtrasFromAPI()
+    ]);
+    renderFleetGrid();
+    console.log('[Wheelso] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
+  } catch (err) {
+    console.warn('[Wheelso] API init failed, using fallback data:', err);
+  }
+})();
+
