@@ -340,7 +340,9 @@ function openVehicleModal(v) {
     document.getElementById('modalPriceTotal').textContent = `€${total} total for ${rentalDays} days`;
   }
 
-  document.getElementById('modalPreviewImage').innerHTML = CAR_SVGS[v.category];
+  document.getElementById('modalPreviewImage').innerHTML = v.image_url
+    ? `<img src="https://wheelso-backend-production.up.railway.app${v.image_url}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
+    : CAR_SVGS[v.category];
   document.getElementById('modalCategory').textContent = `${CATEGORY_LABELS[v.category]} · ${v.code}`;
   document.getElementById('modalTitle').textContent = v.name;
   document.getElementById('modalSimilar').textContent = v.similar;
