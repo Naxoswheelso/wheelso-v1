@@ -221,10 +221,7 @@ img { display: block; max-width: 100%; height: auto; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 75% 40%, rgba(28, 88, 117, 0.55) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 70%, rgba(207, 221, 40, 0.08) 0%, transparent 50%),
-    linear-gradient(135deg, var(--wh-blue-deep) 0%, var(--wh-blue-dark) 50%, var(--wh-blue-mid) 100%);
+  background: url('./assets/hero.png') center center / cover no-repeat;
 }
 
 .hero-overlay {
