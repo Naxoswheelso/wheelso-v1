@@ -1890,9 +1890,31 @@ img { display: block; max-width: 100%; height: auto; }
   .field-row { grid-template-columns: 1fr; }
   .booking-tab { padding: 10px 14px; font-size: 13px; }
 
-  .hero-title { font-size: clamp(32px, 9vw, 44px); }
-  .hero-sub { font-size: 16px; }
+  .hero-title {
+    font-size: clamp(32px, 9vw, 44px);
+    text-shadow: 0 2px 12px rgba(9, 61, 94, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  .hero-sub {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 8px rgba(9, 61, 94, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
   .eyebrow { font-size: 12px; padding: 6px 12px; }
+
+  .hero-copy {
+    position: relative;
+    z-index: 3;
+  }
+  .hero-copy::before {
+    content: '';
+    position: absolute;
+    inset: -20px -16px;
+    background: linear-gradient(180deg, rgba(9, 61, 94, 0.35) 0%, rgba(9, 61, 94, 0.55) 100%);
+    border-radius: 16px;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: -1;
+  }
 
   .trust-item { flex: 0 0 100%; }
   .trust-item svg { width: 36px; height: 36px; padding: 8px; }
