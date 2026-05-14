@@ -210,7 +210,7 @@ img { display: block; max-width: 100%; height: auto; }
   background: var(--wh-blue-dark);
   overflow: visible;
   padding-bottom: 0;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
 }
@@ -1608,6 +1608,9 @@ img { display: block; max-width: 100%; height: auto; }
 
   /* Footer sticky at bottom of viewport */
   .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--wh-white);
     padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--wh-gray-200);
     box-shadow: 0 -4px 16px rgba(9, 61, 94, 0.08);
