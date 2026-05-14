@@ -1892,7 +1892,7 @@ img { display: block; max-width: 100%; height: auto; }
 
   .hero-title {
     font-size: clamp(32px, 9vw, 44px);
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.4);
+    text-shadow: none;
   }
   .hero-sub {
     font-size: 16px;
