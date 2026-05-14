@@ -371,9 +371,8 @@ function openVehicleModal(v) {
   continueBtn.onclick = () => {
     const rateChoice = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value || 'best';
     closeVehicleModal();
-    openProtectionPage(v, rentalDays, rateChoice);
+    setTimeout(() => openProtectionPage(v, rentalDays, rateChoice), 250);
   };
-
   recalc();
   vehicleModal.hidden = false;
   document.body.classList.add('vehicle-modal-open');

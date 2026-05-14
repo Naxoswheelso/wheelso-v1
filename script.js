@@ -468,7 +468,7 @@ bookingForm.addEventListener('submit', (e) => {
 
   setTimeout(() => {
     window.location.href = `search.html?${params.toString()}`;
-  }, 400);
+  }, 100);
 });
 
 // Hide location error when user selects
