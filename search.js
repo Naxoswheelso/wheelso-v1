@@ -509,11 +509,15 @@ function openVehicleModal(v) {
 
   function recalc() {
     const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
-    const dailyExtra = bookingOpt === 'flex' ? flexExtra(basePrice) : 0;
+    const extra = flexExtra(basePrice);
+    const dailyExtra = bookingOpt === 'flex' ? extra : 0;
     const daily = basePrice + dailyExtra;
     const total = (daily * rentalDays).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
     document.getElementById('modalPriceTotal').textContent = `€${total} total for ${rentalDays} days`;
+    // Update flex label to show actual amount
+    const flexLabel = document.getElementById('flexRateLabel');
+    if (flexLabel) flexLabel.textContent = `+ €${extra.toFixed(2)}/day`;
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
@@ -669,8 +673,8 @@ async function openProtectionPage(v, days, rate) {
 
   if (overviewCancellation) {
     const cancelText = rate === 'flex'
-      ? 'Total flexibility — Free cancellation any time before pick-up'
-      : 'Best price — Free cancellation up to 48h before pick-up';
+      ? 'Pay on arrival — Free cancellation any time before pick-up'
+      : 'Pay now — Free cancellation up to 48h before pick-up';
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
@@ -876,7 +880,7 @@ function populateSummarySidebar() {
 
   const sRate = document.getElementById('summaryRate');
   const sProt = document.getElementById('summaryProtection');
-  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Total flexibility · Free cancellation anytime' : 'Best price · Free cancellation up to 48h before';
+  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Pay on arrival · Free cancellation anytime' : 'Pay now · Free cancellation up to 48h before';
   if (sProt) sProt.textContent = pkg ? pkg.name : 'Protection package';
 }
 
@@ -1041,8 +1045,8 @@ function populateDriverSummary() {
   document.getElementById('driverSummaryReturnDate').textContent = `${fmt(searchCtx.to)} · ${searchCtx.toTime}`;
 
   document.getElementById('driverSummaryRate').textContent = currentProtection.rate === 'flex'
-    ? 'Total flexibility'
-    : 'Best price · Free cancellation up to 48h before';
+    ? 'Pay on arrival'
+    : 'Pay now';
   document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : 'Protection package';
 
   const extrasEntries = Object.entries(selectedExtras).filter(([, qty]) => qty > 0);
@@ -1491,7 +1495,7 @@ function buildBreakdown() {
 
   if (rateExtra > 0) {
     html += `<div class="breakdown-line">
-      <span>Total flexibility upgrade<span class="breakdown-line-meta">+€${rateExtra}/day × ${days} ${days===1?'day':'days'}</span></span>
+      <span>Pay on arrival surcharge<span class="breakdown-line-meta">+€${rateExtra}/day × ${days} ${days===1?'day':'days'}</span></span>
       <strong>€${(rateExtra * days).toFixed(2)}</strong>
     </div>`;
   }
