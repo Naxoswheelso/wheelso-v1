@@ -164,7 +164,24 @@ const CAR_SVGS = {
   van: `<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><path d="M12 72 L28 72 C28 81 36 89 46 89 C56 89 64 81 64 72 L136 72 C136 81 144 89 154 89 C164 89 172 81 172 72 L192 72 L192 28 C192 22 187 18 181 18 L30 18 C22 18 16 24 16 32 L16 50 L8 53 C4 55 2 58 2 62 L2 70 Z" fill="#1C5875"/><path d="M30 25 L80 25 L80 45 L30 45 Z M85 25 L130 25 L130 45 L85 45 Z M135 25 L180 25 L180 45 L135 45 Z" fill="#a8c9d9" opacity="0.6"/><circle cx="46" cy="80" r="12" fill="#093D5E"/><circle cx="46" cy="80" r="5" fill="#CFDD28"/><circle cx="154" cy="80" r="12" fill="#093D5E"/><circle cx="154" cy="80" r="5" fill="#CFDD28"/></svg>`
 };
 
-const CATEGORY_LABELS = { economy: 'Economy', compact: 'Compact', intermediate: 'Intermediate', suv: 'SUV', premium: 'Premium', van: '7-Seater' };
+// Car categories — loaded dynamically from API (fallback to hardcoded)
+let CATEGORY_LABELS = {
+  mini: 'Mini', economy: 'Economy', compact: 'Compact',
+  intermediate: 'Intermediate', suv: 'SUV', premium: 'Premium', van: '7-Seater'
+};
+
+async function loadCategoriesFromAPI() {
+  try {
+    const res = await apiGet('/api/categories');
+    const cats = Array.isArray(res) ? res : (res.categories || []);
+    if (cats.length > 0) {
+      CATEGORY_LABELS = {};
+      cats.forEach(c => { CATEGORY_LABELS[c.code.toLowerCase()] = c.label; });
+    }
+  } catch (err) {
+    console.warn('[Wheelso] Could not load categories from API, using defaults');
+  }
+}
 
 const ICON_SEATS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 const ICON_BAGS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
@@ -295,6 +312,40 @@ function renderResults() {
 // Show skeleton loader while prices load (don't render hardcoded prices)
 showLoadingSkeleton();
 
+// Render category filter chips dynamically from CATEGORY_LABELS
+function renderCategoryChips() {
+  const container = document.getElementById('categoryChips');
+  if (!container) return;
+
+  // Keep "All" chip, rebuild the rest
+  container.innerHTML = `
+    <button class="filter-chip ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" role="tab" aria-selected="${currentFilter === 'all'}">
+      All <span class="chip-count" data-count="all"></span>
+    </button>
+    ${Object.entries(CATEGORY_LABELS).map(([code, label]) => `
+      <button class="filter-chip ${currentFilter === code ? 'active' : ''}" data-filter="${code}" role="tab" aria-selected="${currentFilter === code}">
+        ${label} <span class="chip-count" data-count="${code}"></span>
+      </button>
+    `).join('')}
+  `;
+
+  // Re-attach click events
+  container.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      container.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('active');
+        c.setAttribute('aria-selected', 'false');
+      });
+      chip.classList.add('active');
+      chip.setAttribute('aria-selected', 'true');
+      currentFilter = chip.dataset.filter;
+      renderResults();
+    });
+  });
+
+  updateChipCounts();
+}
+
 // Update chip counts (always based on transmission filter)
 function updateChipCounts() {
   document.querySelectorAll('.chip-count').forEach(el => {
@@ -306,19 +357,7 @@ function updateChipCounts() {
 }
 updateChipCounts();
 
-// Filter chip behavior
-document.querySelectorAll('.filter-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.filter-chip').forEach(c => {
-      c.classList.remove('active');
-      c.setAttribute('aria-selected', 'false');
-    });
-    chip.classList.add('active');
-    chip.setAttribute('aria-selected', 'true');
-    currentFilter = chip.dataset.filter;
-    renderResults();
-  });
-});
+// Filter chip behavior handled by renderCategoryChips() after categories load
 
 // Transmission pill filter
 document.querySelector('.pill-filter[data-trans="all"]').classList.add('active');
@@ -1296,10 +1335,9 @@ async function loadAvailabilityPrices() {
 }
 
 (async function initFromAPI() {
-  await Promise.all([loadVehiclesFromAPI(), loadExtrasFromAPI(), loadStationsFromAPI()]);
-  // Fetch real prices — renderResults() is called inside loadAvailabilityPrices on success
+  await Promise.all([loadCategoriesFromAPI(), loadVehiclesFromAPI(), loadExtrasFromAPI(), loadStationsFromAPI()]);
+  renderCategoryChips(); // render chips with real categories
   await loadAvailabilityPrices();
-  // Always render at the end (even if availability returned 0, show whatever we have)
   renderResults();
   updateChipCounts();
   console.log('[Wheelso Search] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
