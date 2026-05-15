@@ -147,7 +147,6 @@ document.addEventListener('keydown', e => {
 });
 
 function populateModifyPanel() {
-  // Set current values
   const fromEl = document.getElementById('modifyFrom');
   const toEl = document.getElementById('modifyTo');
   const fromTimeEl = document.getElementById('modifyFromTime');
@@ -155,7 +154,6 @@ function populateModifyPanel() {
   const ageEl = document.getElementById('modifyAge');
   const pickupEl = document.getElementById('modifyPickup');
   const returnEl = document.getElementById('modifyReturn');
-  const diffCb = document.getElementById('modifyDiffReturn');
 
   if (fromEl) fromEl.value = searchCtx.from || '';
   if (toEl) toEl.value = searchCtx.to || '';
@@ -163,32 +161,20 @@ function populateModifyPanel() {
   if (toTimeEl) toTimeEl.value = searchCtx.toTime || '10:00';
   if (ageEl) ageEl.value = searchCtx.age || '26-69';
 
-  // Set pickup/return dropdowns to current values
+  // Match pickup dropdown to current value
   if (pickupEl && searchCtx.pickup) {
-    const pickupCode = frontendValueToStationCode(searchCtx.pickup).toLowerCase().replace(/_/g, '-') || searchCtx.pickup;
     [...pickupEl.options].forEach(o => {
       if (o.value.toLowerCase() === searchCtx.pickup.toLowerCase()) pickupEl.value = o.value;
     });
   }
-  const hasDiffReturn = searchCtx.return && searchCtx.return !== searchCtx.pickup;
-  if (diffCb) diffCb.checked = hasDiffReturn;
+  // Match return dropdown — default to same as pickup
   if (returnEl) {
-    returnEl.disabled = !hasDiffReturn;
-    returnEl.style.opacity = hasDiffReturn ? '1' : '0.5';
-    if (hasDiffReturn && searchCtx.return) {
-      [...returnEl.options].forEach(o => {
-        if (o.value.toLowerCase() === searchCtx.return.toLowerCase()) returnEl.value = o.value;
-      });
-    }
+    const returnVal = searchCtx.return || searchCtx.pickup;
+    [...returnEl.options].forEach(o => {
+      if (o.value.toLowerCase() === returnVal.toLowerCase()) returnEl.value = o.value;
+    });
   }
 }
-
-// Toggle different drop-off
-document.getElementById('modifyDiffReturn').addEventListener('change', function() {
-  const returnEl = document.getElementById('modifyReturn');
-  returnEl.disabled = !this.checked;
-  returnEl.style.opacity = this.checked ? '1' : '0.5';
-});
 
 // Search button → rebuild URL and reload
 document.getElementById('modifySearchBtn').addEventListener('click', () => {
@@ -198,8 +184,7 @@ document.getElementById('modifySearchBtn').addEventListener('click', () => {
   const toTime = document.getElementById('modifyToTime').value;
   const age = document.getElementById('modifyAge').value;
   const pickup = document.getElementById('modifyPickup').value;
-  const diffCb = document.getElementById('modifyDiffReturn');
-  const returnVal = diffCb.checked ? document.getElementById('modifyReturn').value : '';
+  const returnVal = document.getElementById('modifyReturn').value;
 
   if (!pickup || !from || !to) {
     alert('Please fill in all required fields.');
@@ -210,15 +195,8 @@ document.getElementById('modifySearchBtn').addEventListener('click', () => {
     return;
   }
 
-  const params = new URLSearchParams({
-    pickup,
-    from,
-    to,
-    fromTime,
-    toTime,
-    age,
-    ...(returnVal ? { return: returnVal } : {})
-  });
+  const params = new URLSearchParams({ pickup, from, to, fromTime, toTime, age });
+  if (returnVal && returnVal !== pickup) params.set('return', returnVal);
 
   window.location.href = `search.html?${params.toString()}`;
 });
@@ -1411,9 +1389,9 @@ async function loadStationsFromAPI() {
     const res = await apiGet('/api/stations');
     const stations = Array.isArray(res) ? res : (res.stations || []);
     if (stations.length === 0) return;
-    ['modifyPickup', 'modifyReturn'].forEach((id, i) => {
+    ['modifyPickup', 'modifyReturn'].forEach((id) => {
       const el = document.getElementById(id);
-      if (el) el.innerHTML = buildStationOptions(stations, i === 0);
+      if (el) el.innerHTML = buildStationOptions(stations, true);
     });
     stations.forEach(s => {
       LOCATION_LABELS[s.code.toLowerCase()] = s.name;

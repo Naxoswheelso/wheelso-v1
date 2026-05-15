@@ -9,65 +9,125 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <style>
+    /* ── MODIFY PANEL (Sixt-style) ── */
     .modify-panel {
-      background: #f0f4f8;
-      border-top: 1px solid #dde3ed;
-      padding: 20px 0;
-      animation: slideDown 0.2s ease;
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 8px 24px rgba(0,0,0,.10);
+      padding: 16px 0;
     }
-    @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-    .modify-grid {
+    .modify-row {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-end;
+      align-items: stretch;
+      gap: 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
     }
-    .modify-field {
+    .modify-cell {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      justify-content: center;
+      padding: 10px 14px;
       flex: 1;
-      min-width: 140px;
+      min-width: 0;
+      border-right: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: background .15s;
+      position: relative;
     }
-    .modify-field--action { min-width: 140px; flex: 0 0 auto; }
-    .modify-label {
-      font-size: 11px;
+    .modify-cell:last-child { border-right: none; }
+    .modify-cell:hover { background: #f8fafc; }
+    .modify-cell--btn {
+      flex: 0 0 auto;
+      padding: 0;
+      cursor: default;
+    }
+    .modify-cell--btn:hover { background: #fff; }
+    .modify-cell-label {
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #64748b;
+      letter-spacing: .6px;
+      color: #94a3b8;
+      margin-bottom: 3px;
+      white-space: nowrap;
     }
-    .modify-select, .modify-input {
-      padding: 10px 12px;
-      border: 2px solid #dde3ed;
-      border-radius: 10px;
+    .modify-cell select,
+    .modify-cell input[type="date"] {
+      border: none;
+      outline: none;
+      background: transparent;
       font-family: 'Manrope', sans-serif;
       font-size: 14px;
-      background: #fff;
-      color: #1a2332;
+      font-weight: 600;
+      color: #0f172a;
+      padding: 0;
       width: 100%;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
     }
-    .modify-select:focus, .modify-input:focus {
-      outline: none;
-      border-color: #093D5E;
+    .modify-cell input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
     }
     .modify-search-btn {
-      width: 100%;
-      padding: 12px 20px;
+      margin: 8px;
+      padding: 10px 20px;
       background: #093D5E;
       color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       font-family: 'Manrope', sans-serif;
       font-weight: 700;
       font-size: 14px;
       cursor: pointer;
-      transition: background 0.15s;
+      white-space: nowrap;
+      transition: background .15s;
+      height: calc(100% - 16px);
     }
     .modify-search-btn:hover { background: #1C5875; }
+
+    /* Mobile: stack vertically, single column */
     @media (max-width: 720px) {
-      .modify-field { min-width: calc(50% - 6px); }
-      .modify-field--action { min-width: 100%; }
+      .modify-panel { padding: 12px 0; }
+      .modify-row {
+        flex-direction: column;
+        border-radius: 10px;
+      }
+      .modify-cell {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 14px;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+      }
+      .modify-cell:last-child { border-bottom: none; }
+      .modify-cell--btn { border-bottom: none; padding: 0; }
+      .modify-cell-label {
+        min-width: 100px;
+        margin-bottom: 0;
+        font-size: 11px;
+      }
+      .modify-cell select,
+      .modify-cell input[type="date"] {
+        font-size: 14px;
+        flex: 1;
+      }
+      .modify-search-btn {
+        margin: 12px;
+        width: calc(100% - 24px);
+        padding: 14px;
+        font-size: 15px;
+        height: auto;
+      }
     }
   </style>
 </head>
@@ -132,28 +192,29 @@
       </button>
     </div>
 
-    <!-- Modify panel — drops down when Modify is clicked -->
+    <!-- Modify panel — Sixt-style compact dropdown -->
     <div class="modify-panel" id="modifyPanel" hidden>
       <div class="container">
-        <div class="modify-grid">
-          <div class="modify-field">
-            <label class="modify-label">Pick-up location</label>
-            <select id="modifyPickup" class="modify-select"></select>
+        <div class="modify-row">
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Pick-up</span>
+            <select id="modifyPickup"></select>
           </div>
-          <div class="modify-field">
-            <label class="modify-label">
-              <input type="checkbox" id="modifyDiffReturn" style="margin-right:6px">
-              Different drop-off
-            </label>
-            <select id="modifyReturn" class="modify-select" disabled style="opacity:0.5"></select>
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Drop-off</span>
+            <select id="modifyReturn"></select>
           </div>
-          <div class="modify-field">
-            <label class="modify-label">Pick-up date</label>
-            <input type="date" id="modifyFrom" class="modify-input">
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Pick-up date</span>
+            <input type="date" id="modifyFrom">
           </div>
-          <div class="modify-field">
-            <label class="modify-label">Pick-up time</label>
-            <select id="modifyFromTime" class="modify-select">
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Pick-up time</span>
+            <select id="modifyFromTime">
               <option value="09:00">09:00</option><option value="10:00">10:00</option>
               <option value="11:00">11:00</option><option value="12:00">12:00</option>
               <option value="13:00">13:00</option><option value="14:00">14:00</option>
@@ -163,13 +224,15 @@
               <option value="21:00">21:00</option>
             </select>
           </div>
-          <div class="modify-field">
-            <label class="modify-label">Return date</label>
-            <input type="date" id="modifyTo" class="modify-input">
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Return date</span>
+            <input type="date" id="modifyTo">
           </div>
-          <div class="modify-field">
-            <label class="modify-label">Return time</label>
-            <select id="modifyToTime" class="modify-select">
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Return time</span>
+            <select id="modifyToTime">
               <option value="09:00">09:00</option><option value="10:00">10:00</option>
               <option value="11:00">11:00</option><option value="12:00">12:00</option>
               <option value="13:00">13:00</option><option value="14:00">14:00</option>
@@ -179,19 +242,20 @@
               <option value="21:00">21:00</option>
             </select>
           </div>
-          <div class="modify-field">
-            <label class="modify-label">Driver age</label>
-            <select id="modifyAge" class="modify-select">
-              <option value="21-25">21–25 (Young Driver)</option>
+
+          <div class="modify-cell">
+            <span class="modify-cell-label">Driver age</span>
+            <select id="modifyAge">
+              <option value="21-25">21–25</option>
               <option value="26-69" selected>26–69</option>
-              <option value="70-75">70–75 (Senior)</option>
+              <option value="70-75">70–75</option>
             </select>
           </div>
-          <div class="modify-field modify-field--action">
-            <button type="button" class="btn btn-primary modify-search-btn" id="modifySearchBtn">
-              Search cars →
-            </button>
+
+          <div class="modify-cell modify-cell--btn">
+            <button type="button" class="modify-search-btn" id="modifySearchBtn">Search</button>
           </div>
+
         </div>
       </div>
     </div>
