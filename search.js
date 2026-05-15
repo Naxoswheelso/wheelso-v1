@@ -64,6 +64,38 @@ function computeDays() {
 }
 const rentalDays = computeDays();
 
+// ─── MAX RENTAL DAYS ───
+const MAX_RENTAL_DAYS = 28;
+
+// ─── FLEX RATE: +10% of car daily price ───
+// Returns the extra daily cost for "Total flexibility" rate
+function flexExtra(carDailyPrice) {
+  return Math.round(carDailyPrice * 0.10 * 100) / 100;
+}
+
+// If rental exceeds 28 days, redirect back with error
+if (rentalDays > MAX_RENTAL_DAYS) {
+  const subtitleEl2 = document.getElementById('resultsSubtitle');
+  if (subtitleEl2) subtitleEl2.textContent = '';
+  const fleetGrid2 = document.getElementById('fleetGrid');
+  const resultsEmpty2 = document.getElementById('resultsEmpty');
+  if (fleetGrid2) fleetGrid2.innerHTML = '';
+  if (resultsEmpty2) {
+    resultsEmpty2.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:56px;margin-bottom:20px;">📅</div>
+        <h3 style="font-size:22px;font-weight:700;color:#093D5E;margin:0 0 12px;font-family:'Bricolage Grotesque',sans-serif;">Maximum rental period exceeded</h3>
+        <p style="color:#64748b;font-size:15px;line-height:1.6;max-width:440px;margin:0 auto;">
+          We currently offer rentals of up to 28 days. Please adjust your dates and try again.
+        </p>
+        <a href="index.html" style="display:inline-block;margin-top:24px;padding:12px 28px;background:#093D5E;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Change dates</a>
+      </div>`;
+    resultsEmpty2.hidden = false;
+  }
+  // Stop all further execution
+  throw new Error('MAX_DAYS_EXCEEDED');
+}
+
 // Location labels
 const LOCATION_LABELS = {
   'ath-airport': 'Athens Airport',
@@ -407,7 +439,7 @@ function openVehicleModal(v) {
 
   function recalc() {
     const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
-    const dailyExtra = bookingOpt === 'flex' ? 1 : 0;
+    const dailyExtra = bookingOpt === 'flex' ? flexExtra(basePrice) : 0;
     const daily = basePrice + dailyExtra;
     const total = (daily * rentalDays).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
@@ -592,7 +624,7 @@ function renderProtectionGrid() {
 function updateProtectionTotal() {
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const rateExtra = currentProtection.rate === 'flex' ? flexExtra(v.price) : 0;
   const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
   const daily = v.price + rateExtra + protectionDaily;
@@ -713,7 +745,7 @@ function calculateExtrasTotal() {
 function updateExtrasTotal() {
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const rateExtra = currentProtection.rate === 'flex' ? flexExtra(v.price) : 0;
   const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
   const baseTotal = (v.price + rateExtra + protectionDaily) * days;
@@ -957,7 +989,7 @@ function populateDriverSummary() {
   }
 
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const rateExtra = currentProtection.rate === 'flex' ? flexExtra(v.price) : 0;
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (v.price + rateExtra + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
@@ -968,7 +1000,7 @@ function updateDriverTotal(afterHoursFee = 0) {
   const v = currentProtection.vehicle;
   if (!v) return;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const rateExtra = currentProtection.rate === 'flex' ? flexExtra(v.price) : 0;
   const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (v.price + rateExtra + protectionDaily) * days;
@@ -1142,7 +1174,7 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
   const pickupStation = frontendValueToStationCode(searchCtx.pickup);
   const returnStation = searchCtx.return ? frontendValueToStationCode(searchCtx.return) : pickupStation;
 
-  const rateExtra = rate === 'flex' ? 1 : 0;
+  const rateExtra = rate === 'flex' ? flexExtra(v.price) : 0;
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const carPriceTotal = +((v.price + rateExtra) * days).toFixed(2);
   const protectionPriceTotal = +(protectionDaily * days).toFixed(2);
@@ -1372,7 +1404,7 @@ function buildBreakdown() {
   if (!currentProtection.vehicle) return;
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? 1 : 0;
+  const rateExtra = currentProtection.rate === 'flex' ? flexExtra(v.price) : 0;
   const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const timing = checkPickupTiming();
