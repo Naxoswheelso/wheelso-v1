@@ -375,6 +375,8 @@ function openVehicleModal(v) {
   };
   recalc();
   vehicleModal.hidden = false;
+  const modalScrollArea = vehicleModal.querySelector('.modal-scroll-area');
+  if (modalScrollArea) modalScrollArea.scrollTop = 0;
   document.body.classList.add('vehicle-modal-open');
   requestAnimationFrame(() => vehicleModal.classList.add('open'));
 }
