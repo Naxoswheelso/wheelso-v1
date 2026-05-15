@@ -8,6 +8,68 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .modify-panel {
+      background: #f0f4f8;
+      border-top: 1px solid #dde3ed;
+      padding: 20px 0;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .modify-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .modify-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 140px;
+    }
+    .modify-field--action { min-width: 140px; flex: 0 0 auto; }
+    .modify-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+    }
+    .modify-select, .modify-input {
+      padding: 10px 12px;
+      border: 2px solid #dde3ed;
+      border-radius: 10px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      background: #fff;
+      color: #1a2332;
+      width: 100%;
+    }
+    .modify-select:focus, .modify-input:focus {
+      outline: none;
+      border-color: #093D5E;
+    }
+    .modify-search-btn {
+      width: 100%;
+      padding: 12px 20px;
+      background: #093D5E;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modify-search-btn:hover { background: #1C5875; }
+    @media (max-width: 720px) {
+      .modify-field { min-width: calc(50% - 6px); }
+      .modify-field--action { min-width: 100%; }
+    }
+  </style>
 </head>
 <body>
 
@@ -68,6 +130,70 @@
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </span>
       </button>
+    </div>
+
+    <!-- Modify panel — drops down when Modify is clicked -->
+    <div class="modify-panel" id="modifyPanel" hidden>
+      <div class="container">
+        <div class="modify-grid">
+          <div class="modify-field">
+            <label class="modify-label">Pick-up location</label>
+            <select id="modifyPickup" class="modify-select"></select>
+          </div>
+          <div class="modify-field">
+            <label class="modify-label">
+              <input type="checkbox" id="modifyDiffReturn" style="margin-right:6px">
+              Different drop-off
+            </label>
+            <select id="modifyReturn" class="modify-select" disabled style="opacity:0.5"></select>
+          </div>
+          <div class="modify-field">
+            <label class="modify-label">Pick-up date</label>
+            <input type="date" id="modifyFrom" class="modify-input">
+          </div>
+          <div class="modify-field">
+            <label class="modify-label">Pick-up time</label>
+            <select id="modifyFromTime" class="modify-select">
+              <option value="09:00">09:00</option><option value="10:00">10:00</option>
+              <option value="11:00">11:00</option><option value="12:00">12:00</option>
+              <option value="13:00">13:00</option><option value="14:00">14:00</option>
+              <option value="15:00">15:00</option><option value="16:00">16:00</option>
+              <option value="17:00">17:00</option><option value="18:00">18:00</option>
+              <option value="19:00">19:00</option><option value="20:00">20:00</option>
+              <option value="21:00">21:00</option>
+            </select>
+          </div>
+          <div class="modify-field">
+            <label class="modify-label">Return date</label>
+            <input type="date" id="modifyTo" class="modify-input">
+          </div>
+          <div class="modify-field">
+            <label class="modify-label">Return time</label>
+            <select id="modifyToTime" class="modify-select">
+              <option value="09:00">09:00</option><option value="10:00">10:00</option>
+              <option value="11:00">11:00</option><option value="12:00">12:00</option>
+              <option value="13:00">13:00</option><option value="14:00">14:00</option>
+              <option value="15:00">15:00</option><option value="16:00">16:00</option>
+              <option value="17:00">17:00</option><option value="18:00">18:00</option>
+              <option value="19:00">19:00</option><option value="20:00">20:00</option>
+              <option value="21:00">21:00</option>
+            </select>
+          </div>
+          <div class="modify-field">
+            <label class="modify-label">Driver age</label>
+            <select id="modifyAge" class="modify-select">
+              <option value="21-25">21–25 (Young Driver)</option>
+              <option value="26-69" selected>26–69</option>
+              <option value="70-75">70–75 (Senior)</option>
+            </select>
+          </div>
+          <div class="modify-field modify-field--action">
+            <button type="button" class="btn btn-primary modify-search-btn" id="modifySearchBtn">
+              Search cars →
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 

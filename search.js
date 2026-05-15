@@ -126,9 +126,101 @@ document.getElementById('summaryAge').textContent = searchCtx.age;
 const subtitleEl = document.getElementById('resultsSubtitle');
 if (subtitleEl) subtitleEl.textContent = `for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'} in ${LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece'}`;
 
-// Search summary click → go back to home with focus on widget
-document.getElementById('searchSummary').addEventListener('click', () => {
-  window.location.href = 'index.html#booking';
+// ─── MODIFY PANEL ───
+const modifyPanel = document.getElementById('modifyPanel');
+const searchSummaryBtn = document.getElementById('searchSummary');
+
+// Toggle modify panel open/close
+searchSummaryBtn.addEventListener('click', () => {
+  const isOpen = !modifyPanel.hidden;
+  modifyPanel.hidden = isOpen;
+  searchSummaryBtn.setAttribute('aria-expanded', !isOpen);
+  if (!isOpen) populateModifyPanel();
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !modifyPanel.hidden) {
+    modifyPanel.hidden = true;
+    searchSummaryBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+function populateModifyPanel() {
+  // Set current values
+  const fromEl = document.getElementById('modifyFrom');
+  const toEl = document.getElementById('modifyTo');
+  const fromTimeEl = document.getElementById('modifyFromTime');
+  const toTimeEl = document.getElementById('modifyToTime');
+  const ageEl = document.getElementById('modifyAge');
+  const pickupEl = document.getElementById('modifyPickup');
+  const returnEl = document.getElementById('modifyReturn');
+  const diffCb = document.getElementById('modifyDiffReturn');
+
+  if (fromEl) fromEl.value = searchCtx.from || '';
+  if (toEl) toEl.value = searchCtx.to || '';
+  if (fromTimeEl) fromTimeEl.value = searchCtx.fromTime || '10:00';
+  if (toTimeEl) toTimeEl.value = searchCtx.toTime || '10:00';
+  if (ageEl) ageEl.value = searchCtx.age || '26-69';
+
+  // Set pickup/return dropdowns to current values
+  if (pickupEl && searchCtx.pickup) {
+    const pickupCode = frontendValueToStationCode(searchCtx.pickup).toLowerCase().replace(/_/g, '-') || searchCtx.pickup;
+    [...pickupEl.options].forEach(o => {
+      if (o.value.toLowerCase() === searchCtx.pickup.toLowerCase()) pickupEl.value = o.value;
+    });
+  }
+  const hasDiffReturn = searchCtx.return && searchCtx.return !== searchCtx.pickup;
+  if (diffCb) diffCb.checked = hasDiffReturn;
+  if (returnEl) {
+    returnEl.disabled = !hasDiffReturn;
+    returnEl.style.opacity = hasDiffReturn ? '1' : '0.5';
+    if (hasDiffReturn && searchCtx.return) {
+      [...returnEl.options].forEach(o => {
+        if (o.value.toLowerCase() === searchCtx.return.toLowerCase()) returnEl.value = o.value;
+      });
+    }
+  }
+}
+
+// Toggle different drop-off
+document.getElementById('modifyDiffReturn').addEventListener('change', function() {
+  const returnEl = document.getElementById('modifyReturn');
+  returnEl.disabled = !this.checked;
+  returnEl.style.opacity = this.checked ? '1' : '0.5';
+});
+
+// Search button → rebuild URL and reload
+document.getElementById('modifySearchBtn').addEventListener('click', () => {
+  const from = document.getElementById('modifyFrom').value;
+  const to = document.getElementById('modifyTo').value;
+  const fromTime = document.getElementById('modifyFromTime').value;
+  const toTime = document.getElementById('modifyToTime').value;
+  const age = document.getElementById('modifyAge').value;
+  const pickup = document.getElementById('modifyPickup').value;
+  const diffCb = document.getElementById('modifyDiffReturn');
+  const returnVal = diffCb.checked ? document.getElementById('modifyReturn').value : '';
+
+  if (!pickup || !from || !to) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+  if (from >= to) {
+    alert('Return date must be after pick-up date.');
+    return;
+  }
+
+  const params = new URLSearchParams({
+    pickup,
+    from,
+    to,
+    fromTime,
+    toTime,
+    age,
+    ...(returnVal ? { return: returnVal } : {})
+  });
+
+  window.location.href = `search.html?${params.toString()}`;
 });
 
 // ============================================
