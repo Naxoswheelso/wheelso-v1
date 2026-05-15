@@ -1373,6 +1373,8 @@ async function loadAvailabilityPrices() {
       renderResults();
       console.log('[Wheelso] Availability prices loaded for', cars.length, 'cars');
     } else {
+      // No cars returned (no pricing for this station/dates) → clear all vehicles
+      VEHICLES = [];
       console.warn('[Wheelso] Availability returned 0 cars:', result.message || 'no message');
     }
   } catch (err) {
