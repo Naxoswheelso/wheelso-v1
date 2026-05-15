@@ -192,16 +192,13 @@ const ICON_TRANS_MAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 function renderVehicleCard(v) {
   const isAuto = v.transmission === 'auto';
   const totalForStay = (v.price * rentalDays).toFixed(2);
-  const isUnavailable = v.unavailable === true;
-
   return `
-    <article class="vehicle-card${isUnavailable ? ' vehicle-unavailable' : ''}" data-category="${v.category}" data-code="${v.code}" data-transmission="${v.transmission}" data-price="${v.price}" ${isUnavailable ? 'data-unavailable="true"' : ''} style="${isUnavailable ? 'opacity:0.6;pointer-events:none;' : ''}">
-      <div class="vehicle-image" style="${isUnavailable ? 'filter:grayscale(0.8);' : ''}">
+    <article class="vehicle-card" data-category="${v.category}" data-code="${v.code}" data-transmission="${v.transmission}" data-price="${v.price}">
+      <div class="vehicle-image">
         ${isAuto ? '<span class="vehicle-badge transmission-auto">Auto</span>' : '<span class="vehicle-badge">Manual</span>'}
         ${v.image_url
           ? `<img src="https://wheelso-backend-production.up.railway.app${v.image_url}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
           : CAR_SVGS[v.category]}
-        ${isUnavailable ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.55);"><span style="background:#e74c3c;color:#fff;padding:8px 16px;border-radius:20px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Not available</span></div>' : ''}
       </div>
       <div class="vehicle-body">
         <div class="vehicle-header">
@@ -216,17 +213,15 @@ function renderVehicleCard(v) {
           <div class="spec">${isAuto ? ICON_TRANS_AUTO : ICON_TRANS_MAN}<span class="spec-value">${isAuto ? 'Auto' : 'Man'}</span></div>
         </div>
         <div class="vehicle-footer">
-          ${isUnavailable
-            ? `<div class="vehicle-price"><span style="color:#64748b;font-size:13px">Try different dates or location</span></div>`
-            : `<div class="vehicle-price">
-                <span class="price-from">From</span>
-                <span><span class="price-amount">€${v.price}</span><span class="price-period">/day</span></span>
-                <span class="price-total-stay">€${totalForStay} total for ${rentalDays} days</span>
-              </div>
-              <span class="vehicle-cta">
-                Select
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </span>`}
+          <div class="vehicle-price">
+            <span class="price-from">From</span>
+            <span><span class="price-amount">€${v.price}</span><span class="price-period">/day</span></span>
+            <span class="price-total-stay">€${totalForStay} total for ${rentalDays} days</span>
+          </div>
+          <span class="vehicle-cta">
+            Select
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
         </div>
       </div>
     </article>
@@ -275,9 +270,6 @@ function filterAndSort() {
     const order = ['economy', 'compact', 'intermediate', 'suv', 'premium', 'van'];
     list.sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category));
   }
-
-  // Always push unavailable cars to the end (after main sort)
-  list.sort((a, b) => (a.unavailable ? 1 : 0) - (b.unavailable ? 1 : 0));
   return list;
 }
 
@@ -310,6 +302,14 @@ function renderResults() {
   resultsCount.textContent = list.length;
   if (list.length === 0) {
     fleetGrid.innerHTML = '';
+    resultsEmpty.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:56px;margin-bottom:20px;">🚗</div>
+        <h3 style="font-size:22px;font-weight:700;color:#093D5E;margin:0 0 12px;font-family:'Bricolage Grotesque',sans-serif;">No cars available</h3>
+        <p style="color:#64748b;font-size:15px;line-height:1.6;max-width:440px;margin:0 auto;">
+          Unfortunately, there are no cars available for the selected location and dates. Please try different dates or another location.
+        </p>
+      </div>`;
     resultsEmpty.hidden = false;
   } else {
     resultsEmpty.hidden = true;
@@ -385,15 +385,14 @@ document.getElementById('sortBy').addEventListener('change', (e) => {
   renderResults();
 });
 
-// Click card → open modal (unless unavailable)
+// Click card → open modal
 fleetGrid.addEventListener('click', (e) => {
   const card = e.target.closest('.vehicle-card');
   if (!card) return;
-  if (card.dataset.unavailable === 'true') return; // unavailable cars don't open modal
   const timing = checkPickupTiming();
   if (!timing.ok) { renderResults(); return; } // re-render with error
   const v = VEHICLES.find(x => x.code === card.dataset.code);
-  if (v && !v.unavailable) openVehicleModal(v);
+  if (v) openVehicleModal(v);
 });
 
 // ============================================
@@ -1327,8 +1326,7 @@ async function loadAvailabilityPrices() {
       // Build set of car codes returned by backend (so we can hide cars NOT returned)
       const backendCodes = new Set(cars.map(c => c.code || c.car_code));
 
-      // Mark vehicles not returned by backend as unavailable (no pricing for this station/dates)
-      // → actually, we hide them by filtering VEHICLES below
+      // Hide vehicles not returned by backend (no pricing OR stopped for this date range)
       VEHICLES = VEHICLES.filter(v => backendCodes.has(v.code));
 
       cars.forEach(item => {
@@ -1338,8 +1336,6 @@ async function loadAvailabilityPrices() {
           if (item.daily_avg != null) v.price = Number(item.daily_avg);
           else if (item.price != null) v.price = Number(item.price);
           if (item.available === false) v.upon_request = true;
-          // Stop sale → mark unavailable but keep visible with "Not available" badge
-          v.unavailable = item.unavailable === true;
         }
       });
       renderResults();
