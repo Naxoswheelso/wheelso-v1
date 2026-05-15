@@ -1412,11 +1412,11 @@ function buildStationOptions(stations, includeDefault = true) {
     ? '<option value="" disabled selected>Select location...</option>'
     : '<option value="">Same as pick-up</option>';
   Object.entries(regions).forEach(([region, stns]) => {
-    html += `<optgroup label="📍 ${region}">`;
+    html += `<optgroup label="${region}">`;
     stns.forEach(s => {
       const val = s.code.toLowerCase();
-      const icon = s.type === 'airport' ? '✈️' : s.type === 'port' ? '⚓' : '🏙️';
-      html += `<option value="${val}">${icon} ${s.name}</option>`;
+      const icon = '';
+      html += `<option value="${val}">${s.name}</option>`;
     });
     html += '</optgroup>';
   });
