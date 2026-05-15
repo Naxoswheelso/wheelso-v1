@@ -43,7 +43,7 @@ function frontendValueToStationCode(v) {
 // ============================================
 // STATIONS — load from API + populate dropdowns
 // ============================================
-const STATION_TYPE_ICON = { airport: '️', port: '', downtown: '' };
+const STATION_TYPE_ICON = { airport: '', port: '', downtown: '' };
 const STATION_TYPE_LABEL = { airport: 'Airport', port: 'Port', downtown: 'Downtown' };
 
 function buildStationOptions(stations, includeDefault = true) {
@@ -60,11 +60,10 @@ function buildStationOptions(stations, includeDefault = true) {
     : '<option value="">Same as pick-up</option>';
 
   Object.entries(regions).forEach(([region, stns]) => {
-    html += `<optgroup label=" ${region}">`;
+    html += `<optgroup label="${region}">`;
     stns.forEach(s => {
       const val = s.code.toLowerCase().replace(/-/g, '-');
-      const icon = STATION_TYPE_ICON[s.type] || '';
-      html += `<option value="${val}">${icon} ${s.name}</option>`;
+      html += `<option value="${val}">${s.name}</option>`;
     });
     html += '</optgroup>';
   });
@@ -89,21 +88,21 @@ async function loadStationsFromAPI() {
     // Fallback: restore hardcoded options
     console.warn('[Wheelso] Could not load stations, using fallback:', err.message);
     const fallback = `
-      <optgroup label=" Athens · Αθήνα">
-        <option value="ath-airport">️  Athens Airport (ATH)</option>
-        <option value="ath-downtown">  Athens Downtown — Syngrou Ave. 22</option>
+      <optgroup label="Athens · Αθήνα">
+        <option value="ath-airport">Athens Airport (ATH)</option>
+        <option value="ath-downtown">Athens Downtown — Syngrou Ave. 22</option>
       </optgroup>
-      <optgroup label=" Mykonos · Μύκονος">
-        <option value="myk-airport">️  Mykonos Airport (JMK)</option>
-        <option value="myk-port">⚓  Mykonos Port (Tourlos)</option>
+      <optgroup label="Mykonos · Μύκονος">
+        <option value="myk-airport">Mykonos Airport (JMK)</option>
+        <option value="myk-port">Mykonos Port (Tourlos)</option>
       </optgroup>
-      <optgroup label=" Paros · Πάρος">
-        <option value="par-airport">️  Paros Airport (PAS)</option>
-        <option value="par-port">⚓  Paros Port (Parikia)</option>
+      <optgroup label="Paros · Πάρος">
+        <option value="par-airport">Paros Airport (PAS)</option>
+        <option value="par-port">Paros Port (Parikia)</option>
       </optgroup>
-      <optgroup label=" Naxos · Νάξος">
-        <option value="nax-airport">️  Naxos Airport (JNX)</option>
-        <option value="nax-port">⚓  Naxos Port (Chora)</option>
+      <optgroup label="Naxos · Νάξος">
+        <option value="nax-airport">Naxos Airport (JNX)</option>
+        <option value="nax-port">Naxos Port (Chora)</option>
       </optgroup>`;
     const pickupEl = document.getElementById('pickupLocation');
     const returnEl = document.getElementById('returnLocation');
@@ -344,6 +343,26 @@ function openPopover() {
     pickingState = 'pickup';
   }
   renderCalendar();
+
+  // Auto-scroll so the calendar AND the search button are both visible
+  // Wait a tick so the popover renders and we can measure it
+  requestAnimationFrame(() => {
+    const searchBtn = document.getElementById('searchBtn');
+    if (!searchBtn) return;
+    const btnRect = searchBtn.getBoundingClientRect();
+    const popRect = dateRangePopover.getBoundingClientRect();
+    const viewportH = window.innerHeight;
+    // If the popover extends below the viewport, scroll the page down enough
+    // to show both the bottom of the popover (with some padding) and the search button
+    const popoverBottom = popRect.bottom;
+    const overflow = popoverBottom - viewportH + 80; // 80px padding
+    if (overflow > 0) {
+      window.scrollBy({ top: overflow, behavior: 'smooth' });
+    } else if (btnRect.bottom > viewportH) {
+      // Otherwise just make sure button is visible
+      window.scrollBy({ top: btnRect.bottom - viewportH + 40, behavior: 'smooth' });
+    }
+  });
 }
 
 function closePopover() {
