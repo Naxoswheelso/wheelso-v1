@@ -211,6 +211,32 @@ function renderVehicleCard(v) {
   `;
 }
 
+// ─── LOADING SKELETON ───
+function showLoadingSkeleton() {
+  const skeletonCard = `
+    <div class="vehicle-card skeleton-card" style="pointer-events:none;">
+      <div class="vehicle-image" style="background:linear-gradient(90deg,#e8eef3 25%,#d0dce5 50%,#e8eef3 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:12px 12px 0 0;height:160px;"></div>
+      <div class="vehicle-info" style="padding:16px;">
+        <div style="height:12px;width:60%;background:#e8eef3;border-radius:6px;margin-bottom:10px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#e8eef3 25%,#d0dce5 50%,#e8eef3 75%);"></div>
+        <div style="height:20px;width:80%;background:#e8eef3;border-radius:6px;margin-bottom:16px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#e8eef3 25%,#d0dce5 50%,#e8eef3 75%);"></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="height:10px;width:30%;background:#e8eef3;border-radius:4px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#e8eef3 25%,#d0dce5 50%,#e8eef3 75%);"></div>
+          <div style="height:10px;width:25%;background:#e8eef3;border-radius:4px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#e8eef3 25%,#d0dce5 50%,#e8eef3 75%);"></div>
+        </div>
+        <div style="height:36px;background:#e8eef3;border-radius:8px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#e8eef3 25%,#d0dce5 50%,#e8eef3 75%);"></div>
+      </div>
+    </div>`;
+  // Inject shimmer keyframes if not already present
+  if (!document.getElementById('shimmer-style')) {
+    const style = document.createElement('style');
+    style.id = 'shimmer-style';
+    style.textContent = `@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
+    document.head.appendChild(style);
+  }
+  if (fleetGrid) fleetGrid.innerHTML = skeletonCard.repeat(6);
+  if (resultsCount) resultsCount.textContent = '...';
+}
+
 // State for filtering and sorting
 let currentFilter = 'all';
 let currentTrans = 'all';
@@ -266,7 +292,8 @@ function renderResults() {
   }
 }
 
-renderResults();
+// Show skeleton loader while prices load (don't render hardcoded prices)
+showLoadingSkeleton();
 
 // Update chip counts (always based on transmission filter)
 function updateChipCounts() {
@@ -398,34 +425,11 @@ document.addEventListener('keydown', (e) => {
 // ============================================
 // PROTECTION PAGE (same as index)
 // ============================================
-// Map for backend feature keys → display labels
-const FEATURE_LABELS = {
-  ldw:      'Loss Damage Waiver (including theft protection)',
-  tire:     'Tire & Windshield Protection',
-  pai:      'Personal Accident Protection',
-  roadside: 'Roadside Protection'
-};
-const FEATURE_ORDER = ['ldw', 'tire', 'pai', 'roadside'];
-
-// Normalize features object into ordered { label: bool } map for rendering
-function normalizeFeatures(features) {
-  if (!features || typeof features !== 'object') return {};
-  const out = {};
-  // If features already have display labels (legacy/default), pass-through
-  if (Object.keys(features).some(k => FEATURE_LABELS[k] !== undefined)) {
-    for (const key of FEATURE_ORDER) {
-      out[FEATURE_LABELS[key]] = !!features[key];
-    }
-    return out;
-  }
-  // Otherwise treat keys as labels directly (legacy fallback)
-  return features;
-}
-
 const DEFAULT_PROTECTION_PACKAGES = [
-  { id: 'no_extra', name: 'No Protection',    stars: 0, excessLabel: 'Liability:', excess: 'Up to full vehicle value', excessClass: 'danger',  pricePerDay: 0,     discount: null,             features: normalizeFeatures({ ldw:false, tire:false, pai:false, roadside:false }) },
-  { id: 'basic',    name: 'Basic Protection', stars: 1, excessLabel: 'Excess:',    excess: 'Up to €800',               excessClass: 'warning', pricePerDay: 1.65,  discount: null,             features: normalizeFeatures({ ldw:true,  tire:false, pai:false, roadside:false }) },
-  { id: 'full',     name: 'Full Protection',  stars: 3, excessLabel: 'Excess:',    excess: 'Zero excess',              excessClass: 'good',    pricePerDay: 27.11, oldPrice: 41.71, discount: '−35% online', recommended: true, features: normalizeFeatures({ ldw:true, tire:true, pai:true, roadside:true }) }
+  { id: 'none', name: 'No extra protection', stars: 0, excessLabel: 'Liability:', excess: 'Up to full vehicle value', excessClass: 'danger', pricePerDay: 0, discount: null, features: { 'Loss Damage Waiver (including theft protection)': false, 'Tire & Windshield Protection': false, 'Personal Accident Protection': false, 'Roadside Protection': false, 'Interior Protection': false } },
+  { id: 'basic', name: 'Basic Protection', stars: 1, excessLabel: 'Excess:', excess: 'Up to €800', excessClass: 'warning', pricePerDay: 1.65, discount: null, features: { 'Loss Damage Waiver (including theft protection)': true, 'Tire & Windshield Protection': false, 'Personal Accident Protection': false, 'Roadside Protection': false, 'Interior Protection': false } },
+  { id: 'smart', name: 'Smart Protection', stars: 2, excessLabel: 'Excess:', excess: 'Zero excess', excessClass: 'good', pricePerDay: 14.02, oldPrice: 20.03, discount: '−30% online', features: { 'Loss Damage Waiver (including theft protection)': true, 'Tire & Windshield Protection': true, 'Personal Accident Protection': false, 'Roadside Protection': false, 'Interior Protection': false } },
+  { id: 'all', name: 'All Inclusive Protection', stars: 3, excessLabel: 'Excess:', excess: 'Zero excess', excessClass: 'good', pricePerDay: 27.11, oldPrice: 41.71, discount: '−35% online', recommended: true, features: { 'Loss Damage Waiver (including theft protection)': true, 'Tire & Windshield Protection': true, 'Personal Accident Protection': true, 'Roadside Protection': true, 'Interior Protection': true } }
 ];
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
@@ -443,26 +447,13 @@ async function loadProtectionForCategory(category) {
         let oldPrice = null, discountLabel = null;
         if (discount > 0 && price > 0) { oldPrice = +(price / (1 - discount / 100)).toFixed(2); discountLabel = `−${discount}% online`; }
         let features = def.features || {};
-        if (p.features) {
-          try {
-            const raw = typeof p.features === 'string' ? JSON.parse(p.features) : p.features;
-            features = normalizeFeatures(raw);
-          } catch(e) {}
-        }
+        if (p.features) { try { features = typeof p.features === 'string' ? JSON.parse(p.features) : p.features; } catch(e) {} }
         let excess = p.excess != null ? `Up to €${p.excess}` : (def.excess || '—');
         let excessClass = def.excessClass || 'warning';
         if (Number(p.excess) === 0) { excess = 'Zero excess'; excessClass = 'good'; }
         if (price === 0) { excess = def.excess || 'Up to full vehicle value'; excessClass = 'danger'; }
-        // Derive stars: count true features (1, 2, or 3 stars based on protection level)
-        const trueCount = Object.values(features).filter(Boolean).length;
-        const derivedStars = def.stars != null ? def.stars : Math.min(3, Math.max(0, trueCount > 0 ? Math.ceil(trueCount * 3 / 4) : 0));
-        return { id: code, name: p.name || def.name || code, stars: derivedStars, excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice, discount: discountLabel, recommended: !!p.recommended || def.recommended || false, features };
+        return { id: code, name: p.name || def.name || code, stars: def.stars ?? 1, excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice, discount: discountLabel, recommended: def.recommended || false, features };
       });
-      // Filter out any legacy 'smart' or 'all_inclusive' / 'all' packages that might still be in DB
-      PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => p.id !== 'smart' && p.id !== 'all_inclusive' && p.id !== 'all');
-      // Sort: no_extra → basic → full
-      const order = { no_extra: 0, basic: 1, full: 2 };
-      PROTECTION_PACKAGES.sort((a, b) => (order[a.id] ?? 99) - (order[b.id] ?? 99));
       return;
     }
   } catch (err) {
@@ -1130,7 +1121,7 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     return_datetime: `${searchCtx.to}T${searchCtx.toTime}:00`,
     car_code: v.code,
     rate_type: rate === 'flex' ? 'flex' : 'best_price',
-    protection_code: pkg ? pkg.id : 'no_extra',
+    protection_code: pkg ? (pkg.id === 'none' ? 'no_extra' : pkg.id) : 'no_extra',
     car_price: carPriceTotal,
     protection_price: protectionPriceTotal,
     extras_price: extrasPriceTotal,
@@ -1306,8 +1297,11 @@ async function loadAvailabilityPrices() {
 
 (async function initFromAPI() {
   await Promise.all([loadVehiclesFromAPI(), loadExtrasFromAPI(), loadStationsFromAPI()]);
-  // After vehicles loaded, fetch real prices
+  // Fetch real prices — renderResults() is called inside loadAvailabilityPrices on success
   await loadAvailabilityPrices();
+  // Always render at the end (even if availability returned 0, show whatever we have)
+  renderResults();
+  updateChipCounts();
   console.log('[Wheelso Search] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
 })();
 
