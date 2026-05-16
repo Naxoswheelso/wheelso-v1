@@ -734,8 +734,8 @@ async function openProtectionPage(v, days, rate) {
 
   if (overviewCancellation) {
     const cancelText = rate === 'flex'
-      ? 'Pay on arrival — Free cancellation any time before pick-up'
-      : 'Pay now — Free cancellation up to 48h before pick-up';
+      ? 'Pay Later — 10% deposit, balance at counter'
+      : 'Pay now — Free cancellation up to 72h before pick-up';
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
@@ -941,7 +941,7 @@ function populateSummarySidebar() {
 
   const sRate = document.getElementById('summaryRate');
   const sProt = document.getElementById('summaryProtection');
-  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Pay on arrival · Free cancellation anytime' : 'Pay now · Free cancellation up to 48h before';
+  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Pay Later · 10% deposit + balance at counter' : 'Pay now · Free cancellation up to 72h before';
   if (sProt) sProt.textContent = pkg ? pkg.name : 'Protection package';
 }
 
@@ -1106,9 +1106,12 @@ function populateDriverSummary() {
   document.getElementById('driverSummaryReturnDate').textContent = `${fmt(searchCtx.to)} · ${searchCtx.toTime}`;
 
   document.getElementById('driverSummaryRate').textContent = currentProtection.rate === 'flex'
-    ? 'Pay on arrival'
+    ? 'Pay Later'
     : 'Pay now';
   document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : 'Protection package';
+
+  // Render dynamic info cards (Payment + Cancellation)
+  renderInfoCards();
 
   const extrasEntries = Object.entries(selectedExtras).filter(([, qty]) => qty > 0);
   const extrasRow = document.getElementById('driverSummaryExtras');
@@ -1556,7 +1559,7 @@ function buildBreakdown() {
 
   if (rateExtra > 0) {
     html += `<div class="breakdown-line">
-      <span>Pay on arrival surcharge<span class="breakdown-line-meta">+€${rateExtra}/day × ${days} ${days===1?'day':'days'}</span></span>
+      <span>Pay Later surcharge<span class="breakdown-line-meta">+€${rateExtra}/day × ${days} ${days===1?'day':'days'}</span></span>
       <strong>€${(rateExtra * days).toFixed(2)}</strong>
     </div>`;
   }
@@ -1660,3 +1663,81 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   closeBtn.addEventListener('click', closeExcl);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeExcl(); });
 })();
+
+// ============ INFO CARDS (Payment / Cancellation) ============
+function renderInfoCards() {
+  const v = currentProtection.vehicle;
+  if (!v) return;
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  const days = currentProtection.days;
+  const rateExtra = currentProtection.rate === 'flex' ? flexExtra(v.price) : 0;
+  const protectionDaily = pkg ? pkg.pricePerDay : 0;
+  const total = ((v.price + rateExtra + protectionDaily) * days) + calculateExtrasTotal();
+  const isFlex = currentProtection.rate === 'flex';
+
+  const payCardSub  = document.getElementById('payCardSub');
+  const payCardBody = document.getElementById('payCardBody');
+  const cancelCardSub  = document.getElementById('cancelCardSub');
+  const cancelCardBody = document.getElementById('cancelCardBody');
+  if (!payCardSub || !payCardBody || !cancelCardSub || !cancelCardBody) return;
+
+  // Format cancellation deadline: 72h before pickup datetime
+  let deadlineStr = '';
+  if (searchCtx.from && searchCtx.fromTime) {
+    const pickupDt = new Date(`${searchCtx.from}T${searchCtx.fromTime}:00`);
+    if (!isNaN(pickupDt.getTime())) {
+      const deadline = new Date(pickupDt.getTime() - 72 * 60 * 60 * 1000);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const hh = String(deadline.getHours()).padStart(2, '0');
+      const mm = String(deadline.getMinutes()).padStart(2, '0');
+      deadlineStr = `${deadline.getDate()} ${months[deadline.getMonth()]}, ${hh}:${mm}`;
+    }
+  }
+
+  if (isFlex) {
+    // PAY LATER
+    const deposit  = total * 0.10;
+    const balance  = total - deposit;
+    payCardSub.textContent = '10% deposit now · 90% balance at counter';
+    payCardBody.innerHTML = `
+      <div class="pay-row">
+        <span>Pay today (booking deposit)</span>
+        <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill now">Online now</span></span>
+      </div>
+      <div class="pay-row">
+        <span>At pick-up (balance)</span>
+        <span><strong>€${balance.toFixed(2)}</strong> <span class="pay-pill later">At counter</span></span>
+      </div>
+      <div class="pay-row highlight">
+        <span>Total</span>
+        <span>€${total.toFixed(2)}</span>
+      </div>
+    `;
+
+    cancelCardSub.textContent = 'Flexible — cancel anytime, deposit non-refundable';
+    cancelCardBody.innerHTML = `
+      <p class="cancel-row">Cancel anytime, even at the last minute. Your booking deposit of <strong>€${deposit.toFixed(2)}</strong> is <span class="warn">non-refundable</span>, but you owe nothing else.</p>
+      <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">Please contact us if you are running late — vehicles unclaimed after the pick-up time may be reallocated.</p>
+    `;
+  } else {
+    // BEST PRICE — full pay now
+    payCardSub.textContent = '100% online today — secure checkout';
+    payCardBody.innerHTML = `
+      <div class="pay-row">
+        <span>Pay today</span>
+        <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill now">Online now</span></span>
+      </div>
+      <div class="pay-row">
+        <span>At pick-up</span>
+        <span><strong>€0.00</strong></span>
+      </div>
+    `;
+
+    cancelCardSub.textContent = 'Free until 72 hours before pick-up';
+    cancelCardBody.innerHTML = `
+      <p class="cancel-row">Cancel anytime up to <strong>3 days before pick-up</strong> for a full refund. After that, the booking becomes non-refundable.</p>
+      ${deadlineStr ? `<div class="cancel-deadline"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Free cancellation until ${deadlineStr}</div>` : ''}
+      <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">Please contact us if you are running late — vehicles unclaimed after the pick-up time may be reallocated.</p>
+    `;
+  }
+}

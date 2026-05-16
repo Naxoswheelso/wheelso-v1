@@ -728,7 +728,7 @@ function renderCancelSection(b) {
     return;
   }
   if (b.can_cancel) {
-    const deadline = b.cancel_deadline || '48 hours before pick-up';
+    const deadline = b.cancel_deadline || '72 hours before pick-up';
     card.innerHTML = `
       <div class="mb-card-title">Cancel booking</div>
       <p class="mb-cancel-info">You can cancel for free up to <strong>${deadline}</strong>. After that, cancellation fees may apply.</p>
@@ -740,7 +740,7 @@ function renderCancelSection(b) {
   } else {
     card.innerHTML = `
       <div class="mb-no-cancel-notice">
-        ⚠️ The free cancellation window has passed (${b.cancel_deadline || '48 hours before pick-up'}). To cancel or modify your booking, please contact us directly.
+        ⚠️ The free cancellation window has passed (${b.cancel_deadline || '72 hours before pick-up'}). To cancel or modify your booking, please contact us directly.
       </div>
     `;
   }
