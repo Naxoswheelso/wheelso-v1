@@ -604,9 +604,9 @@ function normalizeFeatures(features) {
 }
 
 const DEFAULT_PROTECTION_PACKAGES = [
-  { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Basic cover',     excessLabel: 'Liability:', excess: 'Up to full vehicle value', excessClass: 'danger',  pricePerDay: 0,     discount: null,              deposit: { type: 'hold',    amount: '€1,500' },                                                                                       features: normalizeFeatures({ ldw:false, tire:false, pai:false, roadside:false }) },
-  { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',  excessLabel: 'Excess:',    excess: 'Up to €800',               excessClass: 'warning', pricePerDay: 1.65,  discount: null,              deposit: { type: 'hold',    amount: '€500' },                                                                                         features: normalizeFeatures({ ldw:true,  tire:false, pai:false, roadside:false }) },
-  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',     excessLabel: 'Excess:',    excess: 'Zero excess',              excessClass: 'good',    pricePerDay: 27.11, discount: null, deposit: { type: 'none',    amount: '€0 — nothing held', footnote: 'Card on file required. Charged only for excluded events — see terms.' }, recommended: true, features: normalizeFeatures({ ldw:true, tire:true, pai:true, roadside:true }) }
+  { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Included in rate', tag: 'TPL', tagTooltip: 'Third Party Liability — covers damage to other vehicles or people, but not your rental car.', riskLabel: 'If damage occurs', riskValue: 'You cover full repair cost', riskClass: 'bad',  pricePerDay: 0,    features: normalizeFeatures({ tpl:true,  ldw:false, tire:false, pai:false, roadside:false }) },
+  { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',   tag: 'CDW', tagTooltip: 'Collision Damage Waiver — your liability is capped at €800. Beyond that, we cover the damage.', riskLabel: 'If damage occurs', riskValue: 'You pay up to €800',         riskClass: 'mid',  pricePerDay: 8,    recommended: false, features: normalizeFeatures({ tpl:true,  ldw:true,  tire:false, pai:false, roadside:false }) },
+  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',      tag: 'FDW', tagTooltip: 'Full Damage Waiver — zero excess. We cover all accidental damage, you pay nothing.',           riskLabel: 'If damage occurs', riskValue: 'You pay nothing',           riskClass: 'good', pricePerDay: 15,   recommended: true,  footnote: 'Card on file for excluded events only — see terms.', features: normalizeFeatures({ tpl:true, ldw:true, tire:true, pai:true, roadside:true }) }
 ];
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
@@ -636,7 +636,7 @@ async function loadProtectionForCategory(category) {
         if (price === 0) { excess = def.excess || 'Up to full vehicle value'; excessClass = 'danger'; }
         const trueCount = Object.values(features).filter(Boolean).length;
         const derivedCoverage = def.coverage != null ? def.coverage : (code === 'no_extra' ? 1 : code === 'basic' ? 2 : code === 'full' ? 3 : Math.min(3, Math.max(1, Math.ceil(trueCount * 3 / 4))));
-        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice: null, discount: null, recommended: !!p.recommended || def.recommended || false, deposit: def.deposit || null, features };
+        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', tag: def.tag || null, tagTooltip: def.tagTooltip || null, riskLabel: def.riskLabel || 'If damage occurs', riskValue: def.riskValue || '—', riskClass: def.riskClass || 'mid', pricePerDay: price, recommended: !!p.recommended || def.recommended || false, footnote: def.footnote || null, features };
       });
       // Filter out legacy packages, sort
       PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => !['smart','all_inclusive','all','none'].includes(p.id));
@@ -674,34 +674,27 @@ function renderProtectionCard(pkg, selectedId) {
   if (pkg.pricePerDay === 0) {
     priceHTML = `<div class="protection-price">Included <span>in rate</span></div>`;
   } else {
-    priceHTML = `<div class="protection-price">€${pkg.pricePerDay.toFixed(2)} <span>/day</span>${pkg.oldPrice ? `<span class="protection-price-old">€${pkg.oldPrice.toFixed(2)}/day</span>` : ''}</div>`;
+    priceHTML = `<div class="protection-price">+€${pkg.pricePerDay.toFixed(2)} <span>/day</span></div>`;
   }
 
-  // Deposit row (transparency block)
-  let depositHTML = '';
-  if (pkg.deposit) {
-    const isNone = pkg.deposit.type === 'none';
-    const depClass = isNone ? 'protection-deposit good' : 'protection-deposit';
-    const depLabel = isNone ? 'Card hold' : 'Refundable hold';
-    const icon = isNone
-      ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
-      : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>';
-    depositHTML = `
-      <div class="${depClass}">
-        ${icon}
-        <div class="protection-deposit-text">
-          <span class="protection-deposit-label">${depLabel}</span>
-          <span class="protection-deposit-value">${pkg.deposit.amount}</span>
-        </div>
-      </div>
-    `;
-  }
+  // Tag with tooltip (TPL/CDW/FDW)
+  const tagHTML = pkg.tag
+    ? `<span class="protection-tag" tabindex="0">${pkg.tag}${pkg.tagTooltip ? `<span class="protection-tooltip">${pkg.tagTooltip}</span>` : ''}</span>`
+    : '';
 
-  const badgeHTML = pkg.recommended ? '<span class="protection-badge">€0 held</span>' : '';
+  // Risk row — "If damage occurs"
+  const riskHTML = pkg.riskValue
+    ? `<div class="protection-risk ${pkg.riskClass || 'mid'}">
+         <p class="protection-risk-label">${pkg.riskLabel || 'If damage occurs'}</p>
+         <p class="protection-risk-value">${pkg.riskValue}</p>
+       </div>`
+    : '';
+
+  const badgeHTML = pkg.recommended ? '<span class="protection-badge">Most popular</span>' : '';
   const isLime = !!pkg.recommended;
   const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${pkg.eyebrow}</div>` : '';
-  const footnoteHTML = (pkg.deposit && pkg.deposit.footnote)
-    ? `<p class="protection-footnote">${pkg.deposit.footnote.replace('see terms', '<a href="#" class="excl-trigger">see terms</a>')}</p>`
+  const footnoteHTML = pkg.footnote
+    ? `<p class="protection-footnote">${pkg.footnote.replace('see terms', '<a href="#" class="excl-trigger">see terms</a>')}</p>`
     : '';
 
   return `
@@ -710,10 +703,11 @@ function renderProtectionCard(pkg, selectedId) {
       <div class="protection-card-radio"></div>
       ${renderCoverageBar(pkg.coverage || 1, 3, isLime)}
       ${eyebrowHTML}
-      <h3 class="protection-card-name">${pkg.name}</h3>
-      ${pkg.discount ? `<span class="protection-discount">${pkg.discount}</span>` : ''}
-      ${depositHTML}
-      <div class="protection-excess ${pkg.excessClass}"><strong>${pkg.excessLabel}</strong>${pkg.excess}</div>
+      <div class="protection-name-row">
+        <h3 class="protection-card-name">${pkg.name}</h3>
+        ${tagHTML}
+      </div>
+      ${riskHTML}
       <div class="protection-features">${featuresHTML}</div>
       ${priceHTML}
       ${footnoteHTML}
