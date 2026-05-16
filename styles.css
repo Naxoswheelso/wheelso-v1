@@ -2310,7 +2310,7 @@ html, body {
 }
 
 /* Trust strip — transparency selling points */
-.trust-strip {
+.protection-trust-strip {
   display: flex;
   flex-wrap: wrap;
   gap: 14px 24px;
@@ -2321,7 +2321,7 @@ html, body {
   border-radius: var(--radius-lg);
   margin: 0 0 24px;
 }
-.trust-strip-item {
+.protection-trust-strip .trust-strip-item {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2329,7 +2329,7 @@ html, body {
   font-weight: 600;
   color: var(--wh-blue-dark);
 }
-.trust-strip-item svg {
+.protection-trust-strip .trust-strip-item svg {
   flex-shrink: 0;
   color: var(--wh-lime);
   background: var(--wh-blue-dark);
