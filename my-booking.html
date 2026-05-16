@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage My Booking — Wheelso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── PAGE LAYOUT ── */
+    .mb-page {
+      min-height: 100vh;
+      background: var(--wh-gray-50, #f8f9fa);
+    }
+    .mb-header {
+      background: var(--wh-blue-dark, #093D5E);
+      padding: 0;
+    }
+    .mb-header-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .mb-logo img { height: 32px; display: block; }
+    .mb-header-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* ── MAIN CONTAINER ── */
+    .mb-container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── LOOKUP CARD ── */
+    .mb-lookup {
+      background: var(--wh-white, #fff);
+      border: 0.5px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+    .mb-lookup-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--wh-blue-dark, #093D5E);
+      margin: 0 0 6px;
+    }
+    .mb-lookup-sub {
+      font-size: 14px;
+      color: #6B7280;
+      margin: 0 0 24px;
+      line-height: 1.5;
+    }
+    .mb-field {
+      margin-bottom: 16px;
+    }
+    .mb-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .mb-input {
+      width: 100%;
+      box-sizing: border-box;
+      height: 48px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 15px;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      color: var(--wh-blue-dark, #093D5E);
+      background: #fff;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .mb-input:focus { border-color: var(--wh-blue-dark, #093D5E); }
+    .mb-input::placeholder { color: #9CA3AF; }
+    .mb-btn-primary {
+      width: 100%;
+      height: 52px;
+      background: var(--wh-blue-dark, #093D5E);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s;
+    }
+    .mb-btn-primary:hover { opacity: 0.9; }
+    .mb-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .mb-error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #B91C1C;
+    }
+
+    /* ── BOOKING CARD ── */
+    .mb-booking { display: none; }
+    .mb-booking.visible { display: block; }
+
+    .mb-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6B7280;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+    .mb-back:hover { color: var(--wh-blue-dark, #093D5E); }
+
+    .mb-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .mb-ref {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--wh-blue-dark, #093D5E);
+    }
+    .mb-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .mb-status-badge.confirmed  { background: #DCFCE7; color: #166534; }
+    .mb-status-badge.pending    { background: #FEF9C3; color: #854D0E; }
+    .mb-status-badge.cancelled  { background: #FEE2E2; color: #991B1B; }
+    .mb-status-badge.completed  { background: #E0E7FF; color: #3730A3; }
+
+    .mb-card {
+      background: #fff;
+      border: 0.5px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 22px 20px;
+      margin-bottom: 14px;
+    }
+    .mb-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0 0 16px;
+    }
+
+    /* Trip info */
+    .mb-trip {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .mb-trip-point { }
+    .mb-trip-point.end { text-align: right; }
+    .mb-trip-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .mb-trip-station {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--wh-blue-dark, #093D5E);
+      line-height: 1.3;
+    }
+    .mb-trip-datetime {
+      font-size: 12px;
+      color: #6B7280;
+      margin-top: 2px;
+    }
+    .mb-trip-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #D1D5DB;
+    }
+    .mb-trip-arrow span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--wh-blue-dark, #093D5E);
+      background: #EFF6FF;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .mb-trip-line {
+      width: 40px;
+      height: 1px;
+      background: #D1D5DB;
+    }
+
+    /* Car row */
+    .mb-car-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #F3F4F6;
+    }
+    .mb-car-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #EFF6FF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .mb-car-icon svg { color: var(--wh-blue-dark, #093D5E); }
+    .mb-car-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--wh-blue-dark, #093D5E);
+    }
+    .mb-car-meta {
+      font-size: 12px;
+      color: #6B7280;
+      margin-top: 2px;
+    }
+
+    /* Price breakdown */
+    .mb-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      color: #374151;
+      padding: 5px 0;
+    }
+    .mb-price-row.total {
+      border-top: 1px solid #F3F4F6;
+      margin-top: 8px;
+      padding-top: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--wh-blue-dark, #093D5E);
+    }
+    .mb-price-row.discount { color: #15803D; }
+
+    /* Contact section */
+    .mb-contact-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--wh-blue-dark, #093D5E);
+      margin: 0 0 14px;
+    }
+    .mb-contact-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .mb-btn-wa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 50px;
+      background: #25D366;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .mb-btn-wa:hover { opacity: 0.9; }
+    .mb-btn-email {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 50px;
+      background: #fff;
+      color: var(--wh-blue-dark, #093D5E);
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .mb-btn-email:hover { border-color: var(--wh-blue-dark, #093D5E); }
+
+    /* Cancel section */
+    .mb-cancel-card {
+      background: #fff;
+      border: 0.5px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 22px 20px;
+      margin-bottom: 14px;
+    }
+    .mb-cancel-info {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+    .mb-cancel-info strong { color: #374151; }
+    .mb-btn-cancel {
+      width: 100%;
+      height: 48px;
+      background: #fff;
+      color: #B91C1C;
+      border: 1.5px solid #FECACA;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mb-btn-cancel:hover { background: #FEF2F2; border-color: #F87171; }
+    .mb-cancelled-notice {
+      padding: 14px 16px;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #991B1B;
+      line-height: 1.5;
+    }
+    .mb-no-cancel-notice {
+      padding: 14px 16px;
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #92400E;
+      line-height: 1.5;
+    }
+
+    /* Cancel confirm dialog */
+    .mb-confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(9,61,94,0.45);
+      z-index: 9999;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+    .mb-confirm-overlay.open { display: flex; }
+    .mb-confirm-panel {
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
+      width: 100%;
+      max-width: 480px;
+    }
+    @media (min-width: 560px) {
+      .mb-confirm-overlay { align-items: center; padding: 16px; }
+      .mb-confirm-panel { border-radius: 16px; max-width: 420px; }
+    }
+    .mb-confirm-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--wh-blue-dark, #093D5E);
+      margin: 0 0 8px;
+    }
+    .mb-confirm-sub {
+      font-size: 13.5px;
+      color: #6B7280;
+      margin: 0 0 22px;
+      line-height: 1.5;
+    }
+    .mb-confirm-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .mb-confirm-yes {
+      height: 50px;
+      background: #DC2626;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      cursor: pointer;
+    }
+    .mb-confirm-yes:disabled { opacity: 0.6; cursor: not-allowed; }
+    .mb-confirm-no {
+      height: 50px;
+      background: #fff;
+      color: #374151;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font-body, 'Manrope', sans-serif);
+      cursor: pointer;
+    }
+    .mb-success-notice {
+      padding: 14px 16px;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #166534;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    /* Loading spinner */
+    .mb-spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: mb-spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes mb-spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="mb-page">
+  <!-- Header -->
+  <div class="mb-header">
+    <div class="mb-header-inner">
+      <a href="index.html" class="mb-logo" aria-label="Back to Wheelso">
+        <img src="assets/logo.png" alt="Wheelso" />
+      </a>
+      <h1 class="mb-header-title">Manage my booking</h1>
+    </div>
+  </div>
+
+  <div class="mb-container">
+
+    <!-- ── LOOKUP FORM ── -->
+    <div class="mb-lookup" id="mbLookup">
+      <h2 class="mb-lookup-title">Find your booking</h2>
+      <p class="mb-lookup-sub">Enter your booking reference and the email address you used when booking.</p>
+
+      <div class="mb-field">
+        <label class="mb-label" for="mbRef">Booking reference</label>
+        <input class="mb-input" type="text" id="mbRef" placeholder="e.g. WLS-AB1C2D" autocomplete="off" autocapitalize="characters" />
+      </div>
+      <div class="mb-field">
+        <label class="mb-label" for="mbEmail">Email address</label>
+        <input class="mb-input" type="email" id="mbEmail" placeholder="your@email.com" autocomplete="email" />
+      </div>
+
+      <button class="mb-btn-primary" id="mbLookupBtn" type="button">
+        <span id="mbBtnText">Find booking</span>
+        <div class="mb-spinner" id="mbSpinner"></div>
+      </button>
+
+      <div class="mb-error" id="mbError"></div>
+    </div>
+
+    <!-- ── BOOKING DETAILS ── -->
+    <div class="mb-booking" id="mbBooking">
+
+      <button class="mb-back" id="mbBackBtn" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Search again
+      </button>
+
+      <!-- Success notice (shown after cancel) -->
+      <div class="mb-success-notice" id="mbSuccessNotice" style="display:none;">
+        ✓ Your booking has been cancelled. A confirmation will be sent to your email.
+      </div>
+
+      <!-- Status bar -->
+      <div class="mb-status-bar">
+        <div class="mb-ref" id="mbRefDisplay"></div>
+        <div class="mb-status-badge" id="mbStatusBadge"></div>
+      </div>
+
+      <!-- Trip card -->
+      <div class="mb-card">
+        <div class="mb-card-title">Your trip</div>
+        <div class="mb-trip">
+          <div class="mb-trip-point">
+            <div class="mb-trip-label">Pick-up</div>
+            <div class="mb-trip-station" id="mbPickupStation"></div>
+            <div class="mb-trip-datetime" id="mbPickupDatetime"></div>
+          </div>
+          <div class="mb-trip-arrow">
+            <div class="mb-trip-line"></div>
+            <span id="mbDays"></span>
+            <div class="mb-trip-line"></div>
+          </div>
+          <div class="mb-trip-point end">
+            <div class="mb-trip-label">Return</div>
+            <div class="mb-trip-station" id="mbReturnStation"></div>
+            <div class="mb-trip-datetime" id="mbReturnDatetime"></div>
+          </div>
+        </div>
+        <div class="mb-car-row">
+          <div class="mb-car-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div>
+            <div class="mb-car-name" id="mbCarName"></div>
+            <div class="mb-car-meta" id="mbCarMeta"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price card -->
+      <div class="mb-card">
+        <div class="mb-card-title">Price breakdown</div>
+        <div id="mbPriceRows"></div>
+      </div>
+
+      <!-- Cancel card -->
+      <div class="mb-cancel-card" id="mbCancelCard"></div>
+
+      <!-- Contact card -->
+      <div class="mb-card" id="mbContactCard">
+        <div class="mb-contact-title">Need to modify or have a question?</div>
+        <div class="mb-contact-btns" id="mbContactBtns"></div>
+      </div>
+
+    </div><!-- /mb-booking -->
+  </div><!-- /mb-container -->
+</div><!-- /mb-page -->
+
+<!-- Cancel confirm dialog -->
+<div class="mb-confirm-overlay" id="mbConfirmOverlay">
+  <div class="mb-confirm-panel">
+    <div class="mb-confirm-title">Cancel booking?</div>
+    <p class="mb-confirm-sub">This action cannot be undone. Your booking will be cancelled and you will receive a confirmation email.</p>
+    <div class="mb-confirm-btns">
+      <button class="mb-confirm-yes" id="mbConfirmYes" type="button">Yes, cancel my booking</button>
+      <button class="mb-confirm-no" id="mbConfirmNo" type="button">Keep my booking</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://wheelso-backend-production.up.railway.app';
+
+// Per-station contact info — keyed by station name (partial match)
+const STATION_CONTACTS = {
+  'naxos': { whatsapp: '+306971578697', email: 'naxos@wheelso.gr' },
+  'paros':  { whatsapp: '+306985077803', email: 'paros@wheelso.gr' },
+  'mykonos': { whatsapp: null, email: 'info@wheelso.gr' },
+};
+
+function getStationContact(stationName) {
+  if (!stationName) return { whatsapp: null, email: 'info@wheelso.gr' };
+  const lower = stationName.toLowerCase();
+  for (const [key, contact] of Object.entries(STATION_CONTACTS)) {
+    if (lower.includes(key)) return contact;
+  }
+  return { whatsapp: null, email: 'info@wheelso.gr' };
+}
+
+function formatDatetime(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function formatPrice(n) {
+  return '€' + Number(n || 0).toFixed(2);
+}
+
+function protectionLabel(code) {
+  const map = { 'no_extra': 'No Protection', 'basic': 'Basic Protection', 'full': 'Full Protection' };
+  return map[code] || code || 'No Protection';
+}
+
+function statusBadgeClass(status) {
+  const map = { 'confirmed': 'confirmed', 'pending': 'pending', 'cancelled': 'cancelled', 'completed': 'completed' };
+  return map[status] || 'pending';
+}
+
+// ── DOM refs ──
+const mbLookup    = document.getElementById('mbLookup');
+const mbBooking   = document.getElementById('mbBooking');
+const mbLookupBtn = document.getElementById('mbLookupBtn');
+const mbBtnText   = document.getElementById('mbBtnText');
+const mbSpinner   = document.getElementById('mbSpinner');
+const mbError     = document.getElementById('mbError');
+const mbRefInput  = document.getElementById('mbRef');
+const mbEmailInput= document.getElementById('mbEmail');
+
+let currentBooking = null;
+let currentEmail   = null;
+
+function showError(msg) {
+  mbError.textContent = msg;
+  mbError.style.display = 'block';
+}
+function clearError() {
+  mbError.style.display = 'none';
+  mbError.textContent = '';
+}
+function setLoading(on) {
+  mbLookupBtn.disabled = on;
+  mbBtnText.style.display = on ? 'none' : 'inline';
+  mbSpinner.style.display  = on ? 'block' : 'none';
+}
+
+// ── LOOKUP ──
+async function lookupBooking() {
+  clearError();
+  const ref   = mbRefInput.value.trim().toUpperCase();
+  const email = mbEmailInput.value.trim();
+  if (!ref)   { showError('Please enter your booking reference.'); return; }
+  if (!email) { showError('Please enter your email address.'); return; }
+
+  setLoading(true);
+  try {
+    const res  = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(ref)}?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Booking not found. Check your reference and email.'); return; }
+    currentBooking = data.booking;
+    currentEmail   = email;
+    renderBooking(data.booking);
+    mbLookup.style.display  = 'none';
+    mbBooking.classList.add('visible');
+    window.scrollTo(0, 0);
+  } catch (e) {
+    showError('Could not connect to the server. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+mbLookupBtn.addEventListener('click', lookupBooking);
+[mbRefInput, mbEmailInput].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') lookupBooking(); }));
+
+// ── RENDER BOOKING ──
+function renderBooking(b) {
+  // Status
+  document.getElementById('mbRefDisplay').textContent = b.reference;
+  const badge = document.getElementById('mbStatusBadge');
+  badge.textContent = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+  badge.className = 'mb-status-badge ' + statusBadgeClass(b.status);
+
+  // Trip
+  document.getElementById('mbPickupStation').textContent  = b.pickup_station_name  || b.pickup_station;
+  document.getElementById('mbReturnStation').textContent  = b.return_station_name  || b.return_station;
+  document.getElementById('mbPickupDatetime').textContent = formatDatetime(b.pickup_datetime);
+  document.getElementById('mbReturnDatetime').textContent = formatDatetime(b.return_datetime);
+  document.getElementById('mbDays').textContent = b.rental_days + (b.rental_days === 1 ? ' day' : ' days');
+
+  // Car
+  document.getElementById('mbCarName').textContent = b.car_name || b.car_code;
+  const rateLabel = b.rate_type === 'flex' ? 'Total Flexibility' : 'Best Price';
+  document.getElementById('mbCarMeta').textContent = `${protectionLabel(b.protection_code)} · ${rateLabel}`;
+
+  // Price
+  const priceRows = document.getElementById('mbPriceRows');
+  let rows = '';
+  rows += `<div class="mb-price-row"><span>Car rental (${b.rental_days} day${b.rental_days !== 1 ? 's' : ''})</span><span>${formatPrice(b.car_price)}</span></div>`;
+  if (b.protection_price > 0) rows += `<div class="mb-price-row"><span>${protectionLabel(b.protection_code)}</span><span>${formatPrice(b.protection_price)}</span></div>`;
+  if (b.extras_price > 0)     rows += `<div class="mb-price-row"><span>Extras</span><span>${formatPrice(b.extras_price)}</span></div>`;
+  if (b.discount_amount > 0)  rows += `<div class="mb-price-row discount"><span>Discount ${b.promo_code ? '(' + b.promo_code + ')' : ''}</span><span>−${formatPrice(b.discount_amount)}</span></div>`;
+  rows += `<div class="mb-price-row total"><span>Total</span><span>${formatPrice(b.total_price)}</span></div>`;
+  priceRows.innerHTML = rows;
+
+  // Cancel section
+  renderCancelSection(b);
+
+  // Contact
+  renderContactSection(b);
+}
+
+function renderCancelSection(b) {
+  const card = document.getElementById('mbCancelCard');
+  if (b.status === 'cancelled') {
+    const at = b.cancelled_at ? ` on ${formatDatetime(b.cancelled_at)}` : '';
+    card.innerHTML = `<div class="mb-cancelled-notice">This booking was cancelled${at}.</div>`;
+    return;
+  }
+  if (b.status === 'completed') {
+    card.innerHTML = `<div class="mb-no-cancel-notice">This rental has been completed. For any issue, please contact us below.</div>`;
+    return;
+  }
+  if (b.can_cancel) {
+    const deadline = b.cancel_deadline || '48 hours before pick-up';
+    card.innerHTML = `
+      <div class="mb-card-title">Cancel booking</div>
+      <p class="mb-cancel-info">You can cancel for free up to <strong>${deadline}</strong>. After that, cancellation fees may apply.</p>
+      <button class="mb-btn-cancel" id="mbCancelBtn" type="button">Cancel this booking</button>
+    `;
+    document.getElementById('mbCancelBtn').addEventListener('click', () => {
+      document.getElementById('mbConfirmOverlay').classList.add('open');
+    });
+  } else {
+    card.innerHTML = `
+      <div class="mb-no-cancel-notice">
+        ⚠️ The free cancellation window has passed (${b.cancel_deadline || '48 hours before pick-up'}). To cancel or modify your booking, please contact us directly.
+      </div>
+    `;
+  }
+}
+
+function renderContactSection(b) {
+  const contact = getStationContact(b.pickup_station_name || b.pickup_station);
+  const ref     = b.reference;
+  const name    = b.first_name || '';
+  const btns    = document.getElementById('mbContactBtns');
+  const waMsg   = encodeURIComponent(`Hi, I need help with my Wheelso booking ${ref} (${name})`);
+  const emailSubject = encodeURIComponent(`Booking ${ref} — ${name}`);
+
+  let html = '';
+  if (contact.whatsapp) {
+    const waNum = contact.whatsapp.replace(/\s+/g, '');
+    html += `
+      <a class="mb-btn-wa" href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp us
+      </a>
+    `;
+  }
+  html += `
+    <a class="mb-btn-email" href="mailto:${contact.email}?subject=${emailSubject}&body=Booking%20reference%3A%20${ref}%0AName%3A%20${encodeURIComponent(name)}" >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Email us — ${contact.email}
+    </a>
+  `;
+  btns.innerHTML = html;
+}
+
+// ── BACK ──
+document.getElementById('mbBackBtn').addEventListener('click', () => {
+  mbBooking.classList.remove('visible');
+  mbLookup.style.display = 'block';
+  document.getElementById('mbSuccessNotice').style.display = 'none';
+  clearError();
+  window.scrollTo(0, 0);
+});
+
+// ── CANCEL CONFIRM ──
+document.getElementById('mbConfirmNo').addEventListener('click', () => {
+  document.getElementById('mbConfirmOverlay').classList.remove('open');
+});
+
+document.getElementById('mbConfirmYes').addEventListener('click', async () => {
+  const btn = document.getElementById('mbConfirmYes');
+  btn.disabled = true;
+  btn.textContent = 'Cancelling…';
+  try {
+    const res  = await fetch(`${API_BASE}/api/bookings/${encodeURIComponent(currentBooking.reference)}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: currentEmail, reason: 'Customer requested via Manage My Booking' }),
+    });
+    const data = await res.json();
+    document.getElementById('mbConfirmOverlay').classList.remove('open');
+    if (res.ok) {
+      currentBooking.status = 'cancelled';
+      currentBooking.cancelled_at = new Date().toISOString();
+      currentBooking.can_cancel = false;
+      renderBooking(currentBooking);
+      document.getElementById('mbStatusBadge').textContent = 'Cancelled';
+      document.getElementById('mbStatusBadge').className = 'mb-status-badge cancelled';
+      document.getElementById('mbSuccessNotice').style.display = 'block';
+      window.scrollTo(0, 0);
+    } else {
+      alert(data.error || 'Could not cancel. Please contact us directly.');
+    }
+  } catch (e) {
+    alert('Could not connect. Please try again or contact us.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Yes, cancel my booking';
+  }
+});
+
+// Auto-fill from URL params (e.g. from confirmation email link)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const ref   = params.get('ref');
+  const email = params.get('email');
+  if (ref)   mbRefInput.value = ref;
+  if (email) mbEmailInput.value = email;
+  if (ref && email) lookupBooking();
+})();
+</script>
+</body>
+</html>
