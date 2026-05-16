@@ -3688,3 +3688,42 @@ body.breakdown-open { overflow: hidden; }
 @media (max-width: 720px) {
   .protection-subtitle { font-size: 13px; }
 }
+
+/* ============ HERO NO-DEPOSIT BANNER ============ */
+.hero-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  background: var(--wh-lime);
+  color: var(--wh-blue-dark);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin: 18px 0;
+  box-shadow: 0 4px 18px rgba(207,221,40,0.25);
+}
+.hero-banner svg {
+  color: var(--wh-blue-dark);
+  flex-shrink: 0;
+}
+.hero-banner-sep {
+  color: var(--wh-blue-dark);
+  opacity: 0.3;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .hero-banner {
+    font-size: 12px;
+    padding: 9px 14px;
+    gap: 8px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-banner svg { width: 14px; height: 14px; }
+}
