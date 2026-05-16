@@ -604,9 +604,9 @@ function normalizeFeatures(features) {
 }
 
 const DEFAULT_PROTECTION_PACKAGES = [
-  { id: 'no_extra', name: 'No Protection',    stars: 0, excessLabel: 'Liability:', excess: 'Up to full vehicle value', excessClass: 'danger',  pricePerDay: 0,     discount: null,              features: normalizeFeatures({ ldw:false, tire:false, pai:false, roadside:false }) },
-  { id: 'basic',    name: 'Basic Protection', stars: 1, excessLabel: 'Excess:',    excess: 'Up to €800',               excessClass: 'warning', pricePerDay: 1.65,  discount: null,              features: normalizeFeatures({ ldw:true,  tire:false, pai:false, roadside:false }) },
-  { id: 'full',     name: 'Full Protection',  stars: 3, excessLabel: 'Excess:',    excess: 'Zero excess',              excessClass: 'good',    pricePerDay: 27.11, oldPrice: 41.71, discount: '−35% online', recommended: true, features: normalizeFeatures({ ldw:true, tire:true, pai:true, roadside:true }) }
+  { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Basic cover',     excessLabel: 'Liability:', excess: 'Up to full vehicle value', excessClass: 'danger',  pricePerDay: 0,     discount: null,              deposit: { type: 'hold',    amount: '€1,500' },                                                                                       features: normalizeFeatures({ ldw:false, tire:false, pai:false, roadside:false }) },
+  { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',  excessLabel: 'Excess:',    excess: 'Up to €800',               excessClass: 'warning', pricePerDay: 1.65,  discount: null,              deposit: { type: 'hold',    amount: '€500' },                                                                                         features: normalizeFeatures({ ldw:true,  tire:false, pai:false, roadside:false }) },
+  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',     excessLabel: 'Excess:',    excess: 'Zero excess',              excessClass: 'good',    pricePerDay: 27.11, oldPrice: 41.71, discount: '−35% online', deposit: { type: 'none',    amount: '€0 — nothing held', footnote: 'Card on file required. Charged only for excluded events — see terms.' }, recommended: true, features: normalizeFeatures({ ldw:true, tire:true, pai:true, roadside:true }) }
 ];
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
@@ -635,8 +635,8 @@ async function loadProtectionForCategory(category) {
         if (Number(p.excess) === 0) { excess = 'Zero excess'; excessClass = 'good'; }
         if (price === 0) { excess = def.excess || 'Up to full vehicle value'; excessClass = 'danger'; }
         const trueCount = Object.values(features).filter(Boolean).length;
-        const derivedStars = def.stars != null ? def.stars : Math.min(3, trueCount > 0 ? Math.ceil(trueCount * 3 / 4) : 0);
-        return { id: code, name: p.name || def.name || code, stars: derivedStars, excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice, discount: discountLabel, recommended: !!p.recommended || def.recommended || false, features };
+        const derivedCoverage = def.coverage != null ? def.coverage : (code === 'no_extra' ? 1 : code === 'basic' ? 2 : code === 'full' ? 3 : Math.min(3, Math.max(1, Math.ceil(trueCount * 3 / 4))));
+        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice, discount: discountLabel, recommended: !!p.recommended || def.recommended || false, deposit: def.deposit || null, features };
       });
       // Filter out legacy packages, sort
       PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => !['smart','all_inclusive','all','none'].includes(p.id));
@@ -653,10 +653,11 @@ async function loadProtectionForCategory(category) {
 const ICON_CHECK = '<svg class="protection-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 const ICON_X = '<svg class="protection-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
-function renderStars(filled, total = 3) {
-  let html = '<div class="protection-stars">';
+function renderCoverageBar(filled, total = 3, isLime = false) {
+  let html = '<div class="protection-coverage-bar">';
   for (let i = 0; i < total; i++) {
-    html += `<svg class="protection-star ${i < filled ? 'filled' : ''}" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+    const cls = i < filled ? (isLime ? 'on lime' : 'on') : '';
+    html += `<div class="protection-coverage-seg ${cls}"></div>`;
   }
   return html + '</div>';
 }
@@ -676,15 +677,46 @@ function renderProtectionCard(pkg, selectedId) {
     priceHTML = `<div class="protection-price">€${pkg.pricePerDay.toFixed(2)} <span>/day</span>${pkg.oldPrice ? `<span class="protection-price-old">€${pkg.oldPrice.toFixed(2)}/day</span>` : ''}</div>`;
   }
 
+  // Deposit row (transparency block)
+  let depositHTML = '';
+  if (pkg.deposit) {
+    const isNone = pkg.deposit.type === 'none';
+    const depClass = isNone ? 'protection-deposit good' : 'protection-deposit';
+    const depLabel = isNone ? 'Card hold' : 'Refundable hold';
+    const icon = isNone
+      ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>';
+    depositHTML = `
+      <div class="${depClass}">
+        ${icon}
+        <div class="protection-deposit-text">
+          <span class="protection-deposit-label">${depLabel}</span>
+          <span class="protection-deposit-value">${pkg.deposit.amount}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  const badgeHTML = pkg.recommended ? '<span class="protection-badge">€0 held</span>' : '';
+  const isLime = !!pkg.recommended;
+  const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${pkg.eyebrow}</div>` : '';
+  const footnoteHTML = (pkg.deposit && pkg.deposit.footnote)
+    ? `<p class="protection-footnote">${pkg.deposit.footnote}</p>`
+    : '';
+
   return `
     <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${pkg.id}">
+      ${badgeHTML}
       <div class="protection-card-radio"></div>
+      ${renderCoverageBar(pkg.coverage || 1, 3, isLime)}
+      ${eyebrowHTML}
       <h3 class="protection-card-name">${pkg.name}</h3>
-      ${renderStars(pkg.stars)}
       ${pkg.discount ? `<span class="protection-discount">${pkg.discount}</span>` : ''}
+      ${depositHTML}
       <div class="protection-excess ${pkg.excessClass}"><strong>${pkg.excessLabel}</strong>${pkg.excess}</div>
       <div class="protection-features">${featuresHTML}</div>
       ${priceHTML}
+      ${footnoteHTML}
     </div>
   `;
 }
