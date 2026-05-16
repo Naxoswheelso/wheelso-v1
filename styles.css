@@ -2302,6 +2302,15 @@ html, body {
   line-height: 1.45;
   color: var(--wh-gray-500);
 }
+.protection-footnote a.excl-trigger {
+  color: var(--wh-blue-mid);
+  text-decoration: underline;
+  font-weight: 600;
+  cursor: pointer;
+}
+.protection-footnote a.excl-trigger:hover {
+  color: var(--wh-blue-dark);
+}
 
 /* Trust strip — transparency selling points */
 .trust-strip {
