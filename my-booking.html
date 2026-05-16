@@ -338,6 +338,28 @@
       padding: 22px 20px;
       margin-bottom: 14px;
     }
+
+    /* Payment status rows */
+    .mb-pay-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #374151;
+      gap: 8px;
+    }
+    .mb-pay-row + .mb-pay-row { border-top: 1px dashed #F3F4F6; }
+    .mb-pay-row.mb-pay-total { border-top: 1px solid #E5E7EB; margin-top: 4px; padding-top: 10px; font-size: 15px; font-weight: 700; color: #093D5E; }
+    .mb-pay-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .mb-pay-paid { background: #DCFCE7; color: #166534; }
+    .mb-pay-due { background: #FEF9C3; color: #854D0E; }
+
     .mb-cancel-info {
       font-size: 13px;
       color: #6B7280;
@@ -559,6 +581,9 @@
         <div id="mbPriceRows"></div>
       </div>
 
+      <!-- Payment status card -->
+      <div class="mb-card" id="mbPaymentCard"></div>
+
       <!-- Cancel card -->
       <div class="mb-cancel-card" id="mbCancelCard"></div>
 
@@ -710,15 +735,47 @@ function renderBooking(b) {
   rows += `<div class="mb-price-row total"><span>Total</span><span>${formatPrice(b.total_price)}</span></div>`;
   priceRows.innerHTML = rows;
 
-  // Cancel section
+  // Payment status + Cancel section + Contact
+  renderPaymentStatus(b);
   renderCancelSection(b);
 
   // Contact
   renderContactSection(b);
 }
 
+function renderPaymentStatus(b) {
+  const card = document.getElementById('mbPaymentCard');
+  const isFlex = b.rate_type === 'flex';
+  const total = Number(b.total_price || 0);
+
+  if (b.status === 'cancelled') {
+    card.innerHTML = '';
+    return;
+  }
+
+  if (isFlex) {
+    const deposit = (total * 0.10);
+    const balance = total - deposit;
+    card.innerHTML = `
+      <div class="mb-card-title">Payment</div>
+      <div class="mb-pay-row"><span>Deposit paid online</span><span class="mb-pay-badge mb-pay-paid">Paid</span><span><strong>${formatPrice(deposit)}</strong></span></div>
+      <div class="mb-pay-row"><span>Balance due at pick-up</span><span class="mb-pay-badge mb-pay-due">At counter</span><span><strong>${formatPrice(balance)}</strong></span></div>
+      <div class="mb-pay-row mb-pay-total"><span>Total</span><span><strong>${formatPrice(total)}</strong></span></div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="mb-card-title">Payment</div>
+      <div class="mb-pay-row"><span>Paid online</span><span class="mb-pay-badge mb-pay-paid">Paid</span><span><strong>${formatPrice(total)}</strong></span></div>
+      <div class="mb-pay-row"><span>Due at pick-up</span><span><strong>${formatPrice(0)}</strong></span></div>
+    `;
+  }
+}
+
 function renderCancelSection(b) {
   const card = document.getElementById('mbCancelCard');
+  const isFlex = b.rate_type === 'flex';
+  const total = Number(b.total_price || 0);
+
   if (b.status === 'cancelled') {
     const at = b.cancelled_at ? ` on ${formatDatetime(b.cancelled_at)}` : '';
     card.innerHTML = `<div class="mb-cancelled-notice">This booking was cancelled${at}.</div>`;
@@ -728,22 +785,52 @@ function renderCancelSection(b) {
     card.innerHTML = `<div class="mb-no-cancel-notice">This rental has been completed. For any issue, please contact us below.</div>`;
     return;
   }
-  if (b.can_cancel) {
-    const deadline = b.cancel_deadline || '72 hours before pick-up';
-    card.innerHTML = `
-      <div class="mb-card-title">Cancel booking</div>
-      <p class="mb-cancel-info">You can cancel for free up to <strong>${deadline}</strong>. After that, cancellation fees may apply.</p>
-      <button class="mb-btn-cancel" id="mbCancelBtn" type="button">Cancel this booking</button>
-    `;
-    document.getElementById('mbCancelBtn').addEventListener('click', () => {
-      document.getElementById('mbConfirmOverlay').classList.add('open');
-    });
+
+  if (isFlex) {
+    // Pay Later: can cancel anytime, deposit non-refundable
+    const deposit = (total * 0.10);
+    if (b.can_cancel) {
+      card.innerHTML = `
+        <div class="mb-card-title">Cancel booking</div>
+        <p class="mb-cancel-info">You can cancel anytime before pick-up. Your booking deposit of <strong>${formatPrice(deposit)}</strong> is <strong style="color:#B45309;">non-refundable</strong>. No further charges will apply.</p>
+        <button class="mb-btn-cancel" id="mbCancelBtn" type="button">Cancel this booking</button>
+      `;
+      document.getElementById('mbCancelBtn').addEventListener('click', () => {
+        document.getElementById('mbConfirmOverlay').classList.add('open');
+      });
+    } else {
+      card.innerHTML = `<div class="mb-no-cancel-notice">⚠️ Pick-up time has passed. To cancel or modify your booking, please contact us directly.</div>`;
+    }
   } else {
-    card.innerHTML = `
-      <div class="mb-no-cancel-notice">
-        ⚠️ The free cancellation window has passed (${b.cancel_deadline || '72 hours before pick-up'}). To cancel or modify your booking, please contact us directly.
-      </div>
-    `;
+    // Best Price: free cancel up to 72h before
+    // Calculate deadline
+    let deadlineStr = '';
+    if (b.pickup_datetime) {
+      const pickupDt = new Date(b.pickup_datetime);
+      if (!isNaN(pickupDt.getTime())) {
+        const deadline = new Date(pickupDt.getTime() - 72 * 60 * 60 * 1000);
+        deadlineStr = formatDatetime(deadline);
+      }
+    }
+
+    if (b.can_cancel) {
+      card.innerHTML = `
+        <div class="mb-card-title">Cancel booking</div>
+        <p class="mb-cancel-info">Free cancellation up to <strong>3 days (72h) before pick-up</strong>. You will receive a full refund of <strong>${formatPrice(total)}</strong>.</p>
+        ${deadlineStr ? `<p class="mb-cancel-info" style="margin-top:6px;"><span style="display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;color:#166534;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;">✓ Free cancellation until ${deadlineStr}</span></p>` : ''}
+        <p class="mb-cancel-info" style="font-size:12px;color:#6B7280;margin-top:8px;">After this deadline, the booking becomes non-refundable.</p>
+        <button class="mb-btn-cancel" id="mbCancelBtn" type="button">Cancel this booking</button>
+      `;
+      document.getElementById('mbCancelBtn').addEventListener('click', () => {
+        document.getElementById('mbConfirmOverlay').classList.add('open');
+      });
+    } else {
+      card.innerHTML = `
+        <div class="mb-no-cancel-notice">
+          ⚠️ The free cancellation window has passed (72 hours before pick-up). The booking is non-refundable. To cancel or modify, please contact us directly.
+        </div>
+      `;
+    }
   }
 }
 
