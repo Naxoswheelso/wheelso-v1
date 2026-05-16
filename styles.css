@@ -1923,21 +1923,7 @@ html, body {
   }
   .eyebrow { font-size: 12px; padding: 6px 12px; }
 
-  .trust-strip { display: block; padding: 14px 0; }
-  .trust-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .trust-divider { display: none; }
-  .trust-item {
-    flex: none;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 12px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 10px;
-  }
-  .trust-item svg { width: 20px; height: 20px; padding: 0; }
-  .trust-item strong { font-size: 12px; }
-  .trust-item span { font-size: 11px; opacity: 0.75; }
+  .trust-strip { display: none; }
 
   .field-time { width: 80px; }
 }
@@ -3585,4 +3571,23 @@ body.breakdown-open { overflow: hidden; }
 .mobile-nav-footer {
   padding: 20px 24px;
   border-top: 1px solid #F3F4F6;
+}
+
+/* ============ BOOKING TRUST HINTS (below search button) ============ */
+.booking-trust-hints {
+  display: none;
+}
+@media (max-width: 720px) {
+  .booking-trust-hints {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .booking-trust-hints span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B7280;
+  }
 }
