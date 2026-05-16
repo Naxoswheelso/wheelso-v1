@@ -409,14 +409,27 @@ dateRangeClear.addEventListener('click', (e) => {
 
 dateRangeApply.addEventListener('click', (e) => {
   e.stopPropagation();
+  e.preventDefault();
   if (pickupDate && returnDate) closePopover();
 });
 
+// iOS sometimes needs touchend to register first tap reliably
+dateRangeApply.addEventListener('touchend', (e) => {
+  e.stopPropagation();
+  e.preventDefault();
+  if (pickupDate && returnDate) closePopover();
+}, { passive: false });
+
 document.addEventListener('click', (e) => {
   if (dateRangePopover.hidden) return;
-  if (!dateRangePopover.contains(e.target) && !dateRangeTrigger.contains(e.target)) {
-    closePopover();
-  }
+  // Don't close if click was inside popover or trigger or the apply/clear buttons
+  if (
+    dateRangePopover.contains(e.target) ||
+    dateRangeTrigger.contains(e.target) ||
+    e.target.closest('#dateRangeApply') ||
+    e.target.closest('#dateRangeClear')
+  ) return;
+  closePopover();
 });
 
 document.addEventListener('keydown', (e) => {
