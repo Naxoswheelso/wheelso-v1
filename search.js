@@ -606,7 +606,7 @@ function normalizeFeatures(features) {
 const DEFAULT_PROTECTION_PACKAGES = [
   { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Basic cover',     excessLabel: 'Liability:', excess: 'Up to full vehicle value', excessClass: 'danger',  pricePerDay: 0,     discount: null,              deposit: { type: 'hold',    amount: '€1,500' },                                                                                       features: normalizeFeatures({ ldw:false, tire:false, pai:false, roadside:false }) },
   { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',  excessLabel: 'Excess:',    excess: 'Up to €800',               excessClass: 'warning', pricePerDay: 1.65,  discount: null,              deposit: { type: 'hold',    amount: '€500' },                                                                                         features: normalizeFeatures({ ldw:true,  tire:false, pai:false, roadside:false }) },
-  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',     excessLabel: 'Excess:',    excess: 'Zero excess',              excessClass: 'good',    pricePerDay: 27.11, oldPrice: 41.71, discount: '−35% online', deposit: { type: 'none',    amount: '€0 — nothing held', footnote: 'Card on file required. Charged only for excluded events — see terms.' }, recommended: true, features: normalizeFeatures({ ldw:true, tire:true, pai:true, roadside:true }) }
+  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',     excessLabel: 'Excess:',    excess: 'Zero excess',              excessClass: 'good',    pricePerDay: 27.11, discount: null, deposit: { type: 'none',    amount: '€0 — nothing held', footnote: 'Card on file required. Charged only for excluded events — see terms.' }, recommended: true, features: normalizeFeatures({ ldw:true, tire:true, pai:true, roadside:true }) }
 ];
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
@@ -636,7 +636,7 @@ async function loadProtectionForCategory(category) {
         if (price === 0) { excess = def.excess || 'Up to full vehicle value'; excessClass = 'danger'; }
         const trueCount = Object.values(features).filter(Boolean).length;
         const derivedCoverage = def.coverage != null ? def.coverage : (code === 'no_extra' ? 1 : code === 'basic' ? 2 : code === 'full' ? 3 : Math.min(3, Math.max(1, Math.ceil(trueCount * 3 / 4))));
-        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice, discount: discountLabel, recommended: !!p.recommended || def.recommended || false, deposit: def.deposit || null, features };
+        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', excessLabel: def.excessLabel || 'Excess:', excess, excessClass, pricePerDay: price, oldPrice: null, discount: null, recommended: !!p.recommended || def.recommended || false, deposit: def.deposit || null, features };
       });
       // Filter out legacy packages, sort
       PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => !['smart','all_inclusive','all','none'].includes(p.id));
