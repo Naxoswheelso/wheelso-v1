@@ -1923,7 +1923,7 @@ html, body {
   }
   .eyebrow { font-size: 12px; padding: 6px 12px; }
 
-  .trust-strip { display: none; }
+  .trust-strip { display: none !important; }
 
   .field-time { width: 80px; }
 }
