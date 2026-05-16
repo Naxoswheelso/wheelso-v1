@@ -701,7 +701,7 @@ function renderProtectionCard(pkg, selectedId) {
   const isLime = !!pkg.recommended;
   const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${pkg.eyebrow}</div>` : '';
   const footnoteHTML = (pkg.deposit && pkg.deposit.footnote)
-    ? `<p class="protection-footnote">${pkg.deposit.footnote}</p>`
+    ? `<p class="protection-footnote">${pkg.deposit.footnote.replace('see terms', '<a href="#" class="excl-trigger">see terms</a>')}</p>`
     : '';
 
   return `
@@ -1648,3 +1648,21 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.add('active');
   });
 });
+
+// ============ EXCLUDED EVENTS MODAL ============
+(function() {
+  const modal = document.getElementById('exclModal');
+  const backdrop = document.getElementById('exclBackdrop');
+  const closeBtn = document.getElementById('exclClose');
+  if (!modal) return;
+
+  function openExcl(e) { e.preventDefault(); modal.hidden = false; document.body.style.overflow = 'hidden'; }
+  function closeExcl() { modal.hidden = true; document.body.style.overflow = ''; }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.excl-trigger')) openExcl(e);
+  });
+  backdrop.addEventListener('click', closeExcl);
+  closeBtn.addEventListener('click', closeExcl);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeExcl(); });
+})();
