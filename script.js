@@ -344,6 +344,12 @@ function openPopover() {
   }
   renderCalendar();
 
+  // Mobile: push a history state so browser back button closes drawer
+  if (window.matchMedia('(max-width: 720px)').matches) {
+    history.pushState({ daterangeOpen: true }, '');
+    return; // Skip auto-scroll on mobile (drawer is fixed, not in document flow)
+  }
+
   // Auto-scroll so the calendar AND the search button are both visible
   // Wait a tick so the popover renders and we can measure it
   requestAnimationFrame(() => {
@@ -365,12 +371,19 @@ function openPopover() {
   });
 }
 
-function closePopover() {
+function closePopover(skipHistoryBack) {
   dateRangePopover.hidden = true;
   dateRangeTrigger.classList.remove('open');
   dateRangeTrigger.setAttribute('aria-expanded', 'false');
   document.body.classList.remove('daterange-open');
   hoverDate = null;
+
+  // Mobile: pop history state when closing programmatically (not from back button)
+  if (!skipHistoryBack && window.matchMedia('(max-width: 720px)').matches) {
+    if (history.state && history.state.daterangeOpen) {
+      history.back();
+    }
+  }
 }
 
 dateRangeTrigger.addEventListener('click', (e) => {
@@ -435,6 +448,28 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !dateRangePopover.hidden) closePopover();
 });
+
+// Mobile: browser back button closes drawer
+window.addEventListener('popstate', (e) => {
+  if (!dateRangePopover.hidden && window.matchMedia('(max-width: 720px)').matches) {
+    // Pass true to skip pushing another history.back() (we're already going back)
+    closePopover(true);
+  }
+});
+
+// Mobile: tap on backdrop (outside drawer) closes it
+document.addEventListener('click', (e) => {
+  if (dateRangePopover.hidden) return;
+  if (!window.matchMedia('(max-width: 720px)').matches) return;
+  // Backdrop is the ::before pseudo-element on body — clicks register on body itself
+  // Close only if click is NOT inside the popover or the trigger
+  if (
+    !dateRangePopover.contains(e.target) &&
+    !dateRangeTrigger.contains(e.target)
+  ) {
+    closePopover();
+  }
+}, true);
 
 updateDisplays();
 renderCalendar();
