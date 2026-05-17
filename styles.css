@@ -837,15 +837,8 @@ html, body {
 
 /* Mobile: bottom drawer (90vh) — shows header peek behind */
 @media (max-width: 720px) {
-  /* Reset positioning so .daterange-popover escapes container stacking */
-  .daterange-container,
-  .field-daterange {
-    position: static !important;
-  }
-
-  /* Backdrop overlay — fixed behind drawer */
-  body.daterange-open::before {
-    content: '';
+  /* Backdrop element (created by JS, appended to body) */
+  .daterange-backdrop {
     position: fixed;
     top: 0;
     left: 0;
@@ -881,8 +874,6 @@ html, body {
     animation: sheetIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 -8px 32px rgba(9, 61, 94, 0.18);
     overflow: hidden;
-    /* Force own stacking context above backdrop */
-    isolation: isolate;
   }
 
   @keyframes sheetIn {

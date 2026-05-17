@@ -333,18 +333,39 @@ function handleMouseLeave() {
 
 // Track scroll position for iOS-safe body lock
 let savedScrollY = 0;
+let drawerBackdrop = null; // separate element for backdrop
+let popoverOriginalParent = null;
+let popoverOriginalNextSibling = null;
 
 function openPopover() {
   dateRangePopover.hidden = false;
   dateRangeTrigger.classList.add('open');
   dateRangeTrigger.setAttribute('aria-expanded', 'true');
 
-  // Mobile: lock body scroll without losing position (iOS-safe)
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
+
+  // Mobile: PORTAL the popover to body to escape any parent stacking context
   if (isMobile) {
+    // Remember original position to restore later
+    popoverOriginalParent = dateRangePopover.parentNode;
+    popoverOriginalNextSibling = dateRangePopover.nextSibling;
+
+    // Create backdrop element (separate from drawer)
+    if (!drawerBackdrop) {
+      drawerBackdrop = document.createElement('div');
+      drawerBackdrop.className = 'daterange-backdrop';
+      drawerBackdrop.addEventListener('click', () => closePopover());
+    }
+    document.body.appendChild(drawerBackdrop);
+
+    // Move drawer to body
+    document.body.appendChild(dateRangePopover);
+
+    // Lock body scroll (iOS-safe)
     savedScrollY = window.scrollY;
     document.body.style.top = `-${savedScrollY}px`;
   }
+
   document.body.classList.add('daterange-open');
 
   if (pickupDate) {
@@ -362,21 +383,17 @@ function openPopover() {
   }
 
   // Auto-scroll so the calendar AND the search button are both visible
-  // Wait a tick so the popover renders and we can measure it
   requestAnimationFrame(() => {
     const searchBtn = document.getElementById('searchBtn');
     if (!searchBtn) return;
     const btnRect = searchBtn.getBoundingClientRect();
     const popRect = dateRangePopover.getBoundingClientRect();
     const viewportH = window.innerHeight;
-    // If the popover extends below the viewport, scroll the page down enough
-    // to show both the bottom of the popover (with some padding) and the search button
     const popoverBottom = popRect.bottom;
-    const overflow = popoverBottom - viewportH + 80; // 80px padding
+    const overflow = popoverBottom - viewportH + 80;
     if (overflow > 0) {
       window.scrollBy({ top: overflow, behavior: 'smooth' });
     } else if (btnRect.bottom > viewportH) {
-      // Otherwise just make sure button is visible
       window.scrollBy({ top: btnRect.bottom - viewportH + 40, behavior: 'smooth' });
     }
   });
@@ -389,8 +406,21 @@ function closePopover(skipHistoryBack) {
 
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
 
-  // Mobile: restore scroll position
+  // Mobile: restore popover to original parent + remove backdrop + restore scroll
   if (isMobile) {
+    // Remove backdrop
+    if (drawerBackdrop && drawerBackdrop.parentNode) {
+      drawerBackdrop.parentNode.removeChild(drawerBackdrop);
+    }
+    // Restore drawer to original parent
+    if (popoverOriginalParent) {
+      if (popoverOriginalNextSibling) {
+        popoverOriginalParent.insertBefore(dateRangePopover, popoverOriginalNextSibling);
+      } else {
+        popoverOriginalParent.appendChild(dateRangePopover);
+      }
+    }
+    // Restore body scroll
     document.body.classList.remove('daterange-open');
     document.body.style.top = '';
     window.scrollTo(0, savedScrollY);
@@ -400,7 +430,7 @@ function closePopover(skipHistoryBack) {
 
   hoverDate = null;
 
-  // Mobile: pop history state when closing programmatically (not from back button)
+  // Mobile: pop history state when closing programmatically
   if (!skipHistoryBack && isMobile) {
     if (history.state && history.state.daterangeOpen) {
       history.back();
@@ -479,19 +509,8 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
-// Mobile: tap on backdrop (outside drawer) closes it
-document.addEventListener('click', (e) => {
-  if (dateRangePopover.hidden) return;
-  if (!window.matchMedia('(max-width: 720px)').matches) return;
-  // Backdrop is the ::before pseudo-element on body — clicks register on body itself
-  // Close only if click is NOT inside the popover or the trigger
-  if (
-    !dateRangePopover.contains(e.target) &&
-    !dateRangeTrigger.contains(e.target)
-  ) {
-    closePopover();
-  }
-}, true);
+// Mobile backdrop click is handled by the .daterange-backdrop element directly
+// (see openPopover where backdrop is created and listener attached)
 
 updateDisplays();
 renderCalendar();
