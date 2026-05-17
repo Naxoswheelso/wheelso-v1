@@ -331,11 +331,22 @@ function handleMouseLeave() {
   }
 }
 
+// Track scroll position for iOS-safe body lock
+let savedScrollY = 0;
+
 function openPopover() {
   dateRangePopover.hidden = false;
   dateRangeTrigger.classList.add('open');
   dateRangeTrigger.setAttribute('aria-expanded', 'true');
+
+  // Mobile: lock body scroll without losing position (iOS-safe)
+  const isMobile = window.matchMedia('(max-width: 720px)').matches;
+  if (isMobile) {
+    savedScrollY = window.scrollY;
+    document.body.style.top = `-${savedScrollY}px`;
+  }
   document.body.classList.add('daterange-open');
+
   if (pickupDate) {
     viewDate = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), 1);
   }
@@ -345,7 +356,7 @@ function openPopover() {
   renderCalendar();
 
   // Mobile: push a history state so browser back button closes drawer
-  if (window.matchMedia('(max-width: 720px)').matches) {
+  if (isMobile) {
     history.pushState({ daterangeOpen: true }, '');
     return; // Skip auto-scroll on mobile (drawer is fixed, not in document flow)
   }
@@ -375,11 +386,22 @@ function closePopover(skipHistoryBack) {
   dateRangePopover.hidden = true;
   dateRangeTrigger.classList.remove('open');
   dateRangeTrigger.setAttribute('aria-expanded', 'false');
-  document.body.classList.remove('daterange-open');
+
+  const isMobile = window.matchMedia('(max-width: 720px)').matches;
+
+  // Mobile: restore scroll position
+  if (isMobile) {
+    document.body.classList.remove('daterange-open');
+    document.body.style.top = '';
+    window.scrollTo(0, savedScrollY);
+  } else {
+    document.body.classList.remove('daterange-open');
+  }
+
   hoverDate = null;
 
   // Mobile: pop history state when closing programmatically (not from back button)
-  if (!skipHistoryBack && window.matchMedia('(max-width: 720px)').matches) {
+  if (!skipHistoryBack && isMobile) {
     if (history.state && history.state.daterangeOpen) {
       history.back();
     }

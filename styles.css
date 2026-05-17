@@ -837,14 +837,24 @@ html, body {
 
 /* Mobile: bottom drawer (90vh) — shows header peek behind */
 @media (max-width: 720px) {
-  /* Backdrop overlay — visible behind drawer */
+  /* Reset positioning so .daterange-popover escapes container stacking */
+  .daterange-container,
+  .field-daterange {
+    position: static !important;
+  }
+
+  /* Backdrop overlay — fixed behind drawer */
   body.daterange-open::before {
     content: '';
     position: fixed;
-    inset: 0;
-    background: rgba(9, 61, 94, 0.35);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(9, 61, 94, 0.45);
     z-index: 9998;
     animation: backdropFadeIn 0.25s ease;
+    pointer-events: auto;
   }
 
   @keyframes backdropFadeIn {
@@ -852,25 +862,27 @@ html, body {
     to { opacity: 1; }
   }
 
-  /* Drawer panel — 90vh from bottom, peek of page behind */
+  /* Drawer panel — 90vh from bottom, opaque white */
   .daterange-popover {
-    position: fixed;
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: 100%;
+    position: fixed !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: 90vh;
     max-height: 90vh;
     border-radius: 20px 20px 0 0;
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    background: var(--wh-white);
+    background: #ffffff !important;
     animation: sheetIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 -8px 32px rgba(9, 61, 94, 0.18);
     overflow: hidden;
+    /* Force own stacking context above backdrop */
+    isolation: isolate;
   }
 
   @keyframes sheetIn {
@@ -885,7 +897,7 @@ html, body {
     z-index: 2;
     background: var(--wh-white);
     border-bottom: 1px solid var(--wh-gray-100);
-    padding: 14px 16px 12px;
+    padding: 20px 16px 12px;
     gap: 8px;
   }
 
@@ -893,7 +905,7 @@ html, body {
   .daterange-popover::before {
     content: '';
     position: absolute;
-    top: 6px;
+    top: 8px;
     left: 50%;
     transform: translateX(-50%);
     width: 36px;
@@ -933,14 +945,16 @@ html, body {
   }
   #calTitle2 { display: none; }
 
-  /* Scrollable body */
+  /* Scrollable body — internal scroll only, no body bleed */
   .daterange-popover-body {
     grid-template-columns: 1fr;
     gap: 32px;
     padding: 16px 16px 100px;
     overflow-y: auto;
+    overflow-x: hidden;
     flex: 1;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* Hide second month — nav to scroll through */
@@ -973,9 +987,12 @@ html, body {
     font-size: 14.5px;
   }
 
-  /* Disable body scroll when drawer is open */
+  /* Lock body scroll when drawer is open — iOS-safe */
   body.daterange-open {
+    position: fixed;
+    width: 100%;
     overflow: hidden;
+    /* top set by JS to preserve scroll position */
   }
 }
 
