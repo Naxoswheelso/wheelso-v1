@@ -292,10 +292,9 @@ const ICON_TRANS_MAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 function renderVehicleCard(v) {
   const isAuto = v.transmission === 'auto';
-  const bp = bestPrice(v);
-  const totalForStay = (bp * rentalDays).toFixed(2);
+  const totalForStay = (v.price * rentalDays).toFixed(2);
   return `
-    <article class="vehicle-card" data-category="${v.category}" data-code="${v.code}" data-transmission="${v.transmission}" data-price="${bp}">
+    <article class="vehicle-card" data-category="${v.category}" data-code="${v.code}" data-transmission="${v.transmission}" data-price="${v.price}">
       <div class="vehicle-image">
         ${isAuto ? '<span class="vehicle-badge transmission-auto">Auto</span>' : '<span class="vehicle-badge">Manual</span>'}
         ${v.image_url
@@ -317,7 +316,7 @@ function renderVehicleCard(v) {
         <div class="vehicle-footer">
           <div class="vehicle-price">
             <span class="price-from">From</span>
-            <span><span class="price-amount">€${bp}</span><span class="price-period">/day</span></span>
+            <span><span class="price-amount">€${v.price}</span><span class="price-period">/day</span></span>
             <span class="price-total-stay">€${totalForStay} total for ${rentalDays} days</span>
           </div>
           <span class="vehicle-cta">
