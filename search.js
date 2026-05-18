@@ -516,10 +516,6 @@ function openVehicleModal(v) {
     const total = (daily * rentalDays).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
     document.getElementById('modalPriceTotal').textContent = `€${total} total for ${rentalDays} days`;
-    // Show total difference for flex rate (not per day, to avoid confusion with 10% deposit)
-    const flexLabel = document.getElementById('flexRateLabel');
-    const flexTotal = extra * rentalDays;
-    if (flexLabel) flexLabel.textContent = `+ €${flexTotal.toFixed(2)} total`;
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
