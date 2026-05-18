@@ -602,31 +602,31 @@ document.getElementById('pickupLocation')?.addEventListener('change', () => {
 // VEHICLES is loaded from backend on init. Fallback to hardcoded if API fails.
 let VEHICLES = [
   // ECONOMY
-  { code: 'MCMR', category: 'economy', name: 'Toyota Aygo', similar: 'or similar', seats: 4, bags: 2, doors: 3, transmission: 'manual', price: 22, flex_price: 24.20 },
-  { code: 'MDMR', category: 'economy', name: 'Toyota Aygo', similar: 'or similar', seats: 4, bags: 2, doors: 5, transmission: 'manual', price: 24, flex_price: 26.40 },
-  { code: 'MCAR', category: 'economy', name: 'Kia Picanto', similar: 'or similar', seats: 4, bags: 2, doors: 5, transmission: 'auto', price: 28, flex_price: 30.80 },
+  { code: 'MCMR', category: 'economy', name: 'Toyota Aygo', similar: 'or similar', seats: 4, bags: 2, doors: 3, transmission: 'manual', price: 22 },
+  { code: 'MDMR', category: 'economy', name: 'Toyota Aygo', similar: 'or similar', seats: 4, bags: 2, doors: 5, transmission: 'manual', price: 24 },
+  { code: 'MCAR', category: 'economy', name: 'Kia Picanto', similar: 'or similar', seats: 4, bags: 2, doors: 5, transmission: 'auto', price: 28 },
 
   // COMPACT
-  { code: 'ECMR', category: 'compact', name: 'Nissan Micra', similar: 'or similar', seats: 5, bags: 2, doors: 5, transmission: 'manual', price: 30, flex_price: 33.00 },
-  { code: 'EDMR', category: 'compact', name: 'Peugeot 208', similar: 'or similar', seats: 5, bags: 2, doors: 5, transmission: 'manual', price: 32, flex_price: 35.20 },
-  { code: 'ECAR', category: 'compact', name: 'Nissan Micra Auto', similar: 'or similar', seats: 5, bags: 2, doors: 5, transmission: 'auto', price: 36, flex_price: 39.60 },
+  { code: 'ECMR', category: 'compact', name: 'Nissan Micra', similar: 'or similar', seats: 5, bags: 2, doors: 5, transmission: 'manual', price: 30 },
+  { code: 'EDMR', category: 'compact', name: 'Peugeot 208', similar: 'or similar', seats: 5, bags: 2, doors: 5, transmission: 'manual', price: 32 },
+  { code: 'ECAR', category: 'compact', name: 'Nissan Micra Auto', similar: 'or similar', seats: 5, bags: 2, doors: 5, transmission: 'auto', price: 36 },
 
   // INTERMEDIATE
-  { code: 'CCMR', category: 'intermediate', name: 'Kia Rio', similar: 'or similar', seats: 5, bags: 3, doors: 5, transmission: 'manual', price: 38, flex_price: 41.80 },
-  { code: 'CDMR', category: 'intermediate', name: 'Fiat Tipo', similar: 'Hatchback', seats: 5, bags: 3, doors: 5, transmission: 'manual', price: 40, flex_price: 44.00 },
-  { code: 'CFMR', category: 'intermediate', name: 'Kia Stonic', similar: 'or similar', seats: 5, bags: 3, doors: 5, transmission: 'manual', price: 44, flex_price: 48.40 },
-  { code: 'CFAR', category: 'intermediate', name: 'Kia Stonic Auto', similar: 'or similar', seats: 5, bags: 3, doors: 5, transmission: 'auto', price: 48, flex_price: 52.80 },
+  { code: 'CCMR', category: 'intermediate', name: 'Kia Rio', similar: 'or similar', seats: 5, bags: 3, doors: 5, transmission: 'manual', price: 38 },
+  { code: 'CDMR', category: 'intermediate', name: 'Fiat Tipo', similar: 'Hatchback', seats: 5, bags: 3, doors: 5, transmission: 'manual', price: 40 },
+  { code: 'CFMR', category: 'intermediate', name: 'Kia Stonic', similar: 'or similar', seats: 5, bags: 3, doors: 5, transmission: 'manual', price: 44 },
+  { code: 'CFAR', category: 'intermediate', name: 'Kia Stonic Auto', similar: 'or similar', seats: 5, bags: 3, doors: 5, transmission: 'auto', price: 48 },
 
   // SUV
-  { code: 'IFAR', category: 'suv', name: 'VW T-Cross Auto', similar: 'or similar', seats: 5, bags: 4, doors: 5, transmission: 'auto', price: 58, flex_price: 63.80 },
-  { code: 'SFAR', category: 'suv', name: 'BMW X1 Auto', similar: 'or similar', seats: 5, bags: 4, doors: 5, transmission: 'auto', price: 85, flex_price: 93.50 },
+  { code: 'IFAR', category: 'suv', name: 'VW T-Cross Auto', similar: 'or similar', seats: 5, bags: 4, doors: 5, transmission: 'auto', price: 58 },
+  { code: 'SFAR', category: 'suv', name: 'BMW X1 Auto', similar: 'or similar', seats: 5, bags: 4, doors: 5, transmission: 'auto', price: 85 },
 
   // PREMIUM
-  { code: 'ICMR', category: 'premium', name: 'Premium Sedan', similar: 'or similar', seats: 5, bags: 4, doors: 4, transmission: 'manual', price: 55, flex_price: 60.50 },
-  { code: 'CWMR', category: 'premium', name: 'Premium Wagon', similar: 'or similar', seats: 5, bags: 5, doors: 5, transmission: 'manual', price: 52, flex_price: 57.20 },
+  { code: 'ICMR', category: 'premium', name: 'Premium Sedan', similar: 'or similar', seats: 5, bags: 4, doors: 4, transmission: 'manual', price: 55 },
+  { code: 'CWMR', category: 'premium', name: 'Premium Wagon', similar: 'or similar', seats: 5, bags: 5, doors: 5, transmission: 'manual', price: 52 },
 
   // 7-SEATER
-  { code: 'FVMR', category: 'van', name: '7-Seater Van', similar: 'or similar', seats: 7, bags: 5, doors: 5, transmission: 'manual', price: 65, flex_price: 71.50 }
+  { code: 'FVMR', category: 'van', name: '7-Seater Van', similar: 'or similar', seats: 7, bags: 5, doors: 5, transmission: 'manual', price: 65 }
 ];
 
 // Map backend car_groups row → frontend vehicle shape
@@ -647,7 +647,6 @@ function mapBackendCarToVehicle(c) {
     transmission: (c.transmission || 'manual').toLowerCase(),
     // price is filled later by availability call; default 0 means "ask backend"
     price: c.price ?? 0,
-    flex_price: c.flex_price != null ? c.flex_price : Math.round((c.price ?? 0) * 1.10 * 100) / 100,
     image_url: c.image_url || null,
     upon_request: !!c.upon_request
   };
@@ -775,13 +774,17 @@ if (fleetGrid) {
 // ============================================
 const vehicleModal = document.getElementById('vehicleModal');
 
+function bestPrice(v) {
+  return Math.round(v.price * 0.90 * 100) / 100;
+}
+
 function openVehicleModal(v) {
   if (!vehicleModal) return;
   const isAuto = v.transmission === 'auto';
   const days = 3;
   function recalc() {
     const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
-    const daily = bookingOpt === 'flex' ? v.flex_price : v.price;
+    const daily = bookingOpt === 'flex' ? v.price : bestPrice(v);
     const total = (daily * days).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
     document.getElementById('modalPriceTotal').textContent = `€${total} total for ${days} days`;
@@ -806,8 +809,8 @@ function openVehicleModal(v) {
 
   const bpEl = vehicleModal.querySelector('#modalBestPriceDay');
   const fpEl = vehicleModal.querySelector('#modalFlexPriceDay');
-  if (bpEl) bpEl.textContent = `€${v.price.toFixed(2)}/day`;
-  if (fpEl) fpEl.textContent = `€${v.flex_price.toFixed(2)}/day`;
+  if (bpEl) bpEl.textContent = `€${bestPrice(v).toFixed(2)}/day`;
+  if (fpEl) fpEl.textContent = `€${v.price.toFixed(2)}/day`;
 
   // Bind change events
   vehicleModal.querySelectorAll('input[type="radio"]').forEach(r => {
@@ -1088,10 +1091,10 @@ function renderProtectionGrid() {
 function updateProtectionTotal() {
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? (v.flex_price - v.price) : 0;
+  const vehicleDaily = currentProtection.rate === 'flex' ? v.price : bestPrice(v);
   const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
-  const daily = v.price + rateExtra + protectionDaily;
+  const daily = vehicleDaily + protectionDaily;
   const total = (daily * days).toFixed(2);
   protectionTotal.textContent = `€${total}`;
 }
@@ -1289,10 +1292,10 @@ function calculateExtrasTotal() {
 function updateExtrasTotal() {
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? (v.flex_price - v.price) : 0;
+  const vehicleDaily = currentProtection.rate === 'flex' ? v.price : bestPrice(v);
   const selectedPkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
-  const baseTotal = (v.price + rateExtra + protectionDaily) * days;
+  const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
   extrasTotal.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
 }
@@ -1516,9 +1519,9 @@ function populateDriverSummary() {
 
   // Total
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? (v.flex_price - v.price) : 0;
+  const vehicleDaily = currentProtection.rate === 'flex' ? v.price : bestPrice(v);
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
-  const baseTotal = (v.price + rateExtra + protectionDaily) * days;
+  const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
   driverTotalEl.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
 }
@@ -1547,9 +1550,9 @@ function buildBookingPayload(formObj) {
     : pickupStation;
 
   // Pricing — totals (όχι per day), όπως τα θέλει το backend
-  const rateExtra = rate === 'flex' ? (v.flex_price - v.price) : 0;
+  const vehicleDaily = rate === 'flex' ? v.price : bestPrice(v);
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
-  const carPriceTotal = +((v.price + rateExtra) * days).toFixed(2);
+  const carPriceTotal = +(vehicleDaily * days).toFixed(2);
   const protectionPriceTotal = +(protectionDaily * days).toFixed(2);
   const extrasPriceTotal = +calculateExtrasTotal().toFixed(2);
   const totalPrice = +(carPriceTotal + protectionPriceTotal + extrasPriceTotal).toFixed(2);
@@ -1747,7 +1750,7 @@ function buildBreakdown() {
   if (!currentProtection.vehicle) return;
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
-  const rateExtra = currentProtection.rate === 'flex' ? (v.flex_price - v.price) : 0;
+  const vehicleDaily = currentProtection.rate === 'flex' ? v.price : bestPrice(v);
   const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
 
@@ -1756,16 +1759,9 @@ function buildBreakdown() {
   // VEHICLE
   html += `<div class="breakdown-section-title">Vehicle</div>`;
   html += `<div class="breakdown-line">
-    <span>${v.name}<span class="breakdown-line-meta">€${v.price}/day × ${days} ${days===1?'day':'days'}</span></span>
-    <strong>€${(v.price * days).toFixed(2)}</strong>
+    <span>${v.name}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+    <strong>€${(vehicleDaily * days).toFixed(2)}</strong>
   </div>`;
-
-  if (rateExtra > 0) {
-    html += `<div class="breakdown-line">
-      <span>Pay Later rate<span class="breakdown-line-meta">+€${rateExtra.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
-      <strong>€${(rateExtra * days).toFixed(2)}</strong>
-    </div>`;
-  }
 
   // PROTECTION
   if (pkg) {
@@ -1804,7 +1800,7 @@ function buildBreakdown() {
   breakdownContent.innerHTML = html;
 
   // Total
-  const baseTotal = (v.price + rateExtra + protectionDaily) * days;
+  const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
   breakdownTotalEl.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
 }
