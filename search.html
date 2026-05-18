@@ -148,7 +148,7 @@
         <div class="lang-switcher" role="group" aria-label="Language">
           <button class="lang-btn active" data-lang="en">EN</button>
           <span class="lang-divider">|</span>
-          <button class="lang-btn" data-lang="gr">GR</button>
+          <button class="lang-btn" data-lang="el">GR</button>
         </div>
         <a href="#" class="btn btn-ghost">My Booking</a>
         <button class="menu-toggle" aria-label="Open menu" id="menuToggle">
@@ -788,6 +788,78 @@
     </div>
   </div>
 
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="container site-footer-inner">
+      <div class="site-footer-brand">
+        <img src="assets/logo.png" alt="Wheelso" class="site-footer-logo" />
+        <p class="site-footer-tagline">
+          <span data-lang-block="en">Premium island car rental — no deposit, no hidden fees.</span>
+          <span data-lang-block="el" hidden>Premium ενοικίαση αυτοκινήτων στα νησιά — χωρίς εγγύηση, χωρίς κρυφές χρεώσεις.</span>
+        </p>
+      </div>
+      <div class="site-footer-cols">
+        <div class="site-footer-col">
+          <h4 data-lang-block="en">Rent</h4>
+          <h4 data-lang-block="el" hidden>Ενοικίαση</h4>
+          <ul>
+            <li><a href="index.html"><span data-lang-block="en">Search a car</span><span data-lang-block="el" hidden>Αναζήτηση αυτοκινήτου</span></a></li>
+            <li><a href="my-booking.html"><span data-lang-block="en">My booking</span><span data-lang-block="el" hidden>Η κράτησή μου</span></a></li>
+          </ul>
+        </div>
+        <div class="site-footer-col">
+          <h4 data-lang-block="en">Legal</h4>
+          <h4 data-lang-block="el" hidden>Νομικά</h4>
+          <ul>
+            <li><a href="terms.html"><span data-lang-block="en">Terms &amp; Conditions</span><span data-lang-block="el" hidden>Όροι &amp; Προϋποθέσεις</span></a></li>
+            <li><a href="privacy.html"><span data-lang-block="en">Privacy Policy</span><span data-lang-block="el" hidden>Πολιτική Απορρήτου</span></a></li>
+            <li><a href="cookies.html"><span data-lang-block="en">Cookies Policy</span><span data-lang-block="el" hidden>Πολιτική Cookies</span></a></li>
+          </ul>
+        </div>
+        <div class="site-footer-col">
+          <h4 data-lang-block="en">Stations</h4>
+          <h4 data-lang-block="el" hidden>Σταθμοί</h4>
+          <ul>
+            <li><a href="mailto:athens@wheelso.gr">Athens · athens@wheelso.gr</a></li>
+            <li><a href="mailto:mykonos@wheelso.gr">Mykonos · mykonos@wheelso.gr</a></li>
+            <li><a href="mailto:paros@wheelso.gr">Paros · paros@wheelso.gr</a></li>
+            <li><a href="mailto:naxos@wheelso.gr">Naxos · naxos@wheelso.gr</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="site-footer-bottom">
+      <div class="container site-footer-bottom-inner">
+        <span data-lang-block="en">© 2026 Georgios Bogdanis &amp; Co. L.P. (Wheelso). All rights reserved. · Tax ID 801074744 · GEMI 148485501000</span>
+        <span data-lang-block="el" hidden>© 2026 Γεώργιος Μπογδάνης και Σια Ε.Ε. (Wheelso). Με την επιφύλαξη παντός δικαιώματος. · ΑΦΜ 801074744 · ΓΕΜΗ 148485501000</span>
+      </div>
+    </div>
+  </footer>
+
   <script src="search.js"></script>
+  <script>
+    // Language switcher with localStorage persistence (toggles [data-lang-block] elements; main booking copy is currently English-only)
+    (function () {
+      const STORAGE_KEY = 'wh-lang';
+      const validLangs = ['en', 'el'];
+      function applyLang(lang) {
+        if (!validLangs.includes(lang)) lang = 'en';
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-lang-block]').forEach(el => {
+          el.hidden = (el.getAttribute('data-lang-block') !== lang);
+        });
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+        });
+        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+      }
+      let initial = 'en';
+      try { const saved = localStorage.getItem(STORAGE_KEY); if (saved && validLangs.includes(saved)) initial = saved; } catch (e) {}
+      applyLang(initial);
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+      });
+    })();
+  </script>
 </body>
 </html>

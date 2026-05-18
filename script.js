@@ -1840,13 +1840,37 @@ if (breakdownModal) {
   });
 }
 
-// Language switcher (demo)
-document.querySelectorAll('.lang-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+// Language switcher — persists across pages via localStorage and toggles
+// any [data-lang-block] elements present in the document (e.g. the shared
+// footer and the legal pages). Booking-flow copy itself is not yet
+// translated and remains in English regardless of the selected language.
+(function () {
+  const STORAGE_KEY = 'wh-lang';
+  const validLangs = ['en', 'el'];
+
+  function applyLang(lang) {
+    if (!validLangs.includes(lang)) lang = 'en';
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-lang-block]').forEach(el => {
+      el.hidden = (el.getAttribute('data-lang-block') !== lang);
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+    try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+  }
+
+  let initial = 'en';
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && validLangs.includes(saved)) initial = saved;
+  } catch (e) {}
+  applyLang(initial);
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
   });
-});
+})();
 
 // ============================================
 // INIT — load all data from backend in parallel

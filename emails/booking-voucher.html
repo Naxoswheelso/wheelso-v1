@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  WHEELSO BOOKING VOUCHER (live, data-driven)
+  ============================================================
+  Loads booking data from the backend API and renders the
+  voucher dynamically. Doubles as a printable A4 voucher
+  (CTRL+P → clean PDF, no controls).
+
+  URL format:
+    /emails/booking-voucher.html?ref=WLS-XXX&email=user%40example.com
+
+  When the email-sending step (Resend) is wired up later, the
+  confirmation email can either link to this page or be rendered
+  server-side from this same template.
+
+  ------------------------------------------------------------
+  Required backend booking fields (already present per my-booking.html):
+    reference, status, pickup_station_name, return_station_name,
+    pickup_datetime, return_datetime, rental_days,
+    car_name, car_code, rate_type ('best'|'flex'),
+    protection_code, car_price, protection_price, extras_price,
+    discount_amount, promo_code, total_price,
+    first_name, can_cancel, cancelled_at
+
+  Optional fields (voucher gracefully degrades if missing):
+    last_name, email, car_image_url, car_category,
+    car_seats, car_doors, car_transmission, car_aircon,
+    extras (array of {name, price}), pickup_station_address
+  ============================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="supported-color-schemes" content="light" />
+  <title>Booking Voucher · Wheelso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body, table, td, p, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    img { border: 0; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    table { border-collapse: collapse !important; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    a { color: #1C5875; text-decoration: underline; }
+
+    .display-font { font-family: 'Bricolage Grotesque', 'Manrope', Helvetica, Arial, sans-serif; }
+    .body-font    { font-family: 'Manrope', Helvetica, Arial, sans-serif; }
+
+    /* Loading/empty/error states */
+    .voucher-state {
+      max-width: 480px;
+      margin: 80px auto;
+      padding: 32px 24px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(9,61,94,0.08);
+      text-align: center;
+      font-family: 'Manrope', Helvetica, Arial, sans-serif;
+    }
+    .voucher-state h2 {
+      font-family: 'Bricolage Grotesque', 'Manrope', Helvetica, Arial, sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #093D5E;
+      margin: 0 0 8px;
+    }
+    .voucher-state p { margin: 0 0 16px; font-size: 14px; color: #6b7280; line-height: 1.55; }
+    .voucher-state a.button {
+      display: inline-block;
+      background: #CFDD28;
+      color: #093D5E !important;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 36px; height: 36px;
+      border: 3px solid #e6eef3;
+      border-top-color: #093D5E;
+      border-radius: 50%;
+      animation: vspin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes vspin { to { transform: rotate(360deg); } }
+
+    /* Cancelled banner */
+    .cancelled-banner {
+      background: #FEE2E2;
+      color: #991B1B;
+      padding: 14px 32px;
+      text-align: center;
+      font-family: 'Manrope', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* Responsive */
+    @media only screen and (max-width: 640px) {
+      .wh-container { width: 100% !important; }
+      .wh-px-32    { padding-left: 20px !important; padding-right: 20px !important; }
+      .wh-py-40    { padding-top: 28px !important; padding-bottom: 28px !important; }
+      .wh-stack    { display: block !important; width: 100% !important; }
+      .wh-stack-pad { padding: 16px 0 0 0 !important; }
+      .wh-h1       { font-size: 26px !important; line-height: 1.2 !important; }
+      .wh-trip-cell { padding: 14px 12px !important; }
+    }
+
+    /* Print */
+    @media print {
+      body { background: #fff !important; }
+      .wh-no-print { display: none !important; }
+      .wh-shadow   { box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background:#f3f5f7; font-family:'Manrope', Helvetica, Arial, sans-serif; color:#1f2937;">
+
+  <!-- ============ LOADING STATE ============ -->
+  <div id="voucherLoading" class="voucher-state">
+    <div class="spinner" aria-hidden="true"></div>
+    <h2>Loading your voucher…</h2>
+    <p>Just a moment while we fetch your booking details.</p>
+  </div>
+
+  <!-- ============ EMPTY STATE (no params) ============ -->
+  <div id="voucherEmpty" class="voucher-state" style="display:none;">
+    <h2>This voucher is empty</h2>
+    <p>Vouchers are generated automatically when you complete a booking. Please open your confirmation email, or look up your booking using your reference and email.</p>
+    <a class="button" href="/my-booking.html">Open My Booking →</a>
+  </div>
+
+  <!-- ============ ERROR STATE ============ -->
+  <div id="voucherError" class="voucher-state" style="display:none;">
+    <h2>We couldn't load this voucher</h2>
+    <p id="voucherErrorMsg">Please check the link and try again.</p>
+    <a class="button" href="/my-booking.html">Open My Booking →</a>
+  </div>
+
+  <!-- ============ MAIN VOUCHER (hidden until data loads) ============ -->
+  <div id="voucherContent" style="display:none;">
+
+    <!-- Hidden inbox-preview text (matters only when sent as email body) -->
+    <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; visibility:hidden; opacity:0; color:transparent; height:0; width:0;" id="vPreheader">
+      Your Wheelso rental is confirmed.
+    </div>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#f3f5f7" style="background:#f3f5f7;">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" class="wh-container wh-shadow" bgcolor="#ffffff" style="width:640px; max-width:640px; background:#ffffff; border-radius:16px; box-shadow:0 4px 24px rgba(9,61,94,0.08); overflow:hidden;">
+
+            <!-- Cancelled banner (only shown if booking cancelled) -->
+            <tr id="vCancelledRow" style="display:none;">
+              <td>
+                <div class="cancelled-banner">⚠️ This booking was cancelled<span id="vCancelledAt"></span> · This voucher is no longer valid.</div>
+              </td>
+            </tr>
+
+            <!-- HEADER -->
+            <tr>
+              <td bgcolor="#093D5E" class="wh-px-32" style="background:#093D5E; padding:24px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="left" style="vertical-align:middle;">
+                      <span class="display-font" style="font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:24px; font-weight:800; color:#ffffff; letter-spacing:-0.02em;">Wheelso</span>
+                    </td>
+                    <td align="right" style="vertical-align:middle;">
+                      <span id="vRefBadge" style="display:inline-block; background:#CFDD28; color:#093D5E; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:0.06em; padding:6px 12px; border-radius:6px;">—</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- HERO -->
+            <tr>
+              <td class="wh-px-32 wh-py-40" style="padding:40px 32px 24px;">
+                <p style="margin:0 0 6px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; color:#CFDD28; letter-spacing:0.08em; text-transform:uppercase;" id="vStatusBadge">✓ Booking confirmed</p>
+                <h1 class="display-font wh-h1" style="margin:0 0 12px 0; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:30px; line-height:1.15; font-weight:800; color:#093D5E; letter-spacing:-0.02em;">
+                  <span>Hi </span><span id="vGreetingName">there</span>, your island ride is sorted.
+                </h1>
+                <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; line-height:1.6; color:#6b7280;">
+                  Save this voucher — your driver will need it at the counter. Pickup is on <strong style="color:#093D5E;" id="vHeroPickup">—</strong>.
+                </p>
+              </td>
+            </tr>
+
+            <!-- TRIP CARD -->
+            <tr>
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f7f9fb; border:1px solid #dfe3eb; border-radius:12px;">
+                  <tr>
+                    <td colspan="3" style="padding:14px 18px; border-bottom:1px solid #dfe3eb;">
+                      <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">📅 Your trip</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="wh-trip-cell wh-stack" style="padding:18px; vertical-align:top; width:45%;">
+                      <p style="margin:0 0 6px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.08em; text-transform:uppercase;">Pickup</p>
+                      <p style="margin:0 0 2px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:700; color:#093D5E; line-height:1.3;">📍 <span id="vPickupStation">—</span></p>
+                      <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
+                        <span id="vPickupDate">—</span><br />
+                        <strong style="color:#093D5E;" id="vPickupTime">—</strong>
+                      </p>
+                    </td>
+                    <td class="wh-no-print" style="padding:18px 0; vertical-align:middle; width:10%; text-align:center;">
+                      <span style="display:inline-block; width:32px; height:32px; line-height:32px; background:#CFDD28; color:#093D5E; border-radius:50%; font-size:16px; font-weight:700;">→</span>
+                    </td>
+                    <td class="wh-trip-cell wh-stack wh-stack-pad" style="padding:18px; vertical-align:top; width:45%;">
+                      <p style="margin:0 0 6px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.08em; text-transform:uppercase;">Return</p>
+                      <p style="margin:0 0 2px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:700; color:#093D5E; line-height:1.3;">📍 <span id="vReturnStation">—</span></p>
+                      <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
+                        <span id="vReturnDate">—</span><br />
+                        <strong style="color:#093D5E;" id="vReturnTime">—</strong>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" style="padding:12px 18px; border-top:1px solid #dfe3eb; background:#e6eef3;">
+                      <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151;">
+                        <strong style="color:#093D5E;" id="vTripDays">—</strong> · <span id="vTripCustomer">—</span> · <span id="vTripRate">—</span>
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- VEHICLE CARD -->
+            <tr>
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff; border:1px solid #dfe3eb; border-radius:12px;">
+                  <tr>
+                    <td colspan="2" style="padding:14px 18px; border-bottom:1px solid #dfe3eb;">
+                      <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">🚗 Your vehicle</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="wh-stack" style="padding:18px; vertical-align:middle; width:40%;">
+                      <!-- Real image (shown if car_image_url present) -->
+                      <img id="vCarImage" src="" alt="" width="200" style="display:none; max-width:100%; border-radius:8px;" />
+                      <!-- Placeholder (shown if no image) -->
+                      <table id="vCarPlaceholder" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:linear-gradient(135deg, #e6eef3 0%, #f7f9fb 100%); border-radius:8px; min-height:120px;">
+                        <tr>
+                          <td align="center" style="padding:32px 12px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:42px; line-height:1; color:#1C5875;">🚗</td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td class="wh-stack wh-stack-pad" style="padding:18px; vertical-align:middle; width:60%;">
+                      <p id="vCarCategory" style="margin:0 0 4px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.08em; text-transform:uppercase; display:none;">—</p>
+                      <p id="vCarName" style="margin:0 0 4px 0; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:22px; font-weight:800; color:#093D5E; letter-spacing:-0.01em;">—</p>
+                      <p style="margin:0 0 10px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280;">or similar</p>
+                      <p id="vCarSpecs" style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.7; display:none;"></p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- PRICE BREAKDOWN -->
+            <tr>
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff; border:1px solid #dfe3eb; border-radius:12px;">
+                  <tr>
+                    <td colspan="2" style="padding:14px 18px; border-bottom:1px solid #dfe3eb;">
+                      <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">💳 Price breakdown</span>
+                    </td>
+                  </tr>
+                  <tbody id="vPriceRows">
+                    <!-- Populated by JS -->
+                  </tbody>
+                  <tr>
+                    <td colspan="2" style="padding:0 18px 14px;">
+                      <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">
+                        ✓ Additional driver · ✓ Unlimited mileage · ✓ 24/7 roadside · ✓ Third-party insurance
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding:0 18px;">
+                      <div style="border-top:1px dashed #dfe3eb; height:1px; line-height:1px; font-size:1px;">&nbsp;</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 18px 4px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280;">Subtotal (net)</td>
+                    <td align="right" style="padding:12px 18px 4px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280;" id="vNet">—</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 18px 14px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280;">VAT 24%</td>
+                    <td align="right" style="padding:4px 18px 14px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280;" id="vVat">—</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px 18px; background:#093D5E; border-bottom-left-radius:12px; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#ffffff; letter-spacing:-0.01em;">
+                      Total
+                    </td>
+                    <td align="right" style="padding:16px 18px; background:#093D5E; border-bottom-right-radius:12px; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:22px; font-weight:800; color:#CFDD28; letter-spacing:-0.02em;" id="vTotal">—</td>
+                  </tr>
+                </table>
+                <!-- Payment status pill (populated by JS) -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:10px;">
+                  <tr>
+                    <td align="center" id="vPaymentStatusCell"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- CANCELLATION -->
+            <tr id="vCancellationRow">
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" id="vCancellationCard" style="background:#f1f6c2; border:1px solid #CFDD28; border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p id="vCancellationLabel" style="margin:0 0 4px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">🔓 Cancellation</p>
+                      <p id="vCancellationHeadline" style="margin:0 0 4px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; color:#093D5E; line-height:1.4;">—</p>
+                      <p id="vCancellationDetail" style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.5;">—</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- WHAT TO BRING -->
+            <tr>
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff; border:1px solid #dfe3eb; border-radius:12px;">
+                  <tr>
+                    <td style="padding:14px 18px; border-bottom:1px solid #dfe3eb;">
+                      <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">🆔 What to bring at pickup</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:18px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td style="padding:0 0 12px 0; vertical-align:top; width:32px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:16px;">🪪</td>
+                          <td style="padding:0 0 12px 0; vertical-align:top; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
+                            <strong style="color:#093D5E;">Driving licence</strong> — held for at least 2 years, original physical card.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 0 12px 0; vertical-align:top; font-size:16px;">🛂</td>
+                          <td style="padding:0 0 12px 0; vertical-align:top; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
+                            <strong style="color:#093D5E;">Passport or national ID</strong> — physical document.
+                            <span style="display:block; color:#6b7280; font-size:13px; margin-top:2px;">Greek residents can use gov.gr Wallet · Visitors: no digital copies accepted.</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0; vertical-align:top; font-size:16px;">💳</td>
+                          <td style="padding:0; vertical-align:top; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
+                            <strong style="color:#093D5E;">Credit or debit card</strong> — in the main driver's name.
+                            <span style="display:block; color:#6b7280; font-size:13px; margin-top:2px;">No deposit is held — we only keep it on file in case of an excluded-events incident.</span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- STATION CONTACT -->
+            <tr>
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#093D5E; border-radius:12px;">
+                  <tr>
+                    <td style="padding:18px 18px 8px;">
+                      <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#CFDD28; letter-spacing:0.1em; text-transform:uppercase;">📞 Need us? · <span id="vContactTeam">Wheelso team</span></p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 18px 18px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" id="vContactRow">
+                        <!-- Populated by JS -->
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- QR + CTA -->
+            <tr>
+              <td style="padding:0 32px 32px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f7f9fb; border:1px solid #dfe3eb; border-radius:12px;">
+                  <tr>
+                    <td class="wh-stack" align="center" style="padding:20px; vertical-align:middle; width:40%;">
+                      <img id="vQrImage" src="" alt="QR code — scan to open your booking" width="160" height="160" style="display:block; width:160px; height:160px; border-radius:8px; background:#ffffff; padding:8px;" />
+                    </td>
+                    <td class="wh-stack wh-stack-pad" style="padding:20px 20px 20px 0; vertical-align:middle;">
+                      <p style="margin:0 0 8px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">Quick access</p>
+                      <p style="margin:0 0 10px 0; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:18px; font-weight:800; color:#093D5E; line-height:1.3;">Show this QR at the counter</p>
+                      <p style="margin:0 0 14px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.55;">
+                        Or open your booking directly on your phone — modify, cancel or check status anytime.
+                      </p>
+                      <a id="vMyBookingLink" href="#" style="display:inline-block; background:#CFDD28; color:#093D5E; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; text-decoration:none; padding:10px 18px; border-radius:999px;">
+                        Open My Booking →
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td bgcolor="#062b42" class="wh-px-32" style="background:#062b42; padding:24px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding-bottom:14px;">
+                      <a id="vFooterMyBooking" href="#" style="color:rgba(255,255,255,0.8); font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; text-decoration:none; margin:0 10px;">My Booking</a>
+                      <span style="color:rgba(255,255,255,0.25);">·</span>
+                      <a href="https://wheelso.gr/terms.html" style="color:rgba(255,255,255,0.8); font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; text-decoration:none; margin:0 10px;">Terms</a>
+                      <span style="color:rgba(255,255,255,0.25);">·</span>
+                      <a href="https://wheelso.gr/privacy.html" style="color:rgba(255,255,255,0.8); font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; text-decoration:none; margin:0 10px;">Privacy</a>
+                      <span style="color:rgba(255,255,255,0.25);">·</span>
+                      <a id="vFooterHelp" href="mailto:athens@wheelso.gr" style="color:rgba(255,255,255,0.8); font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; text-decoration:none; margin:0 10px;">Help</a>
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:14px;">
+                      <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; color:rgba(255,255,255,0.55); line-height:1.6;">
+                        © 2026 Georgios Bogdanis &amp; Co. L.P. (Wheelso)<br />
+                        22 Syngrou Ave., 117 42 Athens · Tax ID 801074744 · GEMI 148485501000
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+          </table>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" class="wh-container" style="width:640px; max-width:640px;">
+            <tr>
+              <td align="center" style="padding:16px 12px 8px;">
+                <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; color:#9ca3af; line-height:1.5;" id="vBottomNote">
+                  You're receiving this voucher because you booked a rental at wheelso.gr.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+
+  </div>
+
+  <!-- ============ VOUCHER DATA LOADER ============ -->
+  <script>
+  (function () {
+    const API_BASE = 'https://wheelso-backend-production.up.railway.app';
+    const PUBLIC_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('file://')
+      ? 'https://wheelso.gr'
+      : window.location.origin;
+
+    // Per-station contacts (mirrors my-booking.html)
+    const STATION_CONTACTS = {
+      'athens':  { phone: '+30 210 924 9000', whatsapp: '+306983200652', email: 'athens@wheelso.gr', label: 'Athens team' },
+      'mykonos': { phone: '+30 2289 028360',  whatsapp: '+306977448607', email: 'mykonos@wheelso.gr', label: 'Mykonos team' },
+      'paros':   { phone: null,                whatsapp: '+306985077803', email: 'paros@wheelso.gr',   label: 'Paros team' },
+      'naxos':   { phone: null,                whatsapp: '+306971578697', email: 'naxos@wheelso.gr',   label: 'Naxos team' },
+      'skiathos':{ phone: null,                whatsapp: null,             email: 'info@wheelso.gr',    label: 'Skiathos team' },
+    };
+
+    function getStationContact(stationName) {
+      if (!stationName) return { phone: null, whatsapp: null, email: 'info@wheelso.gr', label: 'Wheelso team' };
+      const lower = stationName.toLowerCase();
+      for (const [key, c] of Object.entries(STATION_CONTACTS)) {
+        if (lower.includes(key)) return c;
+      }
+      return { phone: null, whatsapp: null, email: 'info@wheelso.gr', label: 'Wheelso team' };
+    }
+
+    function $(id) { return document.getElementById(id); }
+    function show(id) { $(id).style.display = ''; }
+    function hide(id) { $(id).style.display = 'none'; }
+
+    function showError(msg) {
+      hide('voucherLoading');
+      hide('voucherContent');
+      hide('voucherEmpty');
+      $('voucherErrorMsg').textContent = msg || 'Please check the link and try again.';
+      show('voucherError');
+    }
+
+    function showEmpty() {
+      hide('voucherLoading');
+      hide('voucherContent');
+      hide('voucherError');
+      show('voucherEmpty');
+    }
+
+    function formatPrice(n) {
+      return '€' + Number(n || 0).toFixed(2);
+    }
+
+    function formatDateLong(dt) {
+      if (!dt) return '—';
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function formatTime(dt) {
+      if (!dt) return '—';
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function formatHeroPickup(dt) {
+      if (!dt) return '—';
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return '—';
+      const date = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `${date} at ${time}`;
+    }
+
+    function formatDeadline(dt) {
+      const d = new Date(dt);
+      const date = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `${date} at ${time}`;
+    }
+
+    function rateLabel(rateType) {
+      return rateType === 'flex' ? 'Pay Later' : 'Best Price';
+    }
+
+    function protectionLabel(code) {
+      const map = { 'no_extra': 'No protection', 'basic': 'Basic Protection', 'medium': 'Medium Protection', 'full': 'Full Protection' };
+      return map[code] || (code ? code : 'Basic Protection');
+    }
+
+    function renderVoucher(b, customerEmail) {
+      // Cancelled banner
+      if (b.status === 'cancelled') {
+        $('vCancelledRow').style.display = '';
+        if (b.cancelled_at) {
+          const at = new Date(b.cancelled_at);
+          $('vCancelledAt').textContent = ' on ' + at.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        $('vStatusBadge').textContent = '✗ Cancelled';
+        $('vStatusBadge').style.color = '#DC2626';
+      } else if (b.status === 'completed') {
+        $('vStatusBadge').textContent = '✓ Completed';
+      } else {
+        $('vStatusBadge').textContent = '✓ Booking confirmed';
+      }
+
+      // Ref & greeting
+      $('vRefBadge').textContent = b.reference;
+      $('vGreetingName').textContent = b.first_name || 'there';
+      $('vHeroPickup').textContent = formatHeroPickup(b.pickup_datetime);
+      $('vPreheader').textContent = `Your Wheelso rental ${b.reference} is confirmed. Pickup ${formatHeroPickup(b.pickup_datetime)}.`;
+      document.title = `Booking Voucher · Wheelso ${b.reference}`;
+
+      // Trip
+      $('vPickupStation').textContent = b.pickup_station_name || b.pickup_station || '—';
+      $('vReturnStation').textContent = b.return_station_name || b.return_station || '—';
+      $('vPickupDate').textContent = formatDateLong(b.pickup_datetime);
+      $('vPickupTime').textContent = formatTime(b.pickup_datetime);
+      $('vReturnDate').textContent = formatDateLong(b.return_datetime);
+      $('vReturnTime').textContent = formatTime(b.return_datetime);
+
+      const days = b.rental_days || 0;
+      $('vTripDays').textContent = days + (days === 1 ? ' day' : ' days');
+      const fullName = [b.first_name, b.last_name].filter(Boolean).join(' ') || b.first_name || '—';
+      $('vTripCustomer').textContent = fullName;
+      $('vTripRate').textContent = rateLabel(b.rate_type) + ' rate';
+
+      // Vehicle
+      $('vCarName').textContent = b.car_name || b.car_code || '—';
+      if (b.car_category) {
+        $('vCarCategory').textContent = b.car_category;
+        $('vCarCategory').style.display = '';
+      }
+      if (b.car_image_url) {
+        const img = $('vCarImage');
+        img.src = b.car_image_url;
+        img.alt = b.car_name || 'Vehicle';
+        img.style.display = 'block';
+        $('vCarPlaceholder').style.display = 'none';
+      }
+      // Specs (graceful: render only fields that exist)
+      const specsEl = $('vCarSpecs');
+      const specs = [];
+      if (b.car_seats)        specs.push(`👥 ${b.car_seats} seats`);
+      if (b.car_doors)        specs.push(`🚪 ${b.car_doors} doors`);
+      if (b.car_transmission) specs.push(`⚙️ ${b.car_transmission}`);
+      if (b.car_aircon)       specs.push(`❄️ A/C`);
+      if (specs.length) {
+        // Group as 2 per line for nicer layout
+        const half = Math.ceil(specs.length / 2);
+        const line1 = specs.slice(0, half).map(s => `<span style="display:inline-block; margin-right:14px;">${s}</span>`).join('');
+        const line2 = specs.slice(half).map(s => `<span style="display:inline-block; margin-right:14px;">${s}</span>`).join('');
+        specsEl.innerHTML = line1 + (line2 ? '<br />' + line2 : '');
+        specsEl.style.display = 'block';
+      }
+
+      // Price breakdown
+      const rows = $('vPriceRows');
+      let html = '';
+      if (b.car_price != null) {
+        html += `
+          <tr>
+            <td style="padding:14px 18px 6px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151;">
+              Vehicle <span style="color:#6b7280;">— ${days} day${days !== 1 ? 's' : ''}</span>
+            </td>
+            <td align="right" style="padding:14px 18px 6px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#093D5E;">${formatPrice(b.car_price)}</td>
+          </tr>`;
+      }
+      if (b.protection_price > 0) {
+        html += `
+          <tr>
+            <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151;">
+              ${protectionLabel(b.protection_code)}
+            </td>
+            <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#093D5E;">${formatPrice(b.protection_price)}</td>
+          </tr>`;
+      }
+      if (b.extras_price > 0) {
+        // If detailed extras array present, render each; else single row
+        if (Array.isArray(b.extras) && b.extras.length) {
+          b.extras.forEach(e => {
+            const price = Number(e.price || 0);
+            html += `
+              <tr>
+                <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151;">
+                  ${e.name || 'Extra'}
+                </td>
+                <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; ${price > 0 ? 'font-weight:600; color:#093D5E;' : 'color:#0E7C3A; font-weight:600;'}">
+                  ${price > 0 ? formatPrice(price) : 'Included'}
+                </td>
+              </tr>`;
+          });
+        } else {
+          html += `
+            <tr>
+              <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151;">Extras</td>
+              <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#093D5E;">${formatPrice(b.extras_price)}</td>
+            </tr>`;
+        }
+      }
+      if (b.discount_amount > 0) {
+        html += `
+          <tr>
+            <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#0E7C3A;">
+              Discount${b.promo_code ? ' (' + b.promo_code + ')' : ''}
+            </td>
+            <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#0E7C3A;">−${formatPrice(b.discount_amount)}</td>
+          </tr>`;
+      }
+      // Bottom spacer
+      html += `<tr><td colspan="2" style="padding:0 18px 8px;">&nbsp;</td></tr>`;
+      rows.innerHTML = html;
+
+      // Net / VAT / Total — assume total is VAT-inclusive at 24%
+      const total = Number(b.total_price || 0);
+      const net = total / 1.24;
+      const vat = total - net;
+      $('vNet').textContent = formatPrice(net);
+      $('vVat').textContent = formatPrice(vat);
+      $('vTotal').textContent = formatPrice(total);
+
+      // Payment status pill
+      const isFlex = b.rate_type === 'flex';
+      const payCell = $('vPaymentStatusCell');
+      if (b.status === 'cancelled') {
+        payCell.innerHTML = '';
+      } else if (isFlex) {
+        const deposit = total * 0.10;
+        const balance = total - deposit;
+        payCell.innerHTML = `
+          <span style="display:inline-block; background:#FEF3C7; color:#B45309; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; padding:8px 16px; border-radius:999px;">
+            Deposit ${formatPrice(deposit)} paid · ${formatPrice(balance)} due at pickup
+          </span>`;
+      } else {
+        payCell.innerHTML = `
+          <span style="display:inline-block; background:#e8f5ec; color:#0E7C3A; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; padding:8px 16px; border-radius:999px;">
+            ✓ Paid online · No balance due at pickup
+          </span>`;
+      }
+
+      // Cancellation card
+      if (b.status === 'cancelled' || b.status === 'completed') {
+        $('vCancellationRow').style.display = 'none';
+      } else if (isFlex) {
+        const deposit = total * 0.10;
+        $('vCancellationLabel').innerHTML = '🔓 Cancellation — Pay Later rate';
+        $('vCancellationHeadline').textContent = 'Cancel any time before pickup.';
+        $('vCancellationDetail').innerHTML = `Your ${formatPrice(deposit)} deposit is <strong style="color:#B45309;">non-refundable</strong>; no further amount will be charged. Cancel via <a href="${PUBLIC_BASE}/my-booking.html?ref=${encodeURIComponent(b.reference)}&email=${encodeURIComponent(customerEmail)}" style="color:#1C5875; font-weight:600;">My Booking</a>.`;
+      } else {
+        // Best Price
+        const pickup = new Date(b.pickup_datetime);
+        if (!isNaN(pickup.getTime())) {
+          const deadline = new Date(pickup.getTime() - 72 * 60 * 60 * 1000);
+          $('vCancellationLabel').innerHTML = '🔓 Cancellation — Best Price rate';
+          $('vCancellationHeadline').textContent = `Free cancellation until ${formatDeadline(deadline)}.`;
+          $('vCancellationDetail').innerHTML = `That's 72 hours before pickup. After this deadline the booking is non-refundable. Cancel any time via <a href="${PUBLIC_BASE}/my-booking.html?ref=${encodeURIComponent(b.reference)}&email=${encodeURIComponent(customerEmail)}" style="color:#1C5875; font-weight:600;">My Booking</a>.`;
+        }
+      }
+
+      // Station contact
+      const contact = getStationContact(b.pickup_station_name || b.pickup_station);
+      $('vContactTeam').textContent = contact.label;
+
+      const contactCells = [];
+      contactCells.push(`
+        <td class="wh-stack" style="padding:8px 0; vertical-align:top; width:33%; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
+          <span style="display:block; color:rgba(255,255,255,0.55); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Email</span>
+          <a href="mailto:${contact.email}?subject=Booking%20${encodeURIComponent(b.reference)}" style="color:#ffffff; text-decoration:none; font-weight:600;">${contact.email}</a>
+        </td>`);
+      if (contact.phone) {
+        const phoneLink = contact.phone.replace(/\s+/g, '');
+        contactCells.push(`
+          <td class="wh-stack wh-stack-pad" style="padding:8px 0; vertical-align:top; width:33%; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
+            <span style="display:block; color:rgba(255,255,255,0.55); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Phone</span>
+            <a href="tel:${phoneLink}" style="color:#ffffff; text-decoration:none; font-weight:600;">${contact.phone}</a>
+          </td>`);
+      }
+      if (contact.whatsapp) {
+        const waNum = contact.whatsapp.replace(/\s+/g, '').replace(/^\+/, '');
+        const waMsg = encodeURIComponent(`Hi, I need help with my Wheelso booking ${b.reference}`);
+        contactCells.push(`
+          <td class="wh-stack wh-stack-pad" style="padding:8px 0; vertical-align:top; width:33%; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
+            <span style="display:block; color:rgba(255,255,255,0.55); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">WhatsApp</span>
+            <a href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener" style="color:#ffffff; text-decoration:none; font-weight:600;">Chat with us →</a>
+          </td>`);
+      }
+      $('vContactRow').innerHTML = '<tr>' + contactCells.join('') + '</tr>';
+      $('vFooterHelp').setAttribute('href', `mailto:${contact.email}`);
+
+      // QR + My Booking links
+      const myBookingUrl = `${PUBLIC_BASE}/my-booking.html?ref=${encodeURIComponent(b.reference)}&email=${encodeURIComponent(customerEmail)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=${encodeURIComponent(myBookingUrl)}`;
+      $('vQrImage').src = qrUrl;
+      $('vMyBookingLink').setAttribute('href', myBookingUrl);
+      $('vFooterMyBooking').setAttribute('href', myBookingUrl);
+
+      // Reveal
+      hide('voucherLoading');
+      show('voucherContent');
+    }
+
+    // Boot
+    const params = new URLSearchParams(window.location.search);
+    const ref   = (params.get('ref')   || '').trim().toUpperCase();
+    const email = (params.get('email') || '').trim();
+
+    if (!ref || !email) {
+      showEmpty();
+      return;
+    }
+
+    fetch(`${API_BASE}/api/bookings/${encodeURIComponent(ref)}?email=${encodeURIComponent(email)}`)
+      .then(async res => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showError(data.error || 'Booking not found. Please check your reference and email.');
+          return;
+        }
+        if (!data.booking) {
+          showError('Booking data is missing. Please contact us at athens@wheelso.gr.');
+          return;
+        }
+        renderVoucher(data.booking, email);
+      })
+      .catch(() => showError('We could not reach the server. Please try again in a moment.'));
+  })();
+  </script>
+
+</body>
+</html>
