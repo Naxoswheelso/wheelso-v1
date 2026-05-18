@@ -358,7 +358,7 @@ function openPopover() {
     }
     document.body.appendChild(drawerBackdrop);
 
-    // Inject close button as direct child of popover (top-right corner)
+    // Inject close button as the FIRST child of popover (sits above header on mobile)
     if (!dateRangePopover.querySelector('.daterange-back-btn')) {
       const backBtn = document.createElement('button');
       backBtn.type = 'button';
@@ -366,7 +366,7 @@ function openPopover() {
       backBtn.setAttribute('aria-label', 'Close calendar');
       backBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
       backBtn.addEventListener('click', () => closePopover());
-      dateRangePopover.appendChild(backBtn);
+      dateRangePopover.insertBefore(backBtn, dateRangePopover.firstChild);
     }
 
     // Move drawer to body
