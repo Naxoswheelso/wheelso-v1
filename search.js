@@ -21,7 +21,8 @@ async function apiPost(path, body) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || `POST ${path} failed: ${res.status}`);
+    const msg = data.detail ? `${data.error}: ${data.detail}` : (data.error || `POST ${path} failed: ${res.status}`);
+    const err = new Error(msg);
     err.data = data;
     throw err;
   }
