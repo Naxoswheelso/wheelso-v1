@@ -4422,3 +4422,197 @@ body.breakdown-open { overflow: hidden; }
   }
   .site-footer-bottom-inner { font-size: 12px; line-height: 1.5; }
 }
+
+/* ── Legal Imprint Footer ── */
+.footer-imprint {
+  background: #040f18;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 24px;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: #5a6a78;
+}
+
+.footer-imprint-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.footer-imprint a {
+  color: #7a8c9a;
+  text-decoration: none;
+  border-bottom: 1px dotted #3a4a58;
+}
+
+.footer-imprint a:hover {
+  color: #CFDD28;
+  border-bottom-color: #CFDD28;
+}
+
+@media (max-width: 600px) {
+  .footer-imprint {
+    font-size: 10.5px;
+    padding: 12px 16px;
+  }
+}
+
+/* ── Naxos Landing Page ── */
+.naxos-hero {
+  background: linear-gradient(135deg, #093D5E 0%, #051f33 100%);
+  color: #fff;
+  padding: 80px 0 64px;
+  text-align: center;
+}
+
+.naxos-tag {
+  display: inline-block;
+  background: rgba(207,221,40,0.15);
+  color: #CFDD28;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.naxos-hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  margin: 0 0 16px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+
+.naxos-lead {
+  font-size: 18px;
+  max-width: 640px;
+  margin: 0 auto 28px;
+  color: #cfdbe5;
+  line-height: 1.6;
+}
+
+.naxos-hero-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.naxos-trust {
+  font-size: 13px;
+  color: #8a9bab;
+}
+
+.naxos-section {
+  padding: 64px 0;
+}
+
+.naxos-section-alt {
+  background: #f8fafb;
+}
+
+.naxos-section h2 {
+  font-size: 30px;
+  margin: 0 0 32px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  color: #093D5E;
+}
+
+.naxos-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.naxos-feature {
+  padding: 20px;
+  border: 1px solid #e6edf2;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.naxos-feature h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+  color: #093D5E;
+}
+
+.naxos-feature p {
+  margin: 0;
+  font-size: 14px;
+  color: #5a6a78;
+}
+
+.naxos-pickup {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #e6edf2;
+}
+
+.naxos-pickup:last-child {
+  border-bottom: none;
+}
+
+.naxos-pickup h3 {
+  margin: 0 0 8px;
+  color: #093D5E;
+}
+
+.naxos-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+.naxos-grid-2 h3 {
+  color: #093D5E;
+  margin: 0 0 8px;
+}
+
+.naxos-requirements {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.naxos-requirements li {
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e6edf2;
+  border-radius: 10px;
+}
+
+.naxos-faq details {
+  border: 1px solid #e6edf2;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  background: #fff;
+}
+
+.naxos-faq summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: #093D5E;
+}
+
+.naxos-faq details[open] summary {
+  margin-bottom: 10px;
+}
+
+.naxos-cta-section {
+  background: #093D5E;
+  color: #fff;
+  text-align: center;
+}
+
+.naxos-cta-section h2 {
+  color: #fff;
+}
+
+.btn-large {
+  font-size: 16px;
+  padding: 14px 32px;
+}

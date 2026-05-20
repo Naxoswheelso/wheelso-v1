@@ -1427,6 +1427,39 @@ if (driverForm) {
 // ============================================
 // STATIONS — same loader as script.js
 // ============================================
+
+// ─── PRE-SELECT PICKUP FROM URL PARAMETER ───
+// Called after loadStationsFromAPI() populates the dropdowns.
+// searchCtx.pickup is already set from the URL; loadAvailabilityPrices()
+// already fetches and renders cars automatically. This only syncs the
+// modify-panel dropdowns so they show the correct station if the user
+// opens the modify panel without interacting first.
+function applyUrlPickup() {
+  const pickup = searchCtx.pickup;
+  if (!pickup) return;
+
+  const pickupEl = document.getElementById('modifyPickup');
+  if (!pickupEl) return;
+
+  const match = [...pickupEl.options].find(
+    o => o.value.toLowerCase() === pickup.toLowerCase()
+  );
+  if (match) {
+    pickupEl.value = match.value;
+    // Pre-select return to same station (if not separately specified in URL)
+    if (!searchCtx.return) {
+      const returnEl = document.getElementById('modifyReturn');
+      const retMatch = returnEl && [...returnEl.options].find(
+        o => o.value.toLowerCase() === pickup.toLowerCase()
+      );
+      if (retMatch) returnEl.value = retMatch.value;
+    }
+    console.log(`[Wheelso] Pre-selected pickup: "${match.value}" from URL param`);
+  } else {
+    console.warn(`[Wheelso] URL pickup "${pickup}" not found in station options`);
+  }
+}
+
 function buildStationOptions(stations, includeDefault = true) {
   const regions = {};
   stations.forEach(s => {
@@ -1461,6 +1494,9 @@ async function loadStationsFromAPI() {
     stations.forEach(s => {
       LOCATION_LABELS[s.code.toLowerCase()] = s.name;
     });
+    // ─── PRE-SELECT FROM URL PARAMETER ───
+    // Runs after options are injected so .value assignment works
+    applyUrlPickup();
   } catch (err) {
     console.warn('[Wheelso Search] Could not load stations:', err.message);
   }

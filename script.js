@@ -70,6 +70,33 @@ function buildStationOptions(stations, includeDefault = true) {
   return html;
 }
 
+// ─── PRE-SELECT PICKUP FROM URL PARAMETER ───
+// Called after the pickup dropdown options are injected (API or fallback).
+// If the URL contains ?pickup=nax-port the dropdown is set automatically,
+// so users arriving from a landing page see their station already chosen.
+function applyUrlPickup() {
+  const params = new URLSearchParams(window.location.search);
+  const pickup = params.get('pickup');
+  if (!pickup) return;
+
+  const pickupEl = document.getElementById('pickupLocation');
+  if (!pickupEl) return;
+
+  // Needs at least one real option (not just the placeholder)
+  const realOptions = [...pickupEl.options].filter(o => o.value !== '');
+  if (realOptions.length === 0) return; // options not yet injected — initFromAPI will retry
+
+  const match = realOptions.find(
+    o => o.value.toLowerCase() === pickup.toLowerCase()
+  );
+  if (match) {
+    pickupEl.value = match.value;
+    console.log(`[Wheelso] Pre-selected pickup: "${match.value}" from URL param`);
+  } else {
+    console.warn(`[Wheelso] URL pickup "${pickup}" not found in station options`);
+  }
+}
+
 async function loadStationsFromAPI() {
   try {
     const res = await apiGet('/api/stations');
@@ -84,6 +111,8 @@ async function loadStationsFromAPI() {
     if (returnEl) returnEl.innerHTML = buildStationOptions(stations, false);
 
     console.log('[Wheelso] Stations loaded:', stations.length);
+    // ─── PRE-SELECT FROM URL PARAMETER ───
+    applyUrlPickup();
   } catch (err) {
     // Fallback: restore hardcoded options
     console.warn('[Wheelso] Could not load stations, using fallback:', err.message);
@@ -108,6 +137,8 @@ async function loadStationsFromAPI() {
     const returnEl = document.getElementById('returnLocation');
     if (pickupEl) pickupEl.innerHTML = '<option value="" disabled selected>Select location...</option>' + fallback;
     if (returnEl) returnEl.innerHTML = '<option value="">Same as pick-up</option>' + fallback;
+    // ─── PRE-SELECT FROM URL PARAMETER (fallback path) ───
+    applyUrlPickup();
   }
 }
 
@@ -1879,6 +1910,9 @@ if (breakdownModal) {
       loadExtrasFromAPI()
     ]);
     renderFleetGrid();
+    // Safety-net call: runs after all stations are definitely loaded.
+    // Handles edge cases where early-return inside loadStationsFromAPI skipped the first call.
+    applyUrlPickup();
     console.log('[Wheelso] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
   } catch (err) {
     console.warn('[Wheelso] API init failed, using fallback data:', err);
