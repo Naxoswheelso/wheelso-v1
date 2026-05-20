@@ -4757,3 +4757,11 @@ body.breakdown-open { overflow: hidden; }
 @media (max-width: 720px) {
   .nav-dropdown-menu { min-width: 160px; }
 }
+
+/* ── CookieYes: hide default floating revoke button ──
+   Replaced by custom "Cookie preferences" link in the footer. */
+.cky-revisit-bottom-left,
+.cky-revisit-bottom-right,
+.cky-btn-revisit-wrapper {
+  display: none !important;
+}
