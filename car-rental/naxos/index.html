@@ -121,6 +121,19 @@
       <nav class="primary-nav" aria-label="Primary">
         <ul>
           <li><a href="../../index.html" class="nav-link">Rent a Car</a></li>
+          <li class="nav-dropdown">
+            <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+              Destinations
+              <svg class="nav-dropdown-arrow" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                <path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <ul class="nav-dropdown-menu" role="menu">
+              <li role="none"><a role="menuitem" href="../../car-rental/naxos/">Naxos</a></li>
+              <li role="none"><a role="menuitem" href="../../search.html?pickup=par-port">Paros</a></li>
+              <li role="none"><a role="menuitem" href="../../search.html?pickup=myk-port">Mykonos</a></li>
+            </ul>
+          </li>
         </ul>
       </nav>
       <div class="header-actions">
@@ -402,6 +415,11 @@
     </div>
     <ul class="mobile-nav-links">
       <li><a href="../../index.html" class="mobile-nav-link">Rent a Car</a></li>
+      <li class="mobile-nav-section">DESTINATIONS</li>
+      <li><a href="../../car-rental/naxos/" class="mobile-nav-link">Naxos</a></li>
+      <li><a href="../../search.html?pickup=par-port" class="mobile-nav-link">Paros</a></li>
+      <li><a href="../../search.html?pickup=myk-port" class="mobile-nav-link">Mykonos</a></li>
+      <li class="mobile-nav-divider"></li>
       <li><a href="../../my-booking.html" class="mobile-nav-link">My Booking</a></li>
       <li><a href="../../terms.html" class="mobile-nav-link"><span data-lang-block="en">Terms</span><span data-lang-block="el" hidden>Όροι</span></a></li>
       <li><a href="../../privacy.html" class="mobile-nav-link"><span data-lang-block="en">Privacy</span><span data-lang-block="el" hidden>Απόρρητο</span></a></li>
@@ -454,6 +472,8 @@
       mobileNavOverlay.addEventListener('click', close);
       document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
     })();
+
   </script>
+  <script src="../../nav.js" defer></script>
 </body>
 </html>

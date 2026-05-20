@@ -1918,4 +1918,3 @@ if (breakdownModal) {
     console.warn('[Wheelso] API init failed, using fallback data:', err);
   }
 })();
-

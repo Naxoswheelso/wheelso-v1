@@ -144,7 +144,20 @@
       </a>
       <nav class="primary-nav" aria-label="Primary">
         <ul>
-          <li><a href="index.html" class="nav-link active">Rent a Car</a></li>
+          <li><a href="index.html" class="nav-link">Rent a Car</a></li>
+          <li class="nav-dropdown">
+            <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+              Destinations
+              <svg class="nav-dropdown-arrow" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                <path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <ul class="nav-dropdown-menu" role="menu">
+              <li role="none"><a role="menuitem" href="car-rental/naxos/">Naxos</a></li>
+              <li role="none"><a role="menuitem" href="search.html?pickup=par-port">Paros</a></li>
+              <li role="none"><a role="menuitem" href="search.html?pickup=myk-port">Mykonos</a></li>
+            </ul>
+          </li>
         </ul>
       </nav>
       <div class="header-actions">
@@ -153,7 +166,7 @@
           <span class="lang-divider">|</span>
           <button class="lang-btn" data-lang="el">GR</button>
         </div>
-        <a href="#" class="btn btn-ghost">My Booking</a>
+        <a href="my-booking.html" class="btn btn-ghost">My Booking</a>
         <button class="menu-toggle" aria-label="Open menu" id="menuToggle">
           <span></span><span></span><span></span>
         </button>
@@ -885,5 +898,53 @@
       });
     })();
   </script>
+
+  <!-- ============ MOBILE NAV ============ -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" aria-hidden="true"></div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="mobile-nav-header">
+      <img src="assets/logo.png" alt="Wheelso" style="height:30px;" />
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <ul class="mobile-nav-links">
+      <li><a href="index.html" class="mobile-nav-link">Rent a Car</a></li>
+      <li class="mobile-nav-section">DESTINATIONS</li>
+      <li><a href="car-rental/naxos/" class="mobile-nav-link">Naxos</a></li>
+      <li><a href="search.html?pickup=par-port" class="mobile-nav-link">Paros</a></li>
+      <li><a href="search.html?pickup=myk-port" class="mobile-nav-link">Mykonos</a></li>
+      <li class="mobile-nav-divider"></li>
+      <li><a href="my-booking.html" class="mobile-nav-link">My Booking</a></li>
+      <li><a href="terms.html" class="mobile-nav-link"><span data-lang-block="en">Terms</span><span data-lang-block="el" hidden>Όροι</span></a></li>
+      <li><a href="privacy.html" class="mobile-nav-link"><span data-lang-block="en">Privacy</span><span data-lang-block="el" hidden>Απόρρητο</span></a></li>
+      <li><a href="cookies.html" class="mobile-nav-link"><span data-lang-block="en">Cookies</span><span data-lang-block="el" hidden>Cookies</span></a></li>
+    </ul>
+    <div class="mobile-nav-footer">
+      <div class="lang-switcher" role="group" aria-label="Language">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <span class="lang-divider">|</span>
+        <button class="lang-btn" data-lang="el">GR</button>
+      </div>
+    </div>
+  </nav>
+
+  <script>
+    // Burger menu
+    (function () {
+      const menuToggle       = document.getElementById('menuToggle');
+      const mobileNav        = document.getElementById('mobileNav');
+      const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+      const mobileNavClose   = document.getElementById('mobileNavClose');
+      if (!menuToggle || !mobileNav) return;
+      function openMobileNav()  { mobileNav.classList.add('open');    mobileNavOverlay.classList.add('open');    mobileNav.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; }
+      function closeMobileNav() { mobileNav.classList.remove('open'); mobileNavOverlay.classList.remove('open'); mobileNav.setAttribute('aria-hidden', 'true');  document.body.style.overflow = ''; }
+      menuToggle.addEventListener('click', openMobileNav);
+      mobileNavClose.addEventListener('click', closeMobileNav);
+      mobileNavOverlay.addEventListener('click', closeMobileNav);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
+    })();
+  </script>
+  <script src="nav.js" defer></script>
 </body>
 </html>

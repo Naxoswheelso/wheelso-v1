@@ -4616,3 +4616,144 @@ body.breakdown-open { overflow: hidden; }
   font-size: 16px;
   padding: 14px 32px;
 }
+
+/* ── Desktop Nav Dropdown ── */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-toggle {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+
+.nav-dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.nav-dropdown-arrow {
+  transition: transform 0.2s;
+}
+
+.nav-dropdown-toggle[aria-expanded="true"] .nav-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Specificity 20 beats .primary-nav ul (specificity 11) — fixes cascade conflict */
+.primary-nav .nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;           /* left-align under the toggle button */
+  transform: none;   /* no centering offset needed */
+  min-width: 180px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(9, 61, 94, 0.18);
+  padding: 8px;
+  margin: 0;
+  list-style: none;
+  display: none;     /* wins over .primary-nav ul display:flex (spec 11) */
+  flex-direction: column;  /* safety: if flex wins, items stack vertically */
+  align-items: stretch;
+  gap: 0;
+  z-index: 1000;
+}
+
+/* Specificity 30 — shows menu when toggle is open */
+.nav-dropdown-toggle[aria-expanded="true"] + .nav-dropdown-menu {
+  display: block;
+}
+
+.nav-dropdown-menu a {
+  display: block;
+  padding: 10px 14px;
+  color: #093D5E;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.12s;
+}
+
+.nav-dropdown-menu a:hover {
+  background: #f0f4f8;
+  color: #093D5E;
+}
+
+/* ── Mobile Drawer — blue background ── */
+.mobile-nav {
+  background: #093D5E !important;
+  color: #fff;
+}
+
+.mobile-nav-header {
+  background: #093D5E;
+}
+
+.mobile-nav a {
+  color: #fff !important;
+}
+
+.mobile-nav-link {
+  color: #fff !important;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link:focus {
+  background: rgba(207, 221, 40, 0.12) !important;
+  color: #CFDD28 !important;
+  border-left-color: #CFDD28 !important;
+}
+
+.mobile-nav-close {
+  color: #fff;
+  background: transparent;
+}
+
+.mobile-nav-close:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.mobile-nav-section {
+  padding: 14px 20px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #CFDD28;
+  text-transform: uppercase;
+  list-style: none;
+}
+
+.mobile-nav-divider {
+  list-style: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 12px 20px;
+}
+
+.mobile-nav-footer .lang-btn {
+  color: rgba(255,255,255,0.7);
+}
+
+.mobile-nav-footer .lang-btn.active {
+  color: #CFDD28;
+}
+
+.mobile-nav-footer .lang-divider {
+  color: rgba(255,255,255,0.3);
+}
+
+@media (max-width: 720px) {
+  .nav-dropdown-menu { min-width: 160px; }
+}
