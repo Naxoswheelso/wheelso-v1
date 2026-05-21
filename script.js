@@ -142,22 +142,18 @@ async function loadStationsFromAPI() {
   }
 }
 
-// Sticky header shadow on scroll
+// Sticky header shadow on scroll — null-guarded (Group A, stays top-level)
 const header = document.getElementById('siteHeader');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 8) {
-    header.classList.add('scrolled');
-  } else {
-    header.classList.remove('scrolled');
-  }
-}, { passive: true });
-
-// Different return location toggle
-const diffReturn = document.getElementById('diffReturn');
-const returnLocationField = document.getElementById('returnLocationField');
-diffReturn.addEventListener('change', (e) => {
-  returnLocationField.hidden = !e.target.checked;
-});
+if (header) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 8) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  }, { passive: true });
+}
+// Group B (return toggle) → moved to initBookingWidget()
 
 // Populate time selects (every 30 min, 24h format)
 function populateTimeSelect(selectEl, defaultVal) {
@@ -171,8 +167,7 @@ function populateTimeSelect(selectEl, defaultVal) {
     `<option value="${t}"${t === defaultVal ? ' selected' : ''}>${t}</option>`
   ).join('');
 }
-populateTimeSelect(document.getElementById('pickupTime'), '10:00');
-populateTimeSelect(document.getElementById('returnTime'), '10:00');
+// Group C (time selects) → moved to initBookingWidget()
 
 // ============================================
 // DATE RANGE PICKER
@@ -480,152 +475,9 @@ function closePopover(skipHistoryBack) {
   }
 }
 
-dateRangeTrigger.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (dateRangePopover.hidden) openPopover();
-  else closePopover();
-});
+// Group D (date picker event listeners + initial render) → moved to initBookingWidget()
 
-calPrev.addEventListener('click', (e) => {
-  e.stopPropagation();
-  viewDate = addMonths(viewDate, -1);
-  renderCalendar();
-});
-
-calNext.addEventListener('click', (e) => {
-  e.stopPropagation();
-  viewDate = addMonths(viewDate, 1);
-  renderCalendar();
-});
-
-calMonth1.addEventListener('click', handleDayClick);
-calMonth2.addEventListener('click', handleDayClick);
-calMonth1.addEventListener('mousemove', handleDayHover);
-calMonth2.addEventListener('mousemove', handleDayHover);
-calMonth1.addEventListener('mouseleave', handleMouseLeave);
-calMonth2.addEventListener('mouseleave', handleMouseLeave);
-
-dateRangeClear.addEventListener('click', (e) => {
-  e.stopPropagation();
-  pickupDate = null;
-  returnDate = null;
-  pickingState = 'pickup';
-  renderCalendar();
-  updateDisplays();
-});
-
-dateRangeApply.addEventListener('click', (e) => {
-  e.stopPropagation();
-  e.preventDefault();
-  if (pickupDate && returnDate) closePopover();
-});
-
-// iOS sometimes needs touchend to register first tap reliably
-dateRangeApply.addEventListener('touchend', (e) => {
-  e.stopPropagation();
-  e.preventDefault();
-  if (pickupDate && returnDate) closePopover();
-}, { passive: false });
-
-document.addEventListener('click', (e) => {
-  if (dateRangePopover.hidden) return;
-  // Don't close if click was inside popover or trigger or the apply/clear buttons
-  if (
-    dateRangePopover.contains(e.target) ||
-    dateRangeTrigger.contains(e.target) ||
-    e.target.closest('#dateRangeApply') ||
-    e.target.closest('#dateRangeClear')
-  ) return;
-  closePopover();
-});
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !dateRangePopover.hidden) closePopover();
-});
-
-// Mobile: browser back button closes drawer
-window.addEventListener('popstate', (e) => {
-  if (!dateRangePopover.hidden && window.matchMedia('(max-width: 720px)').matches) {
-    // Pass true to skip pushing another history.back() (we're already going back)
-    closePopover(true);
-  }
-});
-
-// Mobile backdrop click is handled by the .daterange-backdrop element directly
-// (see openPopover where backdrop is created and listener attached)
-
-updateDisplays();
-renderCalendar();
-
-// ============================================
-// FORM SUBMIT
-// ============================================
-const bookingForm = document.getElementById('bookingWidget');
-
-// Inject error message div under the location field
-(function injectSearchErrors() {
-  const locationField = document.querySelector('.field-location');
-  if (locationField && !document.getElementById('locationError')) {
-    const err = document.createElement('p');
-    err.id = 'locationError';
-    err.hidden = true;
-    err.style.cssText = 'color:#e03c3c;font-size:13px;font-weight:600;margin:6px 0 0;padding:8px 12px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
-    err.textContent = 'Please select a pick-up location.';
-    locationField.after(err);
-  }
-})();
-
-bookingForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  const locationEl = document.getElementById('pickupLocation');
-  const locationError = document.getElementById('locationError');
-
-  // Validate location
-  if (!locationEl?.value) {
-    if (locationError) locationError.hidden = false;
-    locationEl?.focus();
-    return;
-  }
-  if (locationError) locationError.hidden = true;
-
-  // Validate dates
-  if (!pickupDate || !returnDate) {
-    openPopover();
-    return;
-  }
-
-  const data = new FormData(bookingForm);
-  const obj = Object.fromEntries(data);
-
-  const btn = bookingForm.querySelector('.btn-search');
-  const originalContent = btn.innerHTML;
-  btn.innerHTML = '<span>Searching...</span>';
-  btn.style.opacity = '0.7';
-  btn.disabled = true;
-
-  // Build search URL with params
-  const params = new URLSearchParams({
-    pickup: obj.pickupLocation,
-    ...(obj.returnLocation ? { return: obj.returnLocation } : {}),
-    from: obj.pickupDate,
-    fromTime: obj.pickupTime,
-    to: obj.returnDate,
-    toTime: obj.returnTime,
-    age: obj.driverAge
-  });
-  if (obj.promoCode) params.set('promo', obj.promoCode);
-
-  setTimeout(() => {
-    window.location.href = `search.html?${params.toString()}`;
-  }, 100);
-});
-
-// Hide location error when user selects
-document.getElementById('pickupLocation')?.addEventListener('change', () => {
-  const err = document.getElementById('locationError');
-  if (err) err.hidden = true;
-});
+// Group E (form submit) → moved to initBookingWidget()
 
 // ============================================
 // FLEET DATA & RENDERING
@@ -1865,6 +1717,200 @@ if (breakdownModal) {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !breakdownModal.hidden) closeBreakdown();
   });
+}
+
+// ============================================
+// BOOKING WIDGET INIT
+// Null-safe: safe to include on any page.
+// Only wires up interactions when all required elements are present.
+// ============================================
+function initBookingWidget() {
+
+  // ─── GROUP B: Return location toggle ───
+  const diffReturn = document.getElementById('diffReturn');
+  const returnLocationField = document.getElementById('returnLocationField');
+  if (diffReturn && returnLocationField) {
+    diffReturn.addEventListener('change', (e) => {
+      returnLocationField.hidden = !e.target.checked;
+    });
+  } else {
+    console.debug('[Wheelso] Booking widget: return toggle elements not found, skipping');
+  }
+
+  // ─── GROUP C: Time selects ───
+  const pickupTimeEl = document.getElementById('pickupTime');
+  const returnTimeEl = document.getElementById('returnTime');
+  if (pickupTimeEl) populateTimeSelect(pickupTimeEl, '10:00');
+  if (returnTimeEl) populateTimeSelect(returnTimeEl, '10:00');
+  if (!pickupTimeEl || !returnTimeEl) {
+    console.debug('[Wheelso] Booking widget: time selects not found, skipping');
+  }
+
+  // ─── GROUP D: Date picker (all 14 elements required) ───
+  if (dateRangeTrigger && dateRangePopover &&
+      calPrev && calNext && calMonth1 && calMonth2 &&
+      calTitle1 && calTitle2 && dateRangeHint && dateRangeClear && dateRangeApply &&
+      pickupDisplay && returnDisplay && pickupDateInput && returnDateInput) {
+
+    updateDisplays();
+    renderCalendar();
+
+    dateRangeTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dateRangePopover.hidden) openPopover();
+      else closePopover();
+    });
+
+    calPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewDate = addMonths(viewDate, -1);
+      renderCalendar();
+    });
+
+    calNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewDate = addMonths(viewDate, 1);
+      renderCalendar();
+    });
+
+    calMonth1.addEventListener('click', handleDayClick);
+    calMonth2.addEventListener('click', handleDayClick);
+    calMonth1.addEventListener('mousemove', handleDayHover);
+    calMonth2.addEventListener('mousemove', handleDayHover);
+    calMonth1.addEventListener('mouseleave', handleMouseLeave);
+    calMonth2.addEventListener('mouseleave', handleMouseLeave);
+
+    dateRangeClear.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pickupDate = null;
+      returnDate = null;
+      pickingState = 'pickup';
+      renderCalendar();
+      updateDisplays();
+    });
+
+    dateRangeApply.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (pickupDate && returnDate) closePopover();
+    });
+
+    // iOS sometimes needs touchend to register first tap reliably
+    dateRangeApply.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (pickupDate && returnDate) closePopover();
+    }, { passive: false });
+
+    document.addEventListener('click', (e) => {
+      if (dateRangePopover.hidden) return;
+      // Don't close if click was inside popover or trigger or the apply/clear buttons
+      if (
+        dateRangePopover.contains(e.target) ||
+        dateRangeTrigger.contains(e.target) ||
+        e.target.closest('#dateRangeApply') ||
+        e.target.closest('#dateRangeClear')
+      ) return;
+      closePopover();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !dateRangePopover.hidden) closePopover();
+    });
+
+    // Mobile: browser back button closes drawer
+    window.addEventListener('popstate', (e) => {
+      if (!dateRangePopover.hidden && window.matchMedia('(max-width: 720px)').matches) {
+        // Pass true to skip pushing another history.back() (we're already going back)
+        closePopover(true);
+      }
+    });
+
+  } else {
+    console.debug('[Wheelso] Booking widget: date picker elements not all present, skipping');
+  }
+
+  // ─── GROUP E: Form submit ───
+  const bookingForm = document.getElementById('bookingWidget');
+
+  if (bookingForm) {
+    // Inject error message div under the location field
+    (function injectSearchErrors() {
+      const locationField = document.querySelector('.field-location');
+      if (locationField && !document.getElementById('locationError')) {
+        const err = document.createElement('p');
+        err.id = 'locationError';
+        err.hidden = true;
+        err.style.cssText = 'color:#e03c3c;font-size:13px;font-weight:600;margin:6px 0 0;padding:8px 12px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
+        err.textContent = 'Please select a pick-up location.';
+        locationField.after(err);
+      }
+    })();
+
+    bookingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const locationEl = document.getElementById('pickupLocation');
+      const locationError = document.getElementById('locationError');
+
+      // Validate location
+      if (!locationEl?.value) {
+        if (locationError) locationError.hidden = false;
+        locationEl?.focus();
+        return;
+      }
+      if (locationError) locationError.hidden = true;
+
+      // Validate dates
+      if (!pickupDate || !returnDate) {
+        openPopover();
+        return;
+      }
+
+      const data = new FormData(bookingForm);
+      const obj = Object.fromEntries(data);
+
+      const btn = bookingForm.querySelector('.btn-search');
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = '<span>Searching...</span>';
+      btn.style.opacity = '0.7';
+      btn.disabled = true;
+
+      // Build search URL with params
+      const params = new URLSearchParams({
+        pickup: obj.pickupLocation,
+        ...(obj.returnLocation ? { return: obj.returnLocation } : {}),
+        from: obj.pickupDate,
+        fromTime: obj.pickupTime,
+        to: obj.returnDate,
+        toTime: obj.returnTime,
+        age: obj.driverAge
+      });
+      if (obj.promoCode) params.set('promo', obj.promoCode);
+
+      setTimeout(() => {
+        window.location.href = `/search.html?${params.toString()}`;
+      }, 100);
+    });
+
+    // Hide location error when user selects
+    document.getElementById('pickupLocation')?.addEventListener('change', () => {
+      const err = document.getElementById('locationError');
+      if (err) err.hidden = true;
+    });
+  } else {
+    console.debug('[Wheelso] Booking widget: form not found, skipping submit init');
+  }
+
+  console.log('[Wheelso] Booking widget initialization complete');
+}
+
+// Run immediately (script loads at end of <body>, DOM is already ready).
+// DOMContentLoaded fallback handles any deferred-load edge case.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initBookingWidget);
+} else {
+  initBookingWidget();
 }
 
 // Language switcher — persists across pages via localStorage and toggles

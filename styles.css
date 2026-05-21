@@ -4765,3 +4765,269 @@ body.breakdown-open { overflow: hidden; }
 .cky-btn-revisit-wrapper {
   display: none !important;
 }
+
+/* ── Paros Landing Page ── */
+.paros-hero {
+  background: linear-gradient(135deg, #093D5E 0%, #051f33 100%);
+  color: #fff;
+  padding: 80px 0 64px;
+  text-align: center;
+}
+.paros-tag {
+  display: inline-block;
+  background: rgba(207,221,40,0.15);
+  color: #CFDD28;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.paros-hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  margin: 0 0 16px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+.paros-lead {
+  font-size: 18px;
+  max-width: 640px;
+  margin: 0 auto 28px;
+  color: #cfdbe5;
+  line-height: 1.6;
+}
+.paros-hero-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.paros-trust {
+  font-size: 13px;
+  color: #8a9bab;
+}
+.paros-section { padding: 64px 0; }
+.paros-section-alt { background: #f8fafb; }
+.paros-section h2 {
+  font-size: 30px;
+  margin: 0 0 32px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  color: #093D5E;
+}
+.paros-prose {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #5a6a78;
+  max-width: 760px;
+}
+.paros-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+.paros-feature {
+  padding: 20px;
+  border: 1px solid #e6edf2;
+  border-radius: 12px;
+  background: #fff;
+}
+.paros-feature h3 { font-size: 16px; margin: 0 0 8px; color: #093D5E; }
+.paros-feature p { margin: 0; font-size: 14px; color: #5a6a78; }
+.paros-pickup {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #e6edf2;
+}
+.paros-pickup:last-child { border-bottom: none; }
+.paros-pickup h3 { margin: 0 0 8px; color: #093D5E; }
+.paros-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+.paros-grid-2 h3 { color: #093D5E; margin: 0 0 8px; }
+.paros-requirements {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.paros-requirements li {
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e6edf2;
+  border-radius: 10px;
+}
+.paros-faq details {
+  border: 1px solid #e6edf2;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  background: #fff;
+}
+.paros-faq summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: #093D5E;
+}
+.paros-faq details[open] summary {
+  margin-bottom: 10px;
+}
+.paros-island-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.paros-island-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid #e6edf2;
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.paros-island-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(9, 61, 94, 0.08);
+}
+.paros-island-card h3 { color: #093D5E; margin: 0 0 6px; }
+.paros-island-card p { margin: 0; font-size: 14px; color: #5a6a78; }
+.paros-cta-section {
+  background: #093D5E;
+  color: #fff;
+  text-align: center;
+}
+.paros-cta-section h2 { color: #fff; }
+
+/* ── Naxos Landing: hero image override ── */
+.naxos-landing .hero-bg {
+  background-image: url('https://images.unsplash.com/photo-1583394293214-28a4f0b8b1ce?auto=format&fit=crop&w=2000&q=80');
+}
+
+@media (max-width: 720px) {
+  .naxos-landing .hero-bg {
+    background: linear-gradient(180deg, #093D5E 0%, #0a4e7a 100%);
+  }
+}
+
+/* ── Hero tag chip (used on landing pages) ── */
+.hero-tag {
+  display: inline-block;
+  background: rgba(207, 221, 40, 0.15);
+  color: #CFDD28;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+/* ── Hero trust line (star rating under banner) ── */
+.hero-trust {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 12px 0 0;
+}
+
+/* ── Paros Landing: hero background ── */
+.paros-landing .hero-bg {
+  background: linear-gradient(135deg, #093D5E 0%, #051f33 100%);
+}
+
+/* ── Mykonos Landing: hero background ── */
+.mykonos-landing .hero-bg {
+  background: linear-gradient(135deg, #093D5E 0%, #051f33 100%);
+}
+
+/* ── Mykonos Landing Page ── */
+.mykonos-section { padding: 64px 0; }
+.mykonos-section-alt { background: #f8fafb; }
+.mykonos-section h2 {
+  font-size: 30px;
+  margin: 0 0 32px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  color: #093D5E;
+}
+.mykonos-prose {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #5a6a78;
+  max-width: 760px;
+}
+.mykonos-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+.mykonos-feature {
+  padding: 20px;
+  border: 1px solid #e6edf2;
+  border-radius: 12px;
+  background: #fff;
+}
+.mykonos-feature h3 { font-size: 16px; margin: 0 0 8px; color: #093D5E; }
+.mykonos-feature p { margin: 0; font-size: 14px; color: #5a6a78; }
+.mykonos-pickup {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #e6edf2;
+}
+.mykonos-pickup:last-child { border-bottom: none; }
+.mykonos-pickup h3 { margin: 0 0 8px; color: #093D5E; }
+.mykonos-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+.mykonos-grid-2 h3 { color: #093D5E; margin: 0 0 8px; }
+.mykonos-requirements {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.mykonos-requirements li {
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e6edf2;
+  border-radius: 10px;
+}
+.mykonos-faq details {
+  border: 1px solid #e6edf2;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  background: #fff;
+}
+.mykonos-faq summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: #093D5E;
+}
+.mykonos-faq details[open] summary { margin-bottom: 10px; }
+.mykonos-island-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.mykonos-island-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid #e6edf2;
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.mykonos-island-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(9, 61, 94, 0.08);
+}
+.mykonos-island-card h3 { color: #093D5E; margin: 0 0 6px; }
+.mykonos-island-card p { margin: 0; font-size: 14px; color: #5a6a78; }
