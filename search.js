@@ -64,6 +64,8 @@ function computeDays() {
   return diff > 0 ? diff : 3;
 }
 let rentalDays = computeDays();
+let isOneWay = false;
+let oneWayFeeGross = 0;
 
 // ─── MAX RENTAL DAYS ───
 const MAX_RENTAL_DAYS = 28;
@@ -882,7 +884,7 @@ function updateExtrasTotal() {
   const protectionDaily = selectedPkg ? selectedPkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  extrasTotal.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
+  extrasTotal.textContent = `€${(baseTotal + extrasCost + oneWayFeeGross).toFixed(2)}`;
 }
 
 function openExtrasPage() {
@@ -1018,6 +1020,7 @@ function openDriverPage() {
   // Show after-hours warning if applicable
   const timing = checkPickupTiming();
   showAfterHoursWarning(timing.warning);
+  showOneWayBanner();
 
   // Show young/senior driver warning if applicable
   const youngDriverBannerId = 'youngDriverBanner';
@@ -1128,7 +1131,7 @@ function populateDriverSummary() {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  driverTotalEl.textContent = `€${(baseTotal + extrasCost).toFixed(2)}`;
+  driverTotalEl.textContent = `€${(baseTotal + extrasCost + oneWayFeeGross).toFixed(2)}`;
 }
 
 function updateDriverTotal(afterHoursFee = 0) {
@@ -1140,7 +1143,7 @@ function updateDriverTotal(afterHoursFee = 0) {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  driverTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee).toFixed(2)}`;
+  driverTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross).toFixed(2)}`;
 }
 
 if (driverBack) driverBack.addEventListener('click', closeDriverPage);
@@ -1201,6 +1204,24 @@ function checkPickupTiming() {
   }
 
   return { ok: true, afterHoursFee, warning };
+}
+
+// One-way rental banner in driver page (sky blue — distinct from after-hours amber)
+function showOneWayBanner() {
+  let banner = document.getElementById('oneWayBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'oneWayBanner';
+    banner.style.cssText = 'background:#e0f2fe;border:1.5px solid #38bdf8;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;color:#0c4a6e;margin-bottom:16px;';
+    const driverForm = document.getElementById('driverForm');
+    driverForm?.parentElement?.insertBefore(banner, driverForm);
+  }
+  if (isOneWay && oneWayFeeGross > 0) {
+    banner.textContent = `🚢 One-way rental — different island return. Includes €${oneWayFeeGross.toFixed(2)} one-way fee.`;
+    banner.hidden = false;
+  } else {
+    banner.hidden = true;
+  }
 }
 
 // After-hours warning banner in driver page
@@ -1314,7 +1335,8 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
   const carPriceTotal = +(vehicleDaily * days).toFixed(2);
   const protectionPriceTotal = +(protectionDaily * days).toFixed(2);
   const extrasPriceTotal = +calculateExtrasTotal().toFixed(2);
-  const totalPrice = +(carPriceTotal + protectionPriceTotal + extrasPriceTotal + afterHoursFee).toFixed(2);
+  const owFee = isOneWay ? oneWayFeeGross : 0;
+  const totalPrice = +(carPriceTotal + protectionPriceTotal + extrasPriceTotal + afterHoursFee + owFee).toFixed(2);
 
   const extrasArr = Object.entries(selectedExtras)
     .filter(([, qty]) => qty > 0)
@@ -1340,6 +1362,7 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     protection_price: protectionPriceTotal,
     extras_price: extrasPriceTotal,
     after_hours_fee: afterHoursFee,
+    one_way_fee: owFee,
     total_price: totalPrice,
     discount_amount: 0,
     promo_code: searchCtx.promo || null,
@@ -1534,6 +1557,9 @@ async function loadAvailabilityPrices() {
       if (subtitleEl) subtitleEl.textContent = `for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'} in ${LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece'}`;
     }
 
+    isOneWay = result.is_one_way === true;
+    oneWayFeeGross = result.one_way_fee?.fee_total ? Number(result.one_way_fee.fee_total) : 0;
+
     if (cars.length > 0) {
       // Build set of car codes returned by backend (so we can hide cars NOT returned)
       const backendCodes = new Set(cars.map(c => c.code || c.car_code));
@@ -1628,19 +1654,27 @@ function buildBreakdown() {
     });
   }
 
-  if (afterHoursFee > 0) {
+  if (afterHoursFee > 0 || (isOneWay && oneWayFeeGross > 0)) {
     html += `<div class="breakdown-divider"></div>`;
     html += `<div class="breakdown-section-title">Fees</div>`;
-    html += `<div class="breakdown-line">
-      <span>After-hours service fee<span class="breakdown-line-meta">Outside 09:00–21:00</span></span>
-      <strong>€${afterHoursFee.toFixed(2)}</strong>
-    </div>`;
+    if (afterHoursFee > 0) {
+      html += `<div class="breakdown-line">
+        <span>After-hours service fee<span class="breakdown-line-meta">Outside 09:00–21:00</span></span>
+        <strong>€${afterHoursFee.toFixed(2)}</strong>
+      </div>`;
+    }
+    if (isOneWay && oneWayFeeGross > 0) {
+      html += `<div class="breakdown-line">
+        <span>One-way fee<span class="breakdown-line-meta">Different island return</span></span>
+        <strong>€${oneWayFeeGross.toFixed(2)}</strong>
+      </div>`;
+    }
   }
 
   breakdownContent.innerHTML = html;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  breakdownTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee).toFixed(2)}`;
+  breakdownTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross).toFixed(2)}`;
 }
 
 function openBreakdown() {

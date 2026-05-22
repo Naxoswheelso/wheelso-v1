@@ -666,6 +666,20 @@
             <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#0E7C3A;">−${formatPrice(b.discount_amount)}</td>
           </tr>`;
       }
+      if (Number(b.after_hours_fee) > 0) {
+        html += `
+          <tr>
+            <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151;">After-hours fee</td>
+            <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#093D5E;">${formatPrice(b.after_hours_fee)}</td>
+          </tr>`;
+      }
+      if (Number(b.one_way_fee) > 0) {
+        html += `
+          <tr>
+            <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151;">One-way fee</td>
+            <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#093D5E;">${formatPrice(b.one_way_fee)}</td>
+          </tr>`;
+      }
       // Bottom spacer
       html += `<tr><td colspan="2" style="padding:0 18px 8px;">&nbsp;</td></tr>`;
       rows.innerHTML = html;
