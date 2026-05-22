@@ -735,6 +735,8 @@ function renderBooking(b) {
   if (b.protection_price > 0) rows += `<div class="mb-price-row"><span>${protectionLabel(b.protection_code)}</span><span>${formatPrice(b.protection_price)}</span></div>`;
   if (b.extras_price > 0)     rows += `<div class="mb-price-row"><span>Extras</span><span>${formatPrice(b.extras_price)}</span></div>`;
   if (b.discount_amount > 0)  rows += `<div class="mb-price-row discount"><span>Discount ${b.promo_code ? '(' + b.promo_code + ')' : ''}</span><span>−${formatPrice(b.discount_amount)}</span></div>`;
+  if (Number(b.after_hours_fee) > 0) rows += `<div class="mb-price-row"><span>After-hours fee<br><small style="font-weight:400;color:#9ca3af;font-size:12px;">Outside 09:00–21:00 · €25 per occurrence</small></span><span>${formatPrice(b.after_hours_fee)}</span></div>`;
+  if (Number(b.one_way_fee) > 0)     rows += `<div class="mb-price-row"><span>One-way fee<br><small style="font-weight:400;color:#9ca3af;font-size:12px;">Different island return</small></span><span>${formatPrice(b.one_way_fee)}</span></div>`;
   rows += `<div class="mb-price-row total"><span>Total</span><span>${formatPrice(b.total_price)}</span></div>`;
   priceRows.innerHTML = rows;
 
