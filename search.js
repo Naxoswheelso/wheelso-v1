@@ -63,7 +63,7 @@ function computeDays() {
   const diff = Math.round((d2 - d1) / 86400000);
   return diff > 0 ? diff : 3;
 }
-const rentalDays = computeDays();
+let rentalDays = computeDays();
 
 // ─── MAX RENTAL DAYS ───
 const MAX_RENTAL_DAYS = 28;
@@ -317,7 +317,7 @@ function renderVehicleCard(v) {
           <div class="vehicle-price">
             <span class="price-from">From</span>
             <span><span class="price-amount">€${v.price}</span><span class="price-period">/day</span></span>
-            <span class="price-total-stay">€${totalForStay} total for ${rentalDays} days</span>
+            <span class="price-total-stay">€${totalForStay} total for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'}</span>
           </div>
           <span class="vehicle-cta">
             Select
@@ -509,7 +509,7 @@ function openVehicleModal(v) {
     const daily = bookingOpt === 'flex' ? v.price : bestPrice(v);
     const total = (daily * rentalDays).toFixed(2);
     document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
-    document.getElementById('modalPriceTotal').textContent = `€${total} total for ${rentalDays} days`;
+    document.getElementById('modalPriceTotal').textContent = `€${total} total for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'}`;
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
@@ -1524,6 +1524,15 @@ async function loadAvailabilityPrices() {
     const cars = Array.isArray(result)
       ? result
       : (result.cars || result.available || result.vehicles || []);
+
+    // Sync rentalDays with the backend's authoritative 24-hour billing value.
+    // Local computeDays() uses only calendar dates (ignores pickup/return times),
+    // so it can be wrong for time-crossing rentals (e.g. 30h = 1 calendar day but
+    // 2 billing days). The backend already applies max(1, ceil((hours-2)/24)).
+    if (result.days != null) {
+      rentalDays = result.days;
+      if (subtitleEl) subtitleEl.textContent = `for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'} in ${LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece'}`;
+    }
 
     if (cars.length > 0) {
       // Build set of car codes returned by backend (so we can hide cars NOT returned)
