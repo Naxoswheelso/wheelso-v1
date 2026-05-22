@@ -276,7 +276,7 @@ function renderCalendar() {
   } else if (pickingState === 'return') {
     dateRangeHint.innerHTML = 'Select <strong>return date</strong>';
   } else if (pickupDate && returnDate) {
-    const nights = Math.round((returnDate - pickupDate) / 86400000);
+    const nights = Math.max(1, Math.round((returnDate - pickupDate) / 86400000));
     dateRangeHint.innerHTML = `<strong>${nights} day${nights !== 1 ? 's' : ''}</strong> selected`;
   }
 
@@ -321,8 +321,8 @@ function handleDayClick(e) {
       pickupDate = clicked;
       returnDate = null;
     } else if (isSameDay(clicked, pickupDate)) {
+      // Same-day rental allowed (24h billing model — minimum 1 billing day)
       returnDate = new Date(clicked);
-      returnDate.setDate(returnDate.getDate() + 1);
       pickingState = 'pickup';
     } else {
       returnDate = clicked;
