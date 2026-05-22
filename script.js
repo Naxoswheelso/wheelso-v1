@@ -753,8 +753,8 @@ const DEFAULT_PROTECTION_PACKAGES = [
     discount: null,
     features: {
       'Loss Damage Waiver (including theft protection)': false,
-      'Tire & Windshield Protection': false,
-      'Personal Accident Protection': false,
+      'Tire Protection': false,
+      'Windshield Protection': false,
       'Roadside Protection': false,
       'Interior Protection': false
     }
@@ -770,8 +770,8 @@ const DEFAULT_PROTECTION_PACKAGES = [
     discount: null,
     features: {
       'Loss Damage Waiver (including theft protection)': true,
-      'Tire & Windshield Protection': false,
-      'Personal Accident Protection': false,
+      'Tire Protection': false,
+      'Windshield Protection': false,
       'Roadside Protection': false,
       'Interior Protection': false
     }
@@ -788,8 +788,8 @@ const DEFAULT_PROTECTION_PACKAGES = [
     discount: '−30% online',
     features: {
       'Loss Damage Waiver (including theft protection)': true,
-      'Tire & Windshield Protection': true,
-      'Personal Accident Protection': false,
+      'Tire Protection': true,
+      'Windshield Protection': true,
       'Roadside Protection': false,
       'Interior Protection': false
     }
@@ -807,8 +807,8 @@ const DEFAULT_PROTECTION_PACKAGES = [
     recommended: true,
     features: {
       'Loss Damage Waiver (including theft protection)': true,
-      'Tire & Windshield Protection': true,
-      'Personal Accident Protection': true,
+      'Tire Protection': true,
+      'Windshield Protection': true,
       'Roadside Protection': true,
       'Interior Protection': true
     }

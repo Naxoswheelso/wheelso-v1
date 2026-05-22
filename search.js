@@ -580,12 +580,12 @@ document.addEventListener('keydown', (e) => {
 
 // Map backend feature keys → display labels
 const FEATURE_LABELS = {
-  ldw:      'Loss Damage Waiver (including theft protection)',
-  tire:     'Tire & Windshield Protection',
-  pai:      'Personal Accident Protection',
-  roadside: 'Roadside Protection'
+  ldw:        'Loss Damage Waiver (including theft protection)',
+  tire:       'Tire Protection',
+  windshield: 'Windshield Protection',
+  roadside:   'Roadside Protection'
 };
-const FEATURE_ORDER = ['ldw', 'tire', 'pai', 'roadside'];
+const FEATURE_ORDER = ['ldw', 'tire', 'windshield', 'roadside'];
 
 // Normalize features: backend sends {ldw:true,...} → display labels
 function normalizeFeatures(features) {
@@ -594,7 +594,7 @@ function normalizeFeatures(features) {
   // If keys match backend shortcodes → map to labels
   if (Object.keys(features).some(k => FEATURE_LABELS[k] !== undefined)) {
     for (const key of FEATURE_ORDER) {
-      if (FEATURE_LABELS[key]) out[FEATURE_LABELS[key]] = !!features[key];
+      if (FEATURE_LABELS[key]) out[FEATURE_LABELS[key]] = key === 'windshield' ? !!features['tire'] : !!features[key];
     }
     return out;
   }
@@ -603,9 +603,9 @@ function normalizeFeatures(features) {
 }
 
 const DEFAULT_PROTECTION_PACKAGES = [
-  { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Included in rate', tag: 'TPL', tagTooltip: 'Third Party Liability — covers damage to other vehicles or people, but not your rental car.', riskLabel: 'If damage occurs', riskValue: 'You cover full repair cost', riskClass: 'bad',  pricePerDay: 0,    features: normalizeFeatures({ tpl:true,  ldw:false, tire:false, pai:false, roadside:false }) },
-  { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',   tag: 'CDW', tagTooltip: 'Collision Damage Waiver — your liability is capped at €800. Beyond that, we cover the damage.', riskLabel: 'If damage occurs', riskValue: 'You pay up to €800',         riskClass: 'mid',  pricePerDay: 8,    recommended: false, features: normalizeFeatures({ tpl:true,  ldw:true,  tire:false, pai:false, roadside:false }) },
-  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',      tag: 'FDW', tagTooltip: 'Full Damage Waiver — zero excess. We cover all accidental damage, you pay nothing.',           riskLabel: 'If damage occurs', riskValue: 'You pay nothing',           riskClass: 'good', pricePerDay: 15,   recommended: true,  footnote: 'Card on file for excluded events only — see terms.', features: normalizeFeatures({ tpl:true, ldw:true, tire:true, pai:true, roadside:true }) }
+  { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Included in rate', tag: 'TPL', tagTooltip: 'Third Party Liability — covers damage to other vehicles or people, but not your rental car.', riskLabel: 'If damage occurs', riskValue: 'You cover full repair cost', riskClass: 'bad',  pricePerDay: 0,    features: normalizeFeatures({ tpl:true,  ldw:false, tire:false, roadside:false }) },
+  { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',   tag: 'CDW', tagTooltip: 'Collision Damage Waiver — your liability is capped at €800. Beyond that, we cover the damage.', riskLabel: 'If damage occurs', riskValue: 'You pay up to €800',         riskClass: 'mid',  pricePerDay: 8,    recommended: false, features: normalizeFeatures({ tpl:true,  ldw:true,  tire:false, roadside:false }) },
+  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',      tag: 'FDW', tagTooltip: 'Full Damage Waiver — zero excess. We cover all accidental damage, you pay nothing.',           riskLabel: 'If damage occurs', riskValue: 'You pay nothing',           riskClass: 'good', pricePerDay: 15,   recommended: true,  footnote: 'Card on file for excluded events only — see terms.', features: normalizeFeatures({ tpl:true, ldw:true, tire:true, roadside:true }) }
 ];
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
