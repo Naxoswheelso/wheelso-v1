@@ -20,3 +20,7 @@ nav-backup-*/
 legal-backup-*/
 naxos-hero-refactor-backup/
 paros-mykonos-refactor-backup/
+
+# Scratch folder for local backups
+_scratch/
+*.backup-*
