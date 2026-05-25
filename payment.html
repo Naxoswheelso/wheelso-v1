@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Payment — Wheelso</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#f6f7f9;color:#1f2937;line-height:1.5;}
+  .wrap{max-width:560px;margin:40px auto;padding:0 20px;}
+  .header{background:#093D5E;border-radius:12px 12px 0 0;padding:24px;text-align:center;}
+  .header h1{color:#CFDD28;font-size:28px;font-weight:800;margin:0;}
+  .header p{color:#fff;font-size:14px;margin-top:6px;}
+  .card{background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;padding:28px;}
+  .state{padding:20px;border-radius:8px;margin-bottom:20px;font-size:14px;}
+  .state.loading{background:#f3f4f6;color:#6b7280;text-align:center;}
+  .state.error{background:#fee2e2;border-left:4px solid #dc2626;color:#991b1b;}
+  .state.warn{background:#fef3c7;border-left:4px solid #f59e0b;color:#92400e;}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;}
+  table td{padding:10px 0;border-bottom:1px solid #f3f4f6;}
+  table td:first-child{color:#6b7280;}
+  table td:last-child{text-align:right;color:#111827;font-weight:600;}
+  .total{background:#f9fafb;border-radius:8px;padding:16px;margin:20px 0;display:flex;justify-content:space-between;align-items:center;}
+  .total-label{font-size:14px;color:#6b7280;}
+  .total-amount{font-size:28px;font-weight:800;color:#093D5E;}
+  .btn{display:block;width:100%;padding:18px 24px;background:#CFDD28;color:#093D5E;border:none;border-radius:8px;font-weight:800;font-size:16px;text-align:center;cursor:pointer;text-decoration:none;}
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .expiry{background:#fef3c7;border-left:4px solid #f59e0b;padding:14px;border-radius:8px;margin:20px 0;font-size:13px;color:#92400e;}
+  .footer{text-align:center;font-size:12px;color:#9ca3af;margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid #f3f4f6;border-top-color:#CFDD28;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Wheelso</h1>
+    <p>Complete Your Payment</p>
+  </div>
+  <div class="card" id="card">
+    <div class="state loading" id="state"><span class="spinner"></span>Loading booking details…</div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://wheelso-backend-production.up.railway.app/api/payment';
+
+function getToken(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get('token');
+}
+
+function fmtDate(dt){
+  if(!dt) return '';
+  return new Date(dt).toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'2-digit'}) +
+         ' ' + new Date(dt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function hoursUntil(dt){
+  return Math.max(0, Math.floor((new Date(dt) - new Date()) / 36e5));
+}
+
+function renderError(title, body){
+  document.getElementById('card').innerHTML = `
+    <div class="state error">
+      <strong>${title}</strong>
+      <p style="margin-top:8px">${body}</p>
+    </div>
+    <p class="footer">Need help? Contact <a href="mailto:info@wheelso.gr">info@wheelso.gr</a></p>`;
+}
+
+function renderBooking(b){
+  const hrs = hoursUntil(b.expires_at);
+  document.getElementById('card').innerHTML = `
+    <table>
+      <tr><td>Reference</td><td style="font-family:monospace">${b.reference}</td></tr>
+      <tr><td>Vehicle</td><td>${b.car_name || b.car_code}</td></tr>
+      <tr><td>Pick-up</td><td>${b.pickup_station}<br><small>${fmtDate(b.pickup_datetime)}</small></td></tr>
+      <tr><td>Return</td><td>${b.return_station}<br><small>${fmtDate(b.return_datetime)}</small></td></tr>
+      <tr><td>Days</td><td>${b.rental_days}</td></tr>
+    </table>
+    <div class="total">
+      <span class="total-label">Total to pay</span>
+      <span class="total-amount">€${Number(b.total_price).toFixed(2)}</span>
+    </div>
+    <div class="expiry">⏰ Payment link expires in <strong>${hrs} hours</strong></div>
+    <button class="btn" id="payBtn" onclick="initiate()">Complete Payment — €${Number(b.total_price).toFixed(2)}</button>
+    <p class="footer">Payment processed securely by Viva.com</p>`;
+}
+
+async function load(){
+  const token = getToken();
+  if(!token){ renderError('Invalid Link', 'No payment token in URL.'); return; }
+  try{
+    const r = await fetch(`${API_BASE}/${token}`);
+    const d = await r.json();
+    if(!r.ok){
+      if(d.expired) renderError('Payment Link Expired', 'This payment link is no longer valid. Please contact us to make a new booking.');
+      else if(d.alreadyPaid) renderError('Already Paid', 'Payment for this booking has already been completed.');
+      else if(d.cancelled) renderError('Booking Cancelled', 'This booking was cancelled. Please contact us if you have questions.');
+      else renderError('Invalid Link', d.error || 'This payment link is not valid.');
+      return;
+    }
+    renderBooking(d.booking);
+  }catch(e){
+    renderError('Connection Error', 'Could not load booking details. Please try again later.');
+  }
+}
+
+async function initiate(){
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.textContent = 'Redirecting to Viva…';
+  const token = getToken();
+  try{
+    const r = await fetch(`${API_BASE}/${token}/initiate`, { method:'POST', headers:{'Content-Type':'application/json'} });
+    const d = await r.json();
+    if(!r.ok || !d.checkoutUrl){
+      btn.disabled = false;
+      btn.textContent = 'Try again';
+      renderError('Payment Initialization Failed', d.error || 'Could not start payment. Please try again.');
+      return;
+    }
+    window.location.href = d.checkoutUrl;
+  }catch(e){
+    btn.disabled = false;
+    btn.textContent = 'Try again';
+    renderError('Connection Error', 'Could not start payment. Please try again later.');
+  }
+}
+
+load();
+</script>
+</body>
+</html>
