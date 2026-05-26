@@ -39,10 +39,9 @@
               <label class="field"><span>Last name</span><input type="text" id="lastName" placeholder="Last name" required><small class="error">Required field</small></label>
             </div>
             <div class="phone-row">
-              <label class="field country"><span>Country code</span><select id="countryCode"><option value="+30">🇬🇷 +30</option><option value="+44">🇬🇧 +44</option><option value="+49">🇩🇪 +49</option><option value="+33">🇫🇷 +33</option><option value="+39">🇮🇹 +39</option></select></label>
+              <label class="field country"><span>Country code</span><select id="countryCode"></select></label>
               <label class="field phone"><span>Phone number</span><input type="tel" id="phone" placeholder="Enter your phone number" required><small class="error">Please enter a valid phone number</small></label>
             </div>
-            <label class="field full"><span>Driving license country <em>(optional)</em></span><select id="licenseCountry"><option value="">Select country</option><option>Greece</option><option>United Kingdom</option><option>Germany</option><option>France</option><option>Italy</option><option>United States</option></select></label>
             <label class="check-row"><input type="checkbox" id="ageConfirm" checked required><span>I am 23 years or older</span></label>
             <div class="info-note"><strong>i</strong><span>Drivers must hold a valid driving license for at least 1 year.</span></div>
           </section>
@@ -158,7 +157,8 @@
   </div>
   </footer>
 
-  <script src="checkout.js"></script>
+  <script src="country-codes.js"></script>
+<script src="checkout.js"></script>
   <script>
     (function () {
       const STORAGE_KEY = 'wh-lang';
