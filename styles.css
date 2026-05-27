@@ -233,16 +233,19 @@ html, body {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: url('./assets/hero.png') center center / cover no-repeat;
+  background: url('./assets/hero.webp') center center / cover no-repeat;
 }
 
-/* Mobile: replace hero image with brand navy gradient */
+/* Tablet: smaller hero image */
+@media (max-width: 1200px) {
+  .hero-bg {
+    background-image: url('./assets/hero-1200.webp');
+  }
+}
+
 @media (max-width: 720px) {
   .hero-bg {
-    background:
-      radial-gradient(ellipse at 20% 0%, rgba(28, 88, 117, 0.6) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 100%, rgba(207, 221, 40, 0.08) 0%, transparent 50%),
-      linear-gradient(165deg, #093D5E 0%, #1C5875 60%, #093D5E 100%);
+    background: url('./assets/hero-768.webp') center center / cover no-repeat;
   }
 }
 
