@@ -245,6 +245,12 @@ function mapBackendCarToVehicle(c) {
   };
 }
 
+function carImageSrc(imageUrl) {
+  if (!imageUrl) return '';
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return API_BASE + imageUrl;
+}
+
 async function loadVehiclesFromAPI() {
   try {
     const res = await apiGet('/api/cars');
@@ -300,7 +306,7 @@ function renderVehicleCard(v) {
       <div class="vehicle-image">
         ${isAuto ? '<span class="vehicle-badge transmission-auto">Auto</span>' : '<span class="vehicle-badge">Manual</span>'}
         ${v.image_url
-          ? `<img src="https://wheelso-backend-production.up.railway.app${v.image_url}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
+          ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
           : CAR_SVGS[v.category]}
       </div>
       <div class="vehicle-body">
@@ -515,7 +521,7 @@ function openVehicleModal(v) {
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
-    ? `<img src="https://wheelso-backend-production.up.railway.app${v.image_url}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
+    ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
     : CAR_SVGS[v.category];
   document.getElementById('modalCategory').textContent = `${CATEGORY_LABELS[v.category]} · ${v.code}`;
   document.getElementById('modalTitle').textContent = v.name;
