@@ -4901,14 +4901,9 @@ body.breakdown-open { overflow: hidden; }
 
 /* ── Naxos Landing: hero image override ── */
 .naxos-landing .hero-bg {
-  background-image: url('https://images.unsplash.com/photo-1583394293214-28a4f0b8b1ce?auto=format&fit=crop&w=2000&q=80');
+  background: url('./assets/hero-naxos.webp') center center / cover no-repeat;
 }
 
-@media (max-width: 720px) {
-  .naxos-landing .hero-bg {
-    background: linear-gradient(180deg, #093D5E 0%, #0a4e7a 100%);
-  }
-}
 
 /* ── Hero tag chip (used on landing pages) ── */
 .hero-tag {
@@ -4933,12 +4928,12 @@ body.breakdown-open { overflow: hidden; }
 
 /* ── Paros Landing: hero background ── */
 .paros-landing .hero-bg {
-  background: linear-gradient(135deg, #093D5E 0%, #051f33 100%);
+  background: url('./assets/hero-paros.webp') center center / cover no-repeat;
 }
 
 /* ── Mykonos Landing: hero background ── */
 .mykonos-landing .hero-bg {
-  background: linear-gradient(135deg, #093D5E 0%, #051f33 100%);
+  background: url('./assets/hero-mykonos.webp') center center / cover no-repeat;
 }
 
 /* ── Mykonos Landing Page ── */
