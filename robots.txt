@@ -1,0 +1,30 @@
+# robots.txt for wheelso.gr
+# https://wheelso.gr/robots.txt
+
+User-agent: *
+Allow: /
+
+# Block transactional/private pages from indexing
+Disallow: /search.html
+Disallow: /checkout.html
+Disallow: /my-booking.html
+Disallow: /payment.html
+Disallow: /payment-success.html
+Disallow: /payment-fail.html
+
+# Block admin and API paths (defense in depth)
+Disallow: /admin/
+Disallow: /api/
+
+# Block backup folders
+Disallow: /*-backup/
+Disallow: /*-backup-*/
+Disallow: /_scratch/
+Disallow: /emails/
+Disallow: /legal-backup-*/
+Disallow: /nav-backup-*/
+
+# Block crawl of asset query strings
+Disallow: /*?*
+
+Sitemap: https://wheelso.gr/sitemap.xml
