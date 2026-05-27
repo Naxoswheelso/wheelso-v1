@@ -233,7 +233,13 @@ html, body {
 .hero-bg {
   position: absolute;
   inset: 0;
+  /* Fallback for browsers without image-set support */
   background: url('./assets/hero.webp') center center / cover no-repeat;
+  /* Retina/HiDPI screens get the 2x version */
+  background-image: image-set(
+    url('./assets/hero.webp') 1x,
+    url('./assets/hero-2x.webp') 2x
+  );
 }
 
 /* Tablet: smaller hero image */
