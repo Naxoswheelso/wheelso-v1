@@ -1310,6 +1310,14 @@ if (driverContinueBtn) {
     try {
       const payload = buildBookingPayload(obj, timing.afterHoursFee);
       const result = await apiPost('/api/bookings', payload);
+      // Direct (instant) bookings: backend returns payment_url for Viva flow.
+      // Redirect to payment.html where customer reviews booking + proceeds to Viva.
+      // Upon-request bookings have payment_url=null, so the existing showThankYouPopup
+      // flow runs unchanged.
+      if (result && result.payment_url) {
+        window.location.href = result.payment_url;
+        return;
+      }
       const ref = result.reference || 'WLS-???';
       showThankYouPopup(ref, obj.email, driverTotalEl.textContent);
     } catch (err) {
