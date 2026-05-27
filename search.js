@@ -1245,7 +1245,7 @@ function showAfterHoursWarning(warning) {
 // ============================================
 // THANK YOU POPUP
 // ============================================
-function showThankYouPopup(ref, email, total) {
+function showThankYouPopup(ref, email, total) { // TODO: remove unused 'total' param
   // Remove existing
   document.getElementById('thankYouOverlay')?.remove();
 
@@ -1259,18 +1259,18 @@ function showThankYouPopup(ref, email, total) {
 
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:40px 36px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
-      <div style="font-size:52px;margin-bottom:16px;">🇬🇷</div>
-      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">Booking confirmed!</h2>
-      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">We'll see you in Greece!</p>
+      <div style="font-size:52px;margin-bottom:16px;">⏳</div>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">Request received</h2>
+      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">We'll review your booking and respond within 12 hours.</p>
       <div style="background:#f0f7ff;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
-        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">Your booking reference</p>
+        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">Your request reference</p>
         <p style="font-size:22px;font-weight:800;color:#093D5E;letter-spacing:0.05em;margin:0;">${ref}</p>
       </div>
       <p style="font-size:14px;color:#64748b;margin:0 0 28px;line-height:1.5;">
-        A confirmation email has been sent to<br>
+        We've sent a confirmation of your request to<br>
         <strong style="color:#093D5E;">${email}</strong>
       </p>
-      <div style="font-size:18px;font-weight:700;color:#093D5E;margin-bottom:28px;">Total: ${total}</div>
+      <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">You'll receive a payment link once we approve your booking. No charge has been made yet.</p>
       <button id="thankYouClose" style="width:100%;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
         Back to Home
       </button>
