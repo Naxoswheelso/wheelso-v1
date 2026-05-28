@@ -306,7 +306,7 @@ function renderVehicleCard(v) {
       <div class="vehicle-image">
         ${isAuto ? '<span class="vehicle-badge transmission-auto">Auto</span>' : '<span class="vehicle-badge">Manual</span>'}
         ${v.image_url
-          ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
+          ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
           : CAR_SVGS[v.category]}
       </div>
       <div class="vehicle-body">
@@ -521,7 +521,7 @@ function openVehicleModal(v) {
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
-    ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" style="width:100%;height:100%;object-fit:contain;">`
+    ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
     : CAR_SVGS[v.category];
   document.getElementById('modalCategory').textContent = `${CATEGORY_LABELS[v.category]} · ${v.code}`;
   document.getElementById('modalTitle').textContent = v.name;
@@ -1491,7 +1491,7 @@ function applyUrlPickup() {
       );
       if (retMatch) returnEl.value = retMatch.value;
     }
-    console.log(`[Wheelso] Pre-selected pickup: "${match.value}" from URL param`);
+    // console.log(`[Wheelso] Pre-selected pickup: "${match.value}" from URL param`);
   } else {
     console.warn(`[Wheelso] URL pickup "${pickup}" not found in station options`);
   }
@@ -1591,7 +1591,7 @@ async function loadAvailabilityPrices() {
         }
       });
       renderResults();
-      console.log('[Wheelso] Availability prices loaded for', cars.length, 'cars');
+      // console.log('[Wheelso] Availability prices loaded for', cars.length, 'cars');
     } else {
       // No cars returned (no pricing for this station/dates) → clear all vehicles
       VEHICLES = [];
@@ -1608,7 +1608,7 @@ async function loadAvailabilityPrices() {
   await loadAvailabilityPrices();
   renderResults();
   updateChipCounts();
-  console.log('[Wheelso Search] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
+  // console.log('[Wheelso Search] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
 })();
 
 document.addEventListener('keydown', (e) => {
