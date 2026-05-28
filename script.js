@@ -60,10 +60,10 @@ function buildStationOptions(stations, includeDefault = true) {
     : '<option value="">Same as pick-up</option>';
 
   Object.entries(regions).forEach(([region, stns]) => {
-    html += `<optgroup label="${region}">`;
+    html += `<optgroup label="${escapeHtml(region)}">`;
     stns.forEach(s => {
       const val = s.code.toLowerCase().replace(/-/g, '-');
-      html += `<option value="${val}">${s.name}</option>`;
+      html += `<option value="${escapeHtml(val)}">${escapeHtml(s.name)}</option>`;
     });
     html += '</optgroup>';
   });
@@ -689,9 +689,9 @@ function openVehicleModal(v) {
   document.getElementById('modalTitle').textContent = v.name;
   document.getElementById('modalSimilar').textContent = v.similar;
   document.getElementById('modalSpecs').innerHTML = `
-    <div class="spec">${ICON_SEATS}<span class="spec-value">${v.seats} seats</span></div>
-    <div class="spec">${ICON_BAGS}<span class="spec-value">${v.bags} bags</span></div>
-    <div class="spec">${ICON_DOORS}<span class="spec-value">${v.doors} doors</span></div>
+    <div class="spec">${ICON_SEATS}<span class="spec-value">${escapeHtml(v.seats)} seats</span></div>
+    <div class="spec">${ICON_BAGS}<span class="spec-value">${escapeHtml(v.bags)} bags</span></div>
+    <div class="spec">${ICON_DOORS}<span class="spec-value">${escapeHtml(v.doors)} doors</span></div>
     <div class="spec">${isAuto ? ICON_TRANS_AUTO : ICON_TRANS_MAN}<span class="spec-value">${isAuto ? 'Auto' : 'Manual'}</span></div>
   `;
 
@@ -908,7 +908,7 @@ function renderProtectionCard(pkg, selectedId) {
   const featuresHTML = Object.entries(pkg.features).map(([name, included]) => `
     <div class="protection-feature ${included ? 'included' : 'excluded'}">
       ${included ? ICON_CHECK : ICON_X}
-      <span>${name}</span>
+      <span>${escapeHtml(name)}</span>
     </div>
   `).join('');
 
@@ -920,14 +920,14 @@ function renderProtectionCard(pkg, selectedId) {
   }
 
   return `
-    <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${pkg.id}">
+    <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${escapeHtml(pkg.id)}">
       <div class="protection-card-radio"></div>
-      <h3 class="protection-card-name">${pkg.name}</h3>
+      <h3 class="protection-card-name">${escapeHtml(pkg.name)}</h3>
       ${renderStars(pkg.stars)}
-      ${pkg.discount ? `<span class="protection-discount">${pkg.discount}</span>` : ''}
-      <div class="protection-excess ${pkg.excessClass}">
-        <strong>${pkg.excessLabel}</strong>
-        ${pkg.excess}
+      ${pkg.discount ? `<span class="protection-discount">${escapeHtml(pkg.discount)}</span>` : ''}
+      <div class="protection-excess ${escapeHtml(pkg.excessClass)}">
+        <strong>${escapeHtml(pkg.excessLabel)}</strong>
+        ${escapeHtml(pkg.excess)}
       </div>
       <div class="protection-features">${featuresHTML}</div>
       ${priceHTML}
@@ -1140,13 +1140,13 @@ function renderExtrasList() {
     const qty = selectedExtras[extra.id] || 0;
     const isOn = qty > 0;
     return `
-      <div class="extra-card ${isOn ? 'selected' : ''}" data-extra="${extra.id}">
+      <div class="extra-card ${isOn ? 'selected' : ''}" data-extra="${escapeHtml(extra.id)}">
         <div class="extra-row">
           <div class="extra-icon">${extra.icon}</div>
           <div class="extra-info">
-            <h3 class="extra-name">${extra.name}</h3>
-            <p class="extra-summary">${extra.summary}</p>
-            <span class="extra-price">${extra.priceLabel}</span>
+            <h3 class="extra-name">${escapeHtml(extra.name)}</h3>
+            <p class="extra-summary">${escapeHtml(extra.summary)}</p>
+            <span class="extra-price">${escapeHtml(extra.priceLabel)}</span>
           </div>
           <div class="extra-controls">
             ${extra.perUnit && isOn ? `
@@ -1167,7 +1167,7 @@ function renderExtrasList() {
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="extra-details" hidden>
-          <p>${extra.details}</p>
+          <p>${escapeHtml(extra.details)}</p>
         </div>
       </div>
     `;
@@ -1217,9 +1217,9 @@ function populateSummarySidebar() {
     sv.innerHTML = `
       <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
       <div class="summary-vehicle-info">
-        <span class="summary-vehicle-cat">${CATEGORY_LABELS[v.category]}</span>
-        <span class="summary-vehicle-name">${v.name}</span>
-        <span class="summary-vehicle-similar">${v.similar}</span>
+        <span class="summary-vehicle-cat">${escapeHtml(CATEGORY_LABELS[v.category])}</span>
+        <span class="summary-vehicle-name">${escapeHtml(v.name)}</span>
+        <span class="summary-vehicle-similar">${escapeHtml(v.similar)}</span>
       </div>
     `;
   }
@@ -1364,9 +1364,9 @@ function populateDriverSummary() {
     sv.innerHTML = `
       <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
       <div class="summary-vehicle-info">
-        <span class="summary-vehicle-cat">${CATEGORY_LABELS[v.category]}</span>
-        <span class="summary-vehicle-name">${v.name}</span>
-        <span class="summary-vehicle-similar">${v.similar}</span>
+        <span class="summary-vehicle-cat">${escapeHtml(CATEGORY_LABELS[v.category])}</span>
+        <span class="summary-vehicle-name">${escapeHtml(v.name)}</span>
+        <span class="summary-vehicle-similar">${escapeHtml(v.similar)}</span>
       </div>
     `;
   }
@@ -1652,7 +1652,7 @@ function buildBreakdown() {
   // VEHICLE
   html += `<div class="breakdown-section-title">Vehicle</div>`;
   html += `<div class="breakdown-line">
-    <span>${v.name}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+    <span>${escapeHtml(v.name)}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
     <strong>€${(vehicleDaily * days).toFixed(2)}</strong>
   </div>`;
 
@@ -1662,12 +1662,12 @@ function buildBreakdown() {
     html += `<div class="breakdown-section-title">Protection</div>`;
     if (pkg.pricePerDay > 0) {
       html += `<div class="breakdown-line">
-        <span>${pkg.name}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+        <span>${escapeHtml(pkg.name)}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
         <strong>€${(pkg.pricePerDay * days).toFixed(2)}</strong>
       </div>`;
     } else {
       html += `<div class="breakdown-line">
-        <span>${pkg.name}</span>
+        <span>${escapeHtml(pkg.name)}</span>
         <strong>Included</strong>
       </div>`;
     }
@@ -1684,7 +1684,7 @@ function buildBreakdown() {
       const lineTotal = e.pricePerDay * qty * days;
       const qtyLabel = qty > 1 ? ` × ${qty}` : '';
       html += `<div class="breakdown-line">
-        <span>${e.name}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}/day${qty > 1 ? ` × ${qty}` : ''} × ${days} ${days===1?'day':'days'}</span></span>
+        <span>${escapeHtml(e.name)}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}/day${qty > 1 ? ` × ${qty}` : ''} × ${days} ${days===1?'day':'days'}</span></span>
         <strong>€${lineTotal.toFixed(2)}</strong>
       </div>`;
     });
