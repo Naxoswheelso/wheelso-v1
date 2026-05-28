@@ -4479,6 +4479,7 @@ body.breakdown-open { overflow: hidden; }
   font-size: clamp(32px, 5vw, 52px);
   margin: 0 0 16px;
   font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
 }
 
 .naxos-lead {
@@ -4513,6 +4514,7 @@ body.breakdown-open { overflow: hidden; }
   font-size: 30px;
   margin: 0 0 32px;
   font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
   color: #093D5E;
 }
 
@@ -4786,6 +4788,7 @@ body.breakdown-open { overflow: hidden; }
   font-size: clamp(32px, 5vw, 52px);
   margin: 0 0 16px;
   font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
 }
 .paros-lead {
   font-size: 18px;
@@ -4810,6 +4813,7 @@ body.breakdown-open { overflow: hidden; }
   font-size: 30px;
   margin: 0 0 32px;
   font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
   color: #093D5E;
 }
 .paros-prose {
@@ -4943,6 +4947,7 @@ body.breakdown-open { overflow: hidden; }
   font-size: 30px;
   margin: 0 0 32px;
   font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
   color: #093D5E;
 }
 .mykonos-prose {
