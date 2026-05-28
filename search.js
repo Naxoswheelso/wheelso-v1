@@ -450,8 +450,8 @@ function renderCategoryChips() {
       All <span class="chip-count" data-count="all"></span>
     </button>
     ${Object.entries(CATEGORY_LABELS).map(([code, label]) => `
-      <button class="filter-chip ${currentFilter === code ? 'active' : ''}" data-filter="${code}" role="tab" aria-selected="${currentFilter === code}">
-        ${label} <span class="chip-count" data-count="${code}"></span>
+      <button class="filter-chip ${currentFilter === code ? 'active' : ''}" data-filter="${escapeHtml(code)}" role="tab" aria-selected="${currentFilter === code}">
+        ${escapeHtml(label)} <span class="chip-count" data-count="${escapeHtml(code)}"></span>
       </button>
     `).join('')}
   `;
@@ -531,15 +531,15 @@ function openVehicleModal(v) {
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
-    ? `<img src="${carImageSrc(v.image_url)}" alt="${v.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
+    ? `<img src="${escapeHtml(carImageSrc(v.image_url))}" alt="${escapeHtml(v.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
     : CAR_SVGS[v.category];
   document.getElementById('modalCategory').textContent = `${CATEGORY_LABELS[v.category]} · ${v.code}`;
   document.getElementById('modalTitle').textContent = v.name;
   document.getElementById('modalSimilar').textContent = v.similar;
   document.getElementById('modalSpecs').innerHTML = `
-    <div class="spec">${ICON_SEATS}<span class="spec-value">${v.seats} seats</span></div>
-    <div class="spec">${ICON_BAGS}<span class="spec-value">${v.bags} bags</span></div>
-    <div class="spec">${ICON_DOORS}<span class="spec-value">${v.doors} doors</span></div>
+    <div class="spec">${ICON_SEATS}<span class="spec-value">${escapeHtml(v.seats)} seats</span></div>
+    <div class="spec">${ICON_BAGS}<span class="spec-value">${escapeHtml(v.bags)} bags</span></div>
+    <div class="spec">${ICON_DOORS}<span class="spec-value">${escapeHtml(v.doors)} doors</span></div>
     <div class="spec">${isAuto ? ICON_TRANS_AUTO : ICON_TRANS_MAN}<span class="spec-value">${isAuto ? 'Auto' : 'Manual'}</span></div>
   `;
 
@@ -681,7 +681,7 @@ function renderProtectionCard(pkg, selectedId) {
   const featuresHTML = Object.entries(pkg.features).map(([name, included]) => `
     <div class="protection-feature ${included ? 'included' : 'excluded'}">
       ${included ? ICON_CHECK : ICON_X}
-      <span>${name}</span>
+      <span>${escapeHtml(name)}</span>
     </div>
   `).join('');
 
@@ -694,32 +694,32 @@ function renderProtectionCard(pkg, selectedId) {
 
   // Tag with tooltip (TPL/CDW/FDW)
   const tagHTML = pkg.tag
-    ? `<span class="protection-tag" tabindex="0">${pkg.tag}${pkg.tagTooltip ? `<span class="protection-tooltip">${pkg.tagTooltip}</span>` : ''}</span>`
+    ? `<span class="protection-tag" tabindex="0">${escapeHtml(pkg.tag)}${pkg.tagTooltip ? `<span class="protection-tooltip">${escapeHtml(pkg.tagTooltip)}</span>` : ''}</span>`
     : '';
 
   // Risk row — "If damage occurs"
   const riskHTML = pkg.riskValue
-    ? `<div class="protection-risk ${pkg.riskClass || 'mid'}">
-         <p class="protection-risk-label">${pkg.riskLabel || 'If damage occurs'}</p>
-         <p class="protection-risk-value">${pkg.riskValue}</p>
+    ? `<div class="protection-risk ${escapeHtml(pkg.riskClass || 'mid')}">
+         <p class="protection-risk-label">${escapeHtml(pkg.riskLabel || 'If damage occurs')}</p>
+         <p class="protection-risk-value">${escapeHtml(pkg.riskValue)}</p>
        </div>`
     : '';
 
   const badgeHTML = pkg.recommended ? '<span class="protection-badge">Most popular</span>' : '';
   const isLime = !!pkg.recommended;
-  const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${pkg.eyebrow}</div>` : '';
+  const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${escapeHtml(pkg.eyebrow)}</div>` : '';
   const footnoteHTML = pkg.footnote
-    ? `<p class="protection-footnote">${pkg.footnote.replace('see terms', '<a href="#" class="excl-trigger">see terms</a>')}</p>`
+    ? `<p class="protection-footnote">${escapeHtml(pkg.footnote).replace('see terms', '<a href="#" class="excl-trigger">see terms</a>')}</p>`
     : '';
 
   return `
-    <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${pkg.id}">
+    <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${escapeHtml(pkg.id)}">
       ${badgeHTML}
       <div class="protection-card-radio"></div>
       ${renderCoverageBar(pkg.coverage || 1, 3, isLime)}
       ${eyebrowHTML}
       <div class="protection-name-row">
-        <h3 class="protection-card-name">${pkg.name}</h3>
+        <h3 class="protection-card-name">${escapeHtml(pkg.name)}</h3>
         ${tagHTML}
       </div>
       ${riskHTML}
@@ -850,13 +850,13 @@ function renderExtrasList() {
     const qty = selectedExtras[extra.id] || 0;
     const isOn = qty > 0;
     return `
-      <div class="extra-card ${isOn ? 'selected' : ''}" data-extra="${extra.id}">
+      <div class="extra-card ${isOn ? 'selected' : ''}" data-extra="${escapeHtml(extra.id)}">
         <div class="extra-row">
           <div class="extra-icon">${extra.icon}</div>
           <div class="extra-info">
-            <h3 class="extra-name">${extra.name}</h3>
-            <p class="extra-summary">${extra.summary}</p>
-            <span class="extra-price">${extra.priceLabel}</span>
+            <h3 class="extra-name">${escapeHtml(extra.name)}</h3>
+            <p class="extra-summary">${escapeHtml(extra.summary)}</p>
+            <span class="extra-price">${escapeHtml(extra.priceLabel)}</span>
           </div>
           <div class="extra-controls">
             ${extra.perUnit && isOn ? `
@@ -877,7 +877,7 @@ function renderExtrasList() {
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="extra-details" hidden>
-          <p>${extra.details}</p>
+          <p>${escapeHtml(extra.details)}</p>
         </div>
       </div>
     `;
@@ -926,9 +926,9 @@ function populateSummarySidebar() {
     sv.innerHTML = `
       <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
       <div class="summary-vehicle-info">
-        <span class="summary-vehicle-cat">${CATEGORY_LABELS[v.category]}</span>
-        <span class="summary-vehicle-name">${v.name}</span>
-        <span class="summary-vehicle-similar">${v.similar}</span>
+        <span class="summary-vehicle-cat">${escapeHtml(CATEGORY_LABELS[v.category])}</span>
+        <span class="summary-vehicle-name">${escapeHtml(v.name)}</span>
+        <span class="summary-vehicle-similar">${escapeHtml(v.similar)}</span>
       </div>
     `;
   }
@@ -1097,9 +1097,9 @@ function populateDriverSummary() {
     sv.innerHTML = `
       <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
       <div class="summary-vehicle-info">
-        <span class="summary-vehicle-cat">${CATEGORY_LABELS[v.category]}</span>
-        <span class="summary-vehicle-name">${v.name}</span>
-        <span class="summary-vehicle-similar">${v.similar}</span>
+        <span class="summary-vehicle-cat">${escapeHtml(CATEGORY_LABELS[v.category])}</span>
+        <span class="summary-vehicle-name">${escapeHtml(v.name)}</span>
+        <span class="summary-vehicle-similar">${escapeHtml(v.similar)}</span>
       </div>
     `;
   }
@@ -1280,11 +1280,11 @@ function showThankYouPopup(ref, email, total) { // TODO: remove unused 'total' p
       <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">We'll review your booking and respond within 12 hours.</p>
       <div style="background:#f0f7ff;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
         <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">Your request reference</p>
-        <p style="font-size:22px;font-weight:800;color:#093D5E;letter-spacing:0.05em;margin:0;">${ref}</p>
+        <p style="font-size:22px;font-weight:800;color:#093D5E;letter-spacing:0.05em;margin:0;">${escapeHtml(ref)}</p>
       </div>
       <p style="font-size:14px;color:#64748b;margin:0 0 28px;line-height:1.5;">
         We've sent a confirmation of your request to<br>
-        <strong style="color:#093D5E;">${email}</strong>
+        <strong style="color:#093D5E;">${escapeHtml(email)}</strong>
       </p>
       <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">You'll receive a payment link once we approve your booking. No charge has been made yet.</p>
       <button id="thankYouClose" style="width:100%;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
@@ -1518,11 +1518,11 @@ function buildStationOptions(stations, includeDefault = true) {
     ? '<option value="" disabled selected>Select location...</option>'
     : '<option value="">Same as pick-up</option>';
   Object.entries(regions).forEach(([region, stns]) => {
-    html += `<optgroup label="${region}">`;
+    html += `<optgroup label="${escapeHtml(region)}">`;
     stns.forEach(s => {
       const val = s.code.toLowerCase();
       const icon = '';
-      html += `<option value="${val}">${s.name}</option>`;
+      html += `<option value="${escapeHtml(val)}">${escapeHtml(s.name)}</option>`;
     });
     html += '</optgroup>';
   });
@@ -1645,7 +1645,7 @@ function buildBreakdown() {
   let html = '';
   html += `<div class="breakdown-section-title">Vehicle</div>`;
   html += `<div class="breakdown-line">
-    <span>${v.name}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+    <span>${escapeHtml(v.name)}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
     <strong>€${(vehicleDaily * days).toFixed(2)}</strong>
   </div>`;
 
@@ -1654,11 +1654,11 @@ function buildBreakdown() {
     html += `<div class="breakdown-section-title">Protection</div>`;
     if (pkg.pricePerDay > 0) {
       html += `<div class="breakdown-line">
-        <span>${pkg.name}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+        <span>${escapeHtml(pkg.name)}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
         <strong>€${(pkg.pricePerDay * days).toFixed(2)}</strong>
       </div>`;
     } else {
-      html += `<div class="breakdown-line"><span>${pkg.name}</span><strong>Included</strong></div>`;
+      html += `<div class="breakdown-line"><span>${escapeHtml(pkg.name)}</span><strong>Included</strong></div>`;
     }
   }
 
@@ -1672,7 +1672,7 @@ function buildBreakdown() {
       const lineTotal = e.pricePerDay * qty * days;
       const qtyLabel = qty > 1 ? ` × ${qty}` : '';
       html += `<div class="breakdown-line">
-        <span>${e.name}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}/day${qty > 1 ? ` × ${qty}` : ''} × ${days} ${days===1?'day':'days'}</span></span>
+        <span>${escapeHtml(e.name)}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}/day${qty > 1 ? ` × ${qty}` : ''} × ${days} ${days===1?'day':'days'}</span></span>
         <strong>€${lineTotal.toFixed(2)}</strong>
       </div>`;
     });
