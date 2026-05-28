@@ -573,30 +573,40 @@ const ICON_DOORS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const ICON_TRANS_AUTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">A</text></svg>';
 const ICON_TRANS_MAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">M</text></svg>';
 
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function renderVehicleCard(v) {
   const isAuto = v.transmission === 'auto';
   return `
-    <article class="vehicle-card" data-category="${v.category}" data-code="${v.code}">
+    <article class="vehicle-card" data-category="${escapeHtml(v.category)}" data-code="${escapeHtml(v.code)}">
       <div class="vehicle-image">
         ${isAuto ? '<span class="vehicle-badge transmission-auto">Auto</span>' : '<span class="vehicle-badge">Manual</span>'}
         ${CAR_SVGS[v.category]}
       </div>
       <div class="vehicle-body">
         <div class="vehicle-header">
-          <span class="vehicle-category">${CATEGORY_LABELS[v.category]} · ${v.code}</span>
-          <h3 class="vehicle-name">${v.name}</h3>
-          <span class="vehicle-similar">${v.similar}</span>
+          <span class="vehicle-category">${escapeHtml(CATEGORY_LABELS[v.category])} · ${escapeHtml(v.code)}</span>
+          <h3 class="vehicle-name">${escapeHtml(v.name)}</h3>
+          <span class="vehicle-similar">${escapeHtml(v.similar)}</span>
         </div>
         <div class="vehicle-specs">
-          <div class="spec">${ICON_SEATS}<span class="spec-value">${v.seats}</span></div>
-          <div class="spec">${ICON_BAGS}<span class="spec-value">${v.bags}</span></div>
-          <div class="spec">${ICON_DOORS}<span class="spec-value">${v.doors}</span></div>
+          <div class="spec">${ICON_SEATS}<span class="spec-value">${escapeHtml(v.seats)}</span></div>
+          <div class="spec">${ICON_BAGS}<span class="spec-value">${escapeHtml(v.bags)}</span></div>
+          <div class="spec">${ICON_DOORS}<span class="spec-value">${escapeHtml(v.doors)}</span></div>
           <div class="spec">${isAuto ? ICON_TRANS_AUTO : ICON_TRANS_MAN}<span class="spec-value">${isAuto ? 'Auto' : 'Man'}</span></div>
         </div>
         <div class="vehicle-footer">
           <div class="vehicle-price">
             <span class="price-from">From</span>
-            <span><span class="price-amount">€${v.price}</span><span class="price-period">/day</span></span>
+            <span><span class="price-amount">€${escapeHtml(v.price)}</span><span class="price-period">/day</span></span>
           </div>
           <span class="vehicle-cta">
             Select
