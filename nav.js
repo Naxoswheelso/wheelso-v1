@@ -5,7 +5,7 @@
 (function initNavDropdown() {
   const toggles = document.querySelectorAll('.nav-dropdown-toggle');
   if (!toggles.length) {
-    console.log('[Wheelso nav] No dropdown toggles found on this page');
+    // console.log('[Wheelso nav] No dropdown toggles found on this page');
     return;
   }
 
@@ -40,5 +40,5 @@
     }
   });
 
-  console.log('[Wheelso nav] Dropdown initialized for', toggles.length, 'toggle(s)');
+  // console.log('[Wheelso nav] Dropdown initialized for', toggles.length, 'toggle(s)');
 })();

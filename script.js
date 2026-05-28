@@ -91,7 +91,7 @@ function applyUrlPickup() {
   );
   if (match) {
     pickupEl.value = match.value;
-    console.log(`[Wheelso] Pre-selected pickup: "${match.value}" from URL param`);
+    // console.log(`[Wheelso] Pre-selected pickup: "${match.value}" from URL param`);
   } else {
     console.warn(`[Wheelso] URL pickup "${pickup}" not found in station options`);
   }
@@ -110,7 +110,7 @@ async function loadStationsFromAPI() {
     if (pickupEl) pickupEl.innerHTML = buildStationOptions(stations, true);
     if (returnEl) returnEl.innerHTML = buildStationOptions(stations, false);
 
-    console.log('[Wheelso] Stations loaded:', stations.length);
+    // console.log('[Wheelso] Stations loaded:', stations.length);
     // ─── PRE-SELECT FROM URL PARAMETER ───
     applyUrlPickup();
   } catch (err) {
@@ -1902,7 +1902,7 @@ function initBookingWidget() {
     console.debug('[Wheelso] Booking widget: form not found, skipping submit init');
   }
 
-  console.log('[Wheelso] Booking widget initialization complete');
+  // console.log('[Wheelso] Booking widget initialization complete');
 }
 
 // Run immediately (script loads at end of <body>, DOM is already ready).
@@ -1959,7 +1959,7 @@ if (document.readyState === 'loading') {
     // Safety-net call: runs after all stations are definitely loaded.
     // Handles edge cases where early-return inside loadStationsFromAPI skipped the first call.
     applyUrlPickup();
-    console.log('[Wheelso] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
+    // console.log('[Wheelso] API data loaded:', VEHICLES.length, 'vehicles,', EXTRAS.length, 'extras');
   } catch (err) {
     console.warn('[Wheelso] API init failed, using fallback data:', err);
   }
