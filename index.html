@@ -79,6 +79,11 @@
   }
   </script>
 
+  <!-- Preload hero image for faster LCP -->
+  <link rel="preload" as="image" href="/assets/hero.webp" type="image/webp" media="(min-width: 1201px)" />
+  <link rel="preload" as="image" href="/assets/hero-1200.webp" type="image/webp" media="(min-width: 769px) and (max-width: 1200px)" />
+  <link rel="preload" as="image" href="/assets/hero-768.webp" type="image/webp" media="(max-width: 768px)" />
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
