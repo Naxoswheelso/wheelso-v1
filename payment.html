@@ -56,6 +56,16 @@
 <script>
 const API_BASE = 'https://wheelso-backend-production.up.railway.app/api/payment';
 
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getToken(){
   const params = new URLSearchParams(window.location.search);
   return params.get('token');
@@ -74,8 +84,8 @@ function hoursUntil(dt){
 function renderError(title, body){
   document.getElementById('card').innerHTML = `
     <div class="state error">
-      <strong>${title}</strong>
-      <p style="margin-top:8px">${body}</p>
+      <strong>${escapeHtml(title)}</strong>
+      <p style="margin-top:8px">${escapeHtml(body)}</p>
     </div>
     <p class="footer">Need help? Contact <a href="mailto:info@wheelso.gr">info@wheelso.gr</a></p>`;
 }
@@ -84,11 +94,11 @@ function renderBooking(b){
   const hrs = hoursUntil(b.expires_at);
   document.getElementById('card').innerHTML = `
     <table>
-      <tr><td>Reference</td><td style="font-family:monospace">${b.reference}</td></tr>
-      <tr><td>Vehicle</td><td>${b.car_name || b.car_code}</td></tr>
-      <tr><td>Pick-up</td><td>${b.pickup_station}<br><small>${fmtDate(b.pickup_datetime)}</small></td></tr>
-      <tr><td>Return</td><td>${b.return_station}<br><small>${fmtDate(b.return_datetime)}</small></td></tr>
-      <tr><td>Days</td><td>${b.rental_days}</td></tr>
+      <tr><td>Reference</td><td style="font-family:monospace">${escapeHtml(b.reference)}</td></tr>
+      <tr><td>Vehicle</td><td>${escapeHtml(b.car_name || b.car_code)}</td></tr>
+      <tr><td>Pick-up</td><td>${escapeHtml(b.pickup_station)}<br><small>${fmtDate(b.pickup_datetime)}</small></td></tr>
+      <tr><td>Return</td><td>${escapeHtml(b.return_station)}<br><small>${fmtDate(b.return_datetime)}</small></td></tr>
+      <tr><td>Days</td><td>${escapeHtml(b.rental_days)}</td></tr>
     </table>
     <div class="total">
       <span class="total-label">Total to pay</span>
