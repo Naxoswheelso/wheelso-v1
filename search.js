@@ -1023,7 +1023,22 @@ const driverPage = document.getElementById('driverPage');
 const driverBack = document.getElementById('driverBack');
 const driverContinueBtn = document.getElementById('driverContinue');
 const driverTotalEl = document.getElementById('driverTotal');
+const driverTotalLabelEl = document.getElementById('driverTotalLabel');
+const driverTotalSubEl = document.getElementById('driverTotalSub');
 const driverForm = document.getElementById('driverForm');
+
+function renderDriverTotal(fullTotal) {
+  if (currentProtection.rate === 'flex') {
+    const deposit = fullTotal * 0.10;
+    driverTotalLabelEl.textContent = 'Pay now';
+    driverTotalEl.textContent = `€${deposit.toFixed(2)}`;
+    driverTotalSubEl.textContent = `of €${fullTotal.toFixed(2)} total`;
+  } else {
+    driverTotalLabelEl.textContent = 'Total';
+    driverTotalEl.textContent = `€${fullTotal.toFixed(2)}`;
+    driverTotalSubEl.textContent = '';
+  }
+}
 
 function openDriverPage() {
   if (!driverPage) return;
@@ -1147,7 +1162,7 @@ function populateDriverSummary() {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  driverTotalEl.textContent = `€${(baseTotal + extrasCost + oneWayFeeGross).toFixed(2)}`;
+  renderDriverTotal(baseTotal + extrasCost + oneWayFeeGross);
 }
 
 function updateDriverTotal(afterHoursFee = 0) {
@@ -1159,7 +1174,7 @@ function updateDriverTotal(afterHoursFee = 0) {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  driverTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross).toFixed(2)}`;
+  renderDriverTotal(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross);
 }
 
 if (driverBack) driverBack.addEventListener('click', closeDriverPage);

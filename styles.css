@@ -2130,6 +2130,11 @@ html, body {
   color: var(--wh-blue-dark);
   letter-spacing: -0.02em;
 }
+.protection-total-sub {
+  font-size: 11px;
+  color: var(--wh-gray-500);
+  font-weight: 400;
+}
 .protection-breakdown {
   font-size: 12px;
   color: var(--wh-blue-mid);
