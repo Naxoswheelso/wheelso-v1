@@ -647,7 +647,7 @@
 
       // Ref & greeting
       $('vRefBadge').textContent = b.reference;
-      $('vGreetingName').textContent = b.first_name || 'there';
+      $('vGreetingName').textContent = (b.first_name || '').trim() || 'there';
       $('vHeroPickup').textContent = formatHeroPickup(b.pickup_datetime);
       $('vPreheader').textContent = `Your Wheelso rental ${b.reference} is confirmed. Pickup ${formatHeroPickup(b.pickup_datetime)}.`;
       document.title = `Booking Voucher · Wheelso ${b.reference}`;
@@ -768,6 +768,11 @@
 
       // Net / VAT / Total — assume total is VAT-inclusive at 24%
       const total = Number(b.total_price || 0);
+      const amountDueNow = b.amount_due_now != null
+        ? Number(b.amount_due_now)
+        : (b.rate_type === 'flex' ? total * 0.10 : total);
+      const balanceAtDesk = Math.max(0, total - amountDueNow);
+      const hasDeposit = b.rate_type === 'flex' && amountDueNow < total;
       const net = total / 1.24;
       const vat = total - net;
       $('vNet').textContent = formatPrice(net);
@@ -779,12 +784,10 @@
       const payCell = $('vPaymentStatusCell');
       if (b.status === 'cancelled') {
         payCell.innerHTML = '';
-      } else if (isFlex) {
-        const deposit = total * 0.10;
-        const balance = total - deposit;
+      } else if (hasDeposit) {
         payCell.innerHTML = `
           <span style="display:inline-block; background:#FEF3C7; color:#B45309; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; padding:8px 16px; border-radius:999px;">
-            Deposit ${formatPrice(deposit)} paid · ${formatPrice(balance)} due at pickup
+            Paid now ${formatPrice(amountDueNow)}<br>Payable at desk ${formatPrice(balanceAtDesk)}
           </span>`;
       } else {
         payCell.innerHTML = `
