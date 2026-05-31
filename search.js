@@ -751,9 +751,11 @@ async function openProtectionPage(v, days, rate) {
   updateProtectionTotal();
 
   if (overviewCancellation) {
-    const cancelText = rate === 'flex'
-      ? 'Pay Later — 10% deposit, balance at counter'
-      : 'Pay now — Free cancellation up to 72h before pick-up';
+    const cancelText = v.admin_upon_request
+      ? 'On request — no payment now, pay after confirmation'
+      : rate === 'flex'
+        ? 'Pay Later — 10% deposit, balance at counter'
+        : 'Pay now — Free cancellation up to 72h before pick-up';
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
@@ -959,7 +961,11 @@ function populateSummarySidebar() {
 
   const sRate = document.getElementById('summaryRate');
   const sProt = document.getElementById('summaryProtection');
-  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Pay Later · 10% deposit + balance at counter' : 'Pay now · Free cancellation up to 72h before';
+  if (sRate) sRate.textContent = currentProtection.vehicle?.admin_upon_request
+    ? 'On request · No payment until confirmed'
+    : currentProtection.rate === 'flex'
+      ? 'Pay Later · 10% deposit + balance at counter'
+      : 'Pay now · Free cancellation up to 72h before';
   if (sProt) sProt.textContent = pkg ? pkg.name : 'Protection package';
 }
 
@@ -1139,9 +1145,11 @@ function populateDriverSummary() {
   document.getElementById('driverSummaryReturnLoc').textContent = returnLocText;
   document.getElementById('driverSummaryReturnDate').textContent = `${fmt(searchCtx.to)} · ${searchCtx.toTime}`;
 
-  document.getElementById('driverSummaryRate').textContent = currentProtection.rate === 'flex'
-    ? 'Pay Later'
-    : 'Pay now';
+  document.getElementById('driverSummaryRate').textContent = v.admin_upon_request
+    ? 'On request'
+    : currentProtection.rate === 'flex'
+      ? 'Pay Later'
+      : 'Pay now';
   document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : 'Protection package';
 
   // Render dynamic info cards (Payment + Cancellation)
@@ -1785,6 +1793,7 @@ function renderInfoCards() {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const total = ((vehicleDaily + protectionDaily) * days) + calculateExtrasTotal();
   const isFlex = currentProtection.rate === 'flex';
+  const isUponRequest = !!v.admin_upon_request;
 
   const payCardSub  = document.getElementById('payCardSub');
   const payCardBody = document.getElementById('payCardBody');
@@ -1805,7 +1814,23 @@ function renderInfoCards() {
     }
   }
 
-  if (isFlex) {
+  if (isUponRequest) {
+    payCardSub.textContent = 'No payment now — pay only after we confirm';
+    payCardBody.innerHTML = `
+      <div class="pay-row">
+        <span>Pay today</span>
+        <span><strong>€0.00</strong> <span class="pay-pill later">Nothing now</span></span>
+      </div>
+      <div class="pay-row">
+        <span>After confirmation</span>
+        <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">Secure link</span></span>
+      </div>
+    `;
+    cancelCardSub.textContent = 'No charge until we confirm your booking';
+    cancelCardBody.innerHTML = `
+      <p class="cancel-row">We'll review your request and send you a secure payment link within 24 hours. You pay only after confirmation — nothing is charged today.</p>
+    `;
+  } else if (isFlex) {
     // PAY LATER
     const deposit  = total * 0.10;
     const balance  = total - deposit;
@@ -1851,4 +1876,7 @@ function renderInfoCards() {
       <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">Please contact us if you are running late — vehicles unclaimed after the pick-up time may be reallocated.</p>
     `;
   }
+
+  const btn = document.getElementById('driverContinue');
+  if (btn) btn.textContent = v.admin_upon_request ? 'Confirm' : 'Confirm & Pay';
 }
