@@ -851,9 +851,12 @@
       const snap = b.protection_snapshot;
       if (snap) {
         // Parse features if it's still a string (backend double-encodes)
-        const feat = typeof snap.features === 'string'
-          ? JSON.parse(snap.features)
-          : (snap.features || {});
+        let feat = {};
+        if (snap.features && typeof snap.features === 'object') {
+          feat = snap.features;
+        } else if (typeof snap.features === 'string') {
+          try { feat = JSON.parse(snap.features); } catch { feat = {}; }
+        }
 
         const excessText = snap.excess === null || snap.excess === undefined
           ? 'Up to full vehicle value (unlimited)'
