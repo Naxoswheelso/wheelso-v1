@@ -1037,7 +1037,19 @@ const driverTotalSubEl = document.getElementById('driverTotalSub');
 const driverForm = document.getElementById('driverForm');
 
 function renderDriverTotal(fullTotal) {
-  if (currentProtection.rate === 'flex') {
+  const isUponRequest = !!currentProtection.vehicle?.admin_upon_request;
+  if (isUponRequest) {
+    // On-request: nothing is charged at request time; payment happens after
+    // confirmation via the secure link.
+    driverTotalLabelEl.textContent = 'Pay now';
+    driverTotalEl.textContent = '€0.00';
+    if (currentProtection.rate === 'flex') {
+      const deposit = fullTotal * 0.10;
+      driverTotalSubEl.textContent = `€${deposit.toFixed(2)} deposit after confirmation`;
+    } else {
+      driverTotalSubEl.textContent = `€${fullTotal.toFixed(2)} after confirmation`;
+    }
+  } else if (currentProtection.rate === 'flex') {
     const deposit = fullTotal * 0.10;
     driverTotalLabelEl.textContent = 'Pay now';
     driverTotalEl.textContent = `€${deposit.toFixed(2)}`;
