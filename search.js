@@ -1815,17 +1815,41 @@ function renderInfoCards() {
   }
 
   if (isUponRequest) {
-    payCardSub.textContent = 'No payment now — pay only after we confirm';
-    payCardBody.innerHTML = `
-      <div class="pay-row">
-        <span>Pay today</span>
-        <span><strong>€0.00</strong> <span class="pay-pill later">Nothing now</span></span>
-      </div>
-      <div class="pay-row">
-        <span>After confirmation</span>
-        <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">Secure link</span></span>
-      </div>
-    `;
+    if (isFlex) {
+      const deposit = total * 0.10;
+      const balance = total - deposit;
+      payCardSub.textContent = 'Nothing today — deposit on confirmation, balance at counter';
+      payCardBody.innerHTML = `
+        <div class="pay-row">
+          <span>Pay today</span>
+          <span><strong>€0.00</strong> <span class="pay-pill later">Nothing now</span></span>
+        </div>
+        <div class="pay-row">
+          <span>Deposit after confirmation</span>
+          <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill later">Secure link</span></span>
+        </div>
+        <div class="pay-row">
+          <span>Balance at counter</span>
+          <span><strong>€${balance.toFixed(2)}</strong> <span class="pay-pill later">At counter</span></span>
+        </div>
+        <div class="pay-row highlight">
+          <span>Total</span>
+          <span>€${total.toFixed(2)}</span>
+        </div>
+      `;
+    } else {
+      payCardSub.textContent = 'No payment now — pay only after we confirm';
+      payCardBody.innerHTML = `
+        <div class="pay-row">
+          <span>Pay today</span>
+          <span><strong>€0.00</strong> <span class="pay-pill later">Nothing now</span></span>
+        </div>
+        <div class="pay-row">
+          <span>After confirmation</span>
+          <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">Secure link</span></span>
+        </div>
+      `;
+    }
     cancelCardSub.textContent = 'No charge until we confirm your booking';
     cancelCardBody.innerHTML = `
       <p class="cancel-row">We'll review your request and send you a secure payment link within 24 hours. You pay only after confirmation — nothing is charged today.</p>
