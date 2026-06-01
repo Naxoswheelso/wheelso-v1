@@ -311,7 +311,7 @@ function escapeHtml(value) {
 
 function renderVehicleCard(v) {
   const isAuto = v.transmission === 'auto';
-  const totalForStay = (v.price * rentalDays).toFixed(2);
+  const totalForStay = (bestPrice(v) * rentalDays).toFixed(2);
   return `
     <article class="vehicle-card" data-category="${escapeHtml(v.category)}" data-code="${escapeHtml(v.code)}" data-transmission="${escapeHtml(v.transmission)}" data-price="${escapeHtml(v.price)}">
       <div class="vehicle-image">
@@ -336,7 +336,7 @@ function renderVehicleCard(v) {
         <div class="vehicle-footer">
           <div class="vehicle-price">
             <span class="price-from">From</span>
-            <span><span class="price-amount">€${escapeHtml(v.price)}</span><span class="price-period">/day</span></span>
+            <span><span class="price-amount">€${bestPrice(v).toFixed(2)}</span><span class="price-period">/day</span></span>
             <span class="price-total-stay">€${totalForStay} total for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'}</span>
             ${v.admin_upon_request ? '<span class="on-request-note">No payment now — pay only once we confirm</span>' : ''}
           </div>
