@@ -1864,9 +1864,50 @@ function initBookingWidget() {
         err.textContent = 'Maximum rental period is 28 days. Please choose shorter dates.';
         searchBtn.before(err);
       }
+      const promoCodeInput = document.getElementById('promoCode');
+      if (promoCodeInput && !document.getElementById('promoMsg')) {
+        const msg = document.createElement('p');
+        msg.id = 'promoMsg';
+        msg.hidden = true;
+        msg.style.cssText = 'font-size:13px;font-weight:600;margin:6px 0 0;';
+        promoCodeInput.after(msg);
+      }
     })();
 
-    bookingForm.addEventListener('submit', (e) => {
+    let promoCheck = { code: '', valid: true, message: '' };
+    function renderPromoMsg() {
+      const msg = document.getElementById('promoMsg');
+      if (!msg) return;
+      if (!promoCheck.message) { msg.hidden = true; return; }
+      msg.hidden = false;
+      msg.textContent = promoCheck.message;
+      msg.style.color = promoCheck.valid ? '#1a8a4a' : '#e03c3c';
+    }
+    async function validatePromo() {
+      const input = document.getElementById('promoCode');
+      const code = (input?.value || '').trim();
+      if (!code) { promoCheck = { code: '', valid: true, message: '' }; renderPromoMsg(); return true; }
+      if (promoCheck.code === code) { renderPromoMsg(); return promoCheck.valid; }
+      let days;
+      if (pickupDate && returnDate) days = Math.round((returnDate - pickupDate) / 86400000);
+      try {
+        const data = await apiPost('/api/promo/validate', days ? { code, days } : { code });
+        if (((document.getElementById('promoCode')?.value) || '').trim() !== code) return promoCheck.valid;
+        const hint = data.discount_type === 'percent' ? ` (−${data.discount_value}%)`
+                   : data.discount_type === 'fixed'   ? ` (−€${data.discount_value})` : '';
+        promoCheck = { code, valid: true, message: '✓ Promo code applied' + hint };
+      } catch (err) {
+        if (((document.getElementById('promoCode')?.value) || '').trim() !== code) return promoCheck.valid;
+        const m = err?.data?.error || 'Invalid or expired promo code';
+        promoCheck = { code, valid: false, message: '✗ ' + m };
+      }
+      renderPromoMsg();
+      return promoCheck.valid;
+    }
+
+    document.getElementById('promoCode')?.addEventListener('blur', validatePromo);
+
+    bookingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const locationEl = document.getElementById('pickupLocation');
@@ -1892,6 +1933,12 @@ function initBookingWidget() {
       if (rentalDays > 28) {
         if (datesError) datesError.hidden = false;
         datesError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const promoOk = await validatePromo();
+      if (!promoOk) {
+        document.getElementById('promoMsg')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
