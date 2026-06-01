@@ -195,6 +195,8 @@ document.getElementById('modifySearchBtn').addEventListener('click', () => {
     alert('Return date must be after pick-up date.');
     return;
   }
+  const _rentalDays = Math.round((new Date(to) - new Date(from)) / 86400000);
+  if (_rentalDays > 28) { alert('Maximum rental period is 28 days. Please choose shorter dates.'); return; }
 
   const params = new URLSearchParams({ pickup, from, to, fromTime, toTime, age });
   if (returnVal && returnVal !== pickup) params.set('return', returnVal);

@@ -1855,6 +1855,15 @@ function initBookingWidget() {
         err.textContent = 'Please select a pick-up location.';
         locationField.after(err);
       }
+      const searchBtn = bookingForm.querySelector('.btn-search');
+      if (searchBtn && !document.getElementById('datesError')) {
+        const err = document.createElement('p');
+        err.id = 'datesError';
+        err.hidden = true;
+        err.style.cssText = 'color:#e03c3c;font-size:13px;font-weight:600;margin:6px 0 0;padding:8px 12px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
+        err.textContent = 'Maximum rental period is 28 days. Please choose shorter dates.';
+        searchBtn.before(err);
+      }
     })();
 
     bookingForm.addEventListener('submit', (e) => {
@@ -1874,6 +1883,15 @@ function initBookingWidget() {
       // Validate dates
       if (!pickupDate || !returnDate) {
         openPopover();
+        return;
+      }
+
+      const datesError = document.getElementById('datesError');
+      if (datesError) datesError.hidden = true;
+      const rentalDays = Math.round((returnDate - pickupDate) / 86400000);
+      if (rentalDays > 28) {
+        if (datesError) datesError.hidden = false;
+        datesError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
