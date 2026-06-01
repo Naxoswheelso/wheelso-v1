@@ -1402,10 +1402,7 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
 
   const extrasArr = Object.entries(selectedExtras)
     .filter(([, qty]) => qty > 0)
-    .map(([id, qty]) => {
-      const e = EXTRAS.find(x => x.id === id);
-      return { code: id, name: e?.name || id, quantity: qty, price_per_day: e?.pricePerDay || 0, total: +((e?.pricePerDay || 0) * qty * days).toFixed(2) };
-    });
+    .map(([id, qty]) => ({ code: id, quantity: qty }));
 
   return {
     first_name: formObj.firstName || '',
