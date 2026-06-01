@@ -91,7 +91,11 @@ function renderError(title, body){
 }
 
 function renderBooking(b){
-  const hrs = hoursUntil(b.expires_at);
+  const hrs           = hoursUntil(b.expires_at);
+  const total         = Number(b.total_price);
+  const dueNow        = b.amount_due_now != null ? Number(b.amount_due_now) : total;
+  const balanceAtDesk = Math.max(0, total - dueNow);
+  const isFlexDeposit = b.rate_type === 'flex' && dueNow < total;
   document.getElementById('card').innerHTML = `
     <table>
       <tr><td>Reference</td><td style="font-family:monospace">${escapeHtml(b.reference)}</td></tr>
@@ -100,12 +104,29 @@ function renderBooking(b){
       <tr><td>Return</td><td>${escapeHtml(b.return_station)}<br><small>${fmtDate(b.return_datetime)}</small></td></tr>
       <tr><td>Days</td><td>${escapeHtml(b.rental_days)}</td></tr>
     </table>
+    ${isFlexDeposit ? `
+    <div class="total" style="flex-direction:column;align-items:stretch;gap:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="total-label">Pay now (deposit)</span>
+        <span class="total-amount">€${dueNow.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="total-label">Balance at counter</span>
+        <span style="font-size:15px;color:#374151;font-weight:600;">€${balanceAtDesk.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e5e7eb;padding-top:8px;">
+        <span class="total-label">Total</span>
+        <span style="font-size:14px;color:#6b7280;">€${total.toFixed(2)}</span>
+      </div>
+    </div>
+    ` : `
     <div class="total">
       <span class="total-label">Total to pay</span>
-      <span class="total-amount">€${Number(b.total_price).toFixed(2)}</span>
+      <span class="total-amount">€${total.toFixed(2)}</span>
     </div>
+    `}
     <div class="expiry">⏰ Payment link expires in <strong>${hrs} hours</strong></div>
-    <button class="btn" id="payBtn" onclick="initiate()">Complete Payment — €${Number(b.total_price).toFixed(2)}</button>
+    <button class="btn" id="payBtn" onclick="initiate()">Complete Payment — €${dueNow.toFixed(2)}</button>
     <p class="footer">Payment processed securely by Viva.com</p>`;
 }
 
