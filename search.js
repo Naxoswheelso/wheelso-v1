@@ -54,6 +54,7 @@ const searchCtx = {
   age: urlParams.get('age') || '26-69',
   promo: urlParams.get('promo') || ''
 };
+let promoState = { applied: false, discountAmount: 0, code: null };
 
 // Compute days
 function computeDays() {
@@ -1063,8 +1064,39 @@ function renderDriverTotal(fullTotal) {
   }
 }
 
-function openDriverPage() {
+// ─── PROMO DISCOUNT HELPERS ───
+function computePreDiscountTotal(afterHoursFee = 0) {
+  const v = currentProtection.vehicle;
+  if (!v) return 0;
+  const days = currentProtection.days;
+  const vehicleDaily = currentProtection.rate === 'flex' ? v.price : bestPrice(v);
+  const pkg = PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected);
+  const protectionDaily = pkg ? pkg.pricePerDay : 0;
+  const raw = (vehicleDaily + protectionDaily) * days + calculateExtrasTotal() + afterHoursFee + (isOneWay ? oneWayFeeGross : 0);
+  return Math.round(raw * 100) / 100;
+}
+
+async function ensurePromoChecked(afterHoursFee = 0) {
+  promoState = { applied: false, discountAmount: 0, code: null };
+  const code = (searchCtx.promo || '').trim();
+  if (!code) return;
+  const preDiscount = computePreDiscountTotal(afterHoursFee);
+  try {
+    const r = await apiPost('/api/promo/validate', { code, days: currentProtection.days, total: preDiscount });
+    let d = Number(r.discount_amount) || 0;
+    d = Math.min(d, preDiscount);
+    promoState = { applied: d > 0, discountAmount: d, code: r.code || code };
+  } catch (e) { /* invalid/expired/min_days — leave not-applied */ }
+}
+
+function getPromoDiscount() {
+  return promoState.applied ? promoState.discountAmount : 0;
+}
+
+async function openDriverPage() {
   if (!driverPage) return;
+  const timing = checkPickupTiming();
+  await ensurePromoChecked(timing.afterHoursFee);
   populateDriverSummary();
   if (extrasPage) extrasPage.hidden = true;
   driverPage.hidden = false;
@@ -1072,7 +1104,6 @@ function openDriverPage() {
   driverPage.scrollTop = 0;
 
   // Show after-hours warning if applicable
-  const timing = checkPickupTiming();
   showAfterHoursWarning(timing.warning);
   showOneWayBanner();
 
@@ -1187,7 +1218,7 @@ function populateDriverSummary() {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  renderDriverTotal(baseTotal + extrasCost + oneWayFeeGross);
+  renderDriverTotal(baseTotal + extrasCost + oneWayFeeGross - getPromoDiscount());
 }
 
 function updateDriverTotal(afterHoursFee = 0) {
@@ -1199,7 +1230,7 @@ function updateDriverTotal(afterHoursFee = 0) {
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  renderDriverTotal(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross);
+  renderDriverTotal(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross - getPromoDiscount());
 }
 
 if (driverBack) driverBack.addEventListener('click', closeDriverPage);
@@ -1400,7 +1431,7 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
   const protectionPriceTotal = +(protectionDaily * days).toFixed(2);
   const extrasPriceTotal = +calculateExtrasTotal().toFixed(2);
   const owFee = isOneWay ? oneWayFeeGross : 0;
-  const totalPrice = +(carPriceTotal + protectionPriceTotal + extrasPriceTotal + afterHoursFee + owFee).toFixed(2);
+  const totalPrice = +(carPriceTotal + protectionPriceTotal + extrasPriceTotal + afterHoursFee + owFee - getPromoDiscount()).toFixed(2);
 
   const extrasArr = Object.entries(selectedExtras)
     .filter(([, qty]) => qty > 0)
@@ -1422,6 +1453,7 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     after_hours_fee: afterHoursFee,
     one_way_fee: owFee,
     total_price: totalPrice,
+    promo_discount_amount: getPromoDiscount() || null,
     promo_code: searchCtx.promo || null,
     driver_age: searchCtx.age || null,
     flight_ferry: formObj.flight || null,
@@ -1728,10 +1760,18 @@ function buildBreakdown() {
     }
   }
 
+  const promoDiscount = getPromoDiscount();
+  if (promoDiscount > 0) {
+    html += `<div class="breakdown-divider"></div>`;
+    html += `<div class="breakdown-line">
+      <span>Promo ${escapeHtml(promoState.code || '')}</span>
+      <strong>−€${promoDiscount.toFixed(2)}</strong>
+    </div>`;
+  }
   breakdownContent.innerHTML = html;
   const baseTotal = (vehicleDaily + protectionDaily) * days;
   const extrasCost = calculateExtrasTotal();
-  breakdownTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross).toFixed(2)}`;
+  breakdownTotalEl.textContent = `€${(baseTotal + extrasCost + afterHoursFee + oneWayFeeGross - promoDiscount).toFixed(2)}`;
 }
 
 function openBreakdown() {
@@ -1798,7 +1838,7 @@ function renderInfoCards() {
   const days = currentProtection.days;
   const vehicleDaily = currentProtection.rate === 'flex' ? v.price : bestPrice(v);
   const protectionDaily = pkg ? pkg.pricePerDay : 0;
-  const total = ((vehicleDaily + protectionDaily) * days) + calculateExtrasTotal();
+  const total = Math.max(0, ((vehicleDaily + protectionDaily) * days) + calculateExtrasTotal() - getPromoDiscount());
   const isFlex = currentProtection.rate === 'flex';
   const isUponRequest = !!v.admin_upon_request;
 
