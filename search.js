@@ -1376,6 +1376,51 @@ function showThankYouPopup(ref, email, total) { // TODO: remove unused 'total' p
   });
 }
 
+// Confirmed-free booking (100% promo): nothing owed, booking already confirmed.
+function showFreeConfirmedPopup(ref, email) {
+  // Remove existing
+  document.getElementById('thankYouOverlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'thankYouOverlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(9,61,94,0.7);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  `;
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:40px 36px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
+      <div style="font-size:52px;margin-bottom:16px;">✅</div>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">Booking confirmed</h2>
+      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">Your promo code covers the full amount — there's nothing to pay.</p>
+      <div style="background:#f0f7ff;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">Your booking reference</p>
+        <p style="font-size:22px;font-weight:800;color:#093D5E;letter-spacing:0.05em;margin:0;">${escapeHtml(ref)}</p>
+      </div>
+      <p style="font-size:14px;color:#64748b;margin:0 0 28px;line-height:1.5;">
+        We've sent your confirmation and voucher to<br>
+        <strong style="color:#093D5E;">${escapeHtml(email)}</strong>
+      </p>
+      <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">No payment is required. See you on the road!</p>
+      <button id="thankYouClose" style="width:100%;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
+        Back to Home
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('thankYouClose').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  // Click outside → also go home
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) window.location.href = 'index.html';
+  });
+}
+
 if (driverContinueBtn) {
   driverContinueBtn.addEventListener('click', async () => {
     if (!validateDriverForm()) return;
@@ -1406,6 +1451,12 @@ if (driverContinueBtn) {
         return;
       }
       const ref = result.reference || 'WLS-???';
+      // Free (100% promo) booking: backend confirmed it instantly (payment_url=null,
+      // free=true). Show "confirmed, nothing to pay" — NOT the upon-request copy.
+      if (result && result.free) {
+        showFreeConfirmedPopup(ref, obj.email);
+        return;
+      }
       showThankYouPopup(ref, obj.email, driverTotalEl.textContent);
     } catch (err) {
       console.error('[Wheelso] Booking failed:', err);
