@@ -1250,8 +1250,8 @@ function checkPickupTiming() {
   const now = new Date();
   const pickupDT = new Date(`${searchCtx.from}T${searchCtx.fromTime}:00`);
   const returnDT = new Date(`${searchCtx.to}T${searchCtx.toTime}:00`);
-  const pickupHour = pickupDT.getHours();
-  const returnHour = returnDT.getHours();
+  const pickupMin = pickupDT.getHours() * 60 + pickupDT.getMinutes();
+  const returnMin = returnDT.getHours() * 60 + returnDT.getMinutes();
 
   // Lead time check: pickup must be at least 2h from now
   const minPickup = new Date(now.getTime() + LEAD_TIME_HOURS * 60 * 60 * 1000);
@@ -1277,8 +1277,8 @@ function checkPickupTiming() {
   }
 
   // After-hours fee: pickup or return outside 09:00–21:00
-  const pickupOutside = pickupHour < BUSINESS_OPEN || pickupHour >= BUSINESS_CLOSE;
-  const returnOutside = returnHour < BUSINESS_OPEN || returnHour >= BUSINESS_CLOSE;
+  const pickupOutside = pickupMin < BUSINESS_OPEN * 60 || pickupMin > BUSINESS_CLOSE * 60;
+  const returnOutside = returnMin < BUSINESS_OPEN * 60 || returnMin > BUSINESS_CLOSE * 60;
   const feeCount = (pickupOutside ? 1 : 0) + (returnOutside ? 1 : 0);
   const afterHoursFee = feeCount * AFTER_HOURS_FEE;
 
