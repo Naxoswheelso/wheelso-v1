@@ -635,12 +635,12 @@ const STATION_CONTACTS = {
 };
 
 function getStationContact(stationName) {
-  if (!stationName) return { phone: null, whatsapp: null, email: 'info@wheelso.gr' };
+  if (!stationName) return { phone: null, whatsapp: null, email: 'bookings@wheelso.gr' };
   const lower = stationName.toLowerCase();
   for (const [key, contact] of Object.entries(STATION_CONTACTS)) {
     if (lower.includes(key)) return contact;
   }
-  return { phone: null, whatsapp: null, email: 'info@wheelso.gr' };
+  return { phone: null, whatsapp: null, email: 'bookings@wheelso.gr' };
 }
 
 function formatDatetime(dt) {
