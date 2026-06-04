@@ -1968,6 +1968,20 @@ function initBookingWidget() {
       }, 100);
     });
 
+    // bfcache fix: returning via browser back/forward restores the page with the
+    // search button frozen on "Searching..." + disabled. Reset it so the user can
+    // search again.
+    window.addEventListener('pageshow', (e) => {
+      if (!e.persisted) return;
+      const btn = bookingForm.querySelector('.btn-search');
+      if (!btn) return;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.innerHTML = `
+        <span>Search cars</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+    });
+
     // Hide location error when user selects
     document.getElementById('pickupLocation')?.addEventListener('change', () => {
       const err = document.getElementById('locationError');
