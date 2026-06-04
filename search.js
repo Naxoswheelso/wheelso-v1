@@ -1421,11 +1421,98 @@ function showFreeConfirmedPopup(ref, email) {
   });
 }
 
+function showOnRequestConfirmPopup(onProceed) {
+  document.getElementById('onRequestPopup')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'onRequestPopup';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(9,61,94,0.7);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  `;
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
+      <div style="font-size:44px;margin-bottom:12px;">📋</div>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:22px;font-weight:800;color:#093D5E;margin:0 0 6px;letter-spacing:-0.02em;">How on-request bookings work</h2>
+      <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.5;">No payment is made now. Here's what happens next:</p>
+      <div style="text-align:left;background:#f0f7ff;border-radius:12px;padding:18px 20px;margin-bottom:24px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+          <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">1</div>
+          <div>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">Submit your request</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">No payment now — your card is not charged.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+          <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">2</div>
+          <div>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">We review &amp; email you</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">We'll confirm availability and respond within 12 hours.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">3</div>
+          <div>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">Secure payment link</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">Pay only after we confirm your booking.</p>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button id="onRequestCancel" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
+          Cancel
+        </button>
+        <button id="onRequestSubmit" style="flex:2;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
+          Submit Request →
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const close = () => document.getElementById('onRequestPopup')?.remove();
+  document.getElementById('onRequestCancel').addEventListener('click', close);
+  document.getElementById('onRequestSubmit').addEventListener('click', () => { close(); onProceed(); });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+}
+
+async function submitBooking(obj, timing) {
+  const originalText = driverContinueBtn.textContent;
+  driverContinueBtn.disabled = true;
+  driverContinueBtn.textContent = 'Processing…';
+
+  try {
+    const payload = buildBookingPayload(obj, timing.afterHoursFee);
+    const result = await apiPost('/api/bookings', payload);
+    // Direct (instant) bookings: backend returns payment_url for Viva flow.
+    // Redirect to payment.html where customer reviews booking + proceeds to Viva.
+    if (result && result.payment_url) {
+      window.location.href = result.payment_url;
+      return;
+    }
+    const ref = result.reference || 'WLS-???';
+    // Free (100% promo) booking: confirmed instantly, nothing to pay.
+    if (result && result.free) {
+      showFreeConfirmedPopup(ref, obj.email);
+      return;
+    }
+    // Upon-request: show "Request received" popup.
+    showThankYouPopup(ref, obj.email, driverTotalEl.textContent);
+  } catch (err) {
+    console.error('[Wheelso] Booking failed:', err);
+    alert(`Sorry, we couldn't complete your booking:\n\n${err.message}\n\nPlease try again or contact us.`);
+    driverContinueBtn.disabled = false;
+    driverContinueBtn.textContent = originalText;
+  }
+}
+
 if (driverContinueBtn) {
   driverContinueBtn.addEventListener('click', async () => {
     if (!validateDriverForm()) return;
 
-    // Lead time / after-hours check
     const timing = checkPickupTiming();
     if (!timing.ok) {
       alert(timing.warning);
@@ -1434,36 +1521,13 @@ if (driverContinueBtn) {
 
     const data = new FormData(driverForm);
     const obj = Object.fromEntries(data);
+    const isUponRequest = !!currentProtection.vehicle?.admin_upon_request;
 
-    const originalText = driverContinueBtn.textContent;
-    driverContinueBtn.disabled = true;
-    driverContinueBtn.textContent = 'Processing…';
-
-    try {
-      const payload = buildBookingPayload(obj, timing.afterHoursFee);
-      const result = await apiPost('/api/bookings', payload);
-      // Direct (instant) bookings: backend returns payment_url for Viva flow.
-      // Redirect to payment.html where customer reviews booking + proceeds to Viva.
-      // Upon-request bookings have payment_url=null, so the existing showThankYouPopup
-      // flow runs unchanged.
-      if (result && result.payment_url) {
-        window.location.href = result.payment_url;
-        return;
-      }
-      const ref = result.reference || 'WLS-???';
-      // Free (100% promo) booking: backend confirmed it instantly (payment_url=null,
-      // free=true). Show "confirmed, nothing to pay" — NOT the upon-request copy.
-      if (result && result.free) {
-        showFreeConfirmedPopup(ref, obj.email);
-        return;
-      }
-      showThankYouPopup(ref, obj.email, driverTotalEl.textContent);
-    } catch (err) {
-      console.error('[Wheelso] Booking failed:', err);
-      alert(`Sorry, we couldn't complete your booking:\n\n${err.message}\n\nPlease try again or contact us.`);
-      driverContinueBtn.disabled = false;
-      driverContinueBtn.textContent = originalText;
+    if (isUponRequest) {
+      showOnRequestConfirmPopup(() => submitBooking(obj, timing));
+      return;
     }
+    submitBooking(obj, timing);
   });
 }
 
@@ -2000,5 +2064,5 @@ function renderInfoCards() {
   }
 
   const btn = document.getElementById('driverContinue');
-  if (btn) btn.textContent = v.admin_upon_request ? 'Confirm' : 'Confirm & Pay';
+  if (btn) btn.textContent = v.admin_upon_request ? 'Submit Request →' : 'Confirm & Pay';
 }
