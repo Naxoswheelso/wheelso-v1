@@ -49,19 +49,31 @@
   </div>
 </div>
 <script>
-(function(){
-  let data = {};
-  try { data = JSON.parse(sessionStorage.getItem('wls_retry') || '{}'); } catch(e){}
+const API_BASE = 'https://wheelso-backend-production.up.railway.app/api/payment';
+(async function(){
   const retryBtn  = document.getElementById('retryBtn');
   const manageBtn = document.getElementById('manageBtn');
-  if (data.token) {
-    retryBtn.href = 'payment.html?token=' + encodeURIComponent(data.token);
+  function showRetry(token, ref){
+    retryBtn.href = 'payment.html?token=' + encodeURIComponent(token);
     retryBtn.style.display = 'block';
-    if (data.ref) manageBtn.href = 'my-booking.html?ref=' + encodeURIComponent(data.ref);
-  } else {
-    retryBtn.style.display = 'none';
-    manageBtn.className = 'btn';
+    if (ref) manageBtn.href = 'my-booking.html?ref=' + encodeURIComponent(ref);
   }
+  // 1) Reliable: map the Viva orderCode (?s=) back to this booking server-side.
+  const order = new URLSearchParams(window.location.search).get('s');
+  if (order) {
+    try {
+      const r = await fetch(`${API_BASE}/by-order/${encodeURIComponent(order)}`);
+      const d = await r.json();
+      if (r.ok && d.token) { showRetry(d.token, d.reference); return; }
+    } catch(e){}
+  }
+  // 2) Fallback: sessionStorage (same-tab, if it survived the round-trip).
+  let s = {};
+  try { s = JSON.parse(sessionStorage.getItem('wls_retry') || '{}'); } catch(e){}
+  if (s.token) { showRetry(s.token, s.ref); return; }
+  // 3) Nothing to retry → "Manage my booking" becomes primary.
+  retryBtn.style.display = 'none';
+  manageBtn.className = 'btn';
 })();
 </script>
 </body>
