@@ -8,7 +8,7 @@
     # (blocks externally-loaded malicious scripts), clickjacking protection, data
     # exfiltration protection, and form-action lockdown. Tightening to remove
     # 'unsafe-inline' is tracked as post-launch follow-up.
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn-cookieyes.com https://*.cookieyes.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cdn-cookieyes.com https://wheelso-backend-production.up.railway.app https://*.cookieyes.com; frame-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn-cookieyes.com https://*.cookieyes.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cdn-cookieyes.com https://wheelso-backend-production.up.railway.app https://*.cookieyes.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; frame-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
 
     # ---- Clickjacking & MIME sniffing ----
     X-Frame-Options = "DENY"
