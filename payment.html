@@ -91,6 +91,7 @@ function renderError(title, body){
 }
 
 function renderBooking(b){
+  window.__wlsRef = b.reference || '';
   const hrs           = hoursUntil(b.expires_at);
   const total         = Number(b.total_price);
   const dueNow        = b.amount_due_now != null ? Number(b.amount_due_now) : total;
@@ -163,6 +164,8 @@ async function initiate(){
       renderError('Payment Initialization Failed', d.error || 'Could not start payment. Please try again.');
       return;
     }
+    // Remember this booking so payment-fail.html can offer a 1-click retry.
+    try { sessionStorage.setItem('wls_retry', JSON.stringify({ token, ref: (window.__wlsRef||'') })); } catch(e){}
     window.location.href = d.checkoutUrl;
   }catch(e){
     btn.disabled = false;
