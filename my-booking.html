@@ -769,6 +769,29 @@ function renderPaymentStatus(b) {
     return;
   }
 
+  // Pending → payment not completed; offer retry if the payment link is still valid (48h window).
+  if (b.status === 'pending') {
+    const token = b.payment_link_token;
+    const exp   = b.payment_link_expires_at ? new Date(b.payment_link_expires_at) : null;
+    const valid = token && exp && !isNaN(exp.getTime()) && exp.getTime() > Date.now();
+    const dueNow = Number(b.amount_due_now ?? total);
+    if (valid) {
+      card.innerHTML = `
+        <div class="mb-card-title">Payment</div>
+        <div class="mb-pay-row"><span>Payment not completed</span><span class="mb-pay-badge mb-pay-due">Pending</span><span><strong>${formatPrice(dueNow)}</strong></span></div>
+        <p class="mb-cancel-info" style="margin-top:8px;">Your booking is reserved but not yet confirmed. Complete the payment to secure it.</p>
+        <a class="mb-btn-cancel" style="background:#CFDD28;color:#093D5E;text-decoration:none;display:inline-block;text-align:center;" href="payment.html?token=${encodeURIComponent(token)}">Complete payment — ${formatPrice(dueNow)}</a>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="mb-card-title">Payment</div>
+        <div class="mb-pay-row"><span>Payment not completed</span><span class="mb-pay-badge mb-pay-due">Pending</span></div>
+        <p class="mb-cancel-info" style="margin-top:8px;">The payment window for this booking has expired. Please contact us below to complete your reservation.</p>
+      `;
+    }
+    return;
+  }
+
   if (isFlex) {
     const deposit = (total * 0.10);
     const balance = total - deposit;
@@ -799,6 +822,11 @@ function renderCancelSection(b) {
   }
   if (b.status === 'completed') {
     card.innerHTML = `<div class="mb-no-cancel-notice">This rental has been completed. For any issue, please contact us below.</div>`;
+    return;
+  }
+  if (b.status === 'pending') {
+    // Not paid yet → no refund-based cancellation; the reservation auto-releases if unpaid.
+    card.innerHTML = `<div class="mb-no-cancel-notice">No payment has been taken yet. If you don't complete the payment, this reservation is released automatically after 48 hours — there is nothing to cancel.</div>`;
     return;
   }
 
