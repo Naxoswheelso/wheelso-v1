@@ -807,6 +807,35 @@
     </div>
   </nav>
 
+  <script>
+    // ---- Language toggle (EN home → navigate to /el/ on GR) ----
+    // Runs BEFORE script.js so applyLang('en') writes wh-lang='en' first;
+    // otherwise a leftover 'el' from a prior /el/ visit would render the
+    // English home with Greek footer fragments and a wrongly-active GR button.
+    (function () {
+      const STORAGE_KEY = 'wh-lang';
+      const validLangs = ['en', 'el'];
+      function applyLang(lang) {
+        if (!validLangs.includes(lang)) lang = 'en';
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-lang-block]').forEach(el => {
+          el.hidden = (el.getAttribute('data-lang-block') !== lang);
+        });
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+        });
+        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+      }
+      applyLang('en');
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.getAttribute('data-lang') === 'el') {
+            window.location.href = '/el/';
+          }
+        });
+      });
+    })();
+  </script>
   <script src="script.js"></script>
   <script>
     // Burger menu
