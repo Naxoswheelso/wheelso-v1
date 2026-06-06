@@ -2,46 +2,89 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
+  <!-- ===== EN pages ===== -->
   <url>
     <loc>https://wheelso.gr/</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-06-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/" />
   </url>
 
   <url>
     <loc>https://wheelso.gr/car-rental/naxos/</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-06-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/naxos/" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/car-rental/naxos/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/naxos/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/naxos/" />
   </url>
 
   <url>
     <loc>https://wheelso.gr/car-rental/paros/</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-06-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/paros/" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/car-rental/paros/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/paros/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/paros/" />
   </url>
 
   <url>
     <loc>https://wheelso.gr/car-rental/mykonos/</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-06-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/mykonos/" />
-    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/car-rental/mykonos/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/mykonos/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/mykonos/" />
   </url>
 
+  <!-- ===== EL pages ===== -->
+  <url>
+    <loc>https://wheelso.gr/el/</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/" />
+  </url>
+
+  <url>
+    <loc>https://wheelso.gr/el/car-rental/naxos/</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/naxos/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/naxos/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/naxos/" />
+  </url>
+
+  <url>
+    <loc>https://wheelso.gr/el/car-rental/paros/</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/paros/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/paros/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/paros/" />
+  </url>
+
+  <url>
+    <loc>https://wheelso.gr/el/car-rental/mykonos/</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/mykonos/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/mykonos/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/mykonos/" />
+  </url>
+
+  <!-- ===== Legal (single URL, bilingual) ===== -->
   <url>
     <loc>https://wheelso.gr/terms.html</loc>
     <lastmod>2026-05-27</lastmod>

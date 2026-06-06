@@ -5,6 +5,12 @@ Static site on **Netlify**. Staging: `https://soft-florentine-6429c0.netlify.app
 - `API_BASE` hardcoded in `search.js:16` and `script.js` → `https://wheelso-backend-production.up.railway.app`.
 - `apiGet`/`apiPost` helpers: **`apiPost` throws on non-2xx; `err.data` = response body**.
 
+## Second brain (knowledge tracking)
+Knowledge, αποφάσεις & ιστορικό αυτού του project ζουν στο **second brain**:
+`C:\Users\bogda\Documents\GitHub\Yorgos_brain\wiki\projects\wheelso-gr.md` (ιστορικό: `wiki\sources\wheelso-handoffs.md`).
+Όταν παίρνεται **σημαντική απόφαση** (UX, pricing, security, launch), κατέγραψέ την εκεί στο
+*Decisions log*. Ο κώδικας μένει εδώ· το brain κρατά μόνο τη γνώση.
+
 ## Working method (always)
 - Use **Plan mode** for any change touching logic or more than one file: research read-only, present a plan, wait for approval, then edit.
 - Flow: recon (read-only) → plan → **show `git diff` before committing** → **atomic commit per logical change** → push. Stage only the intended files.

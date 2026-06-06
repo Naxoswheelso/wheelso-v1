@@ -17,7 +17,7 @@
 
   <!-- Language alternates -->
   <link rel="alternate" hreflang="en" href="https://wheelso.gr/car-rental/mykonos/" />
-  <link rel="alternate" hreflang="el" href="https://wheelso.gr/car-rental/mykonos/" />
+  <link rel="alternate" hreflang="el" href="https://wheelso.gr/el/car-rental/mykonos/" />
   <link rel="alternate" hreflang="x-default" href="https://wheelso.gr/car-rental/mykonos/" />
 
   <!-- Favicon & app icons -->
@@ -752,11 +752,13 @@
         });
         try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
       }
-      let initial = 'en';
-      try { const saved = localStorage.getItem(STORAGE_KEY); if (saved && validLangs.includes(saved)) initial = saved; } catch (e) {}
-      applyLang(initial);
+      applyLang('en');
       document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+        btn.addEventListener('click', () => {
+          if (btn.getAttribute('data-lang') === 'el') {
+            window.location.href = '/el/car-rental/mykonos/';
+          }
+        });
       });
     })();
 
