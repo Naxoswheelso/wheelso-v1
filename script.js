@@ -56,8 +56,8 @@ function buildStationOptions(stations, includeDefault = true) {
   });
 
   let html = includeDefault
-    ? '<option value="" disabled selected>Select location...</option>'
-    : '<option value="">Same as pick-up</option>';
+    ? `<option value="" disabled selected>${typeof t === 'function' ? t('selectLocation') : 'Select location...'}</option>`
+    : `<option value="">${typeof t === 'function' ? t('sameAsPickup') : 'Same as pick-up'}</option>`;
 
   Object.entries(regions).forEach(([region, stns]) => {
     html += `<optgroup label="${escapeHtml(region)}">`;
@@ -1947,7 +1947,7 @@ function initBookingWidget() {
 
       const btn = bookingForm.querySelector('.btn-search');
       const originalContent = btn.innerHTML;
-      btn.innerHTML = '<span>Searching...</span>';
+      btn.innerHTML = `<span>${typeof t === 'function' ? t('searching') : 'Searching...'}</span>`;
       btn.style.opacity = '0.7';
       btn.disabled = true;
 
@@ -1964,7 +1964,9 @@ function initBookingWidget() {
       if (obj.promoCode) params.set('promo', obj.promoCode);
 
       setTimeout(() => {
-        window.location.href = `/search.html?${params.toString()}`;
+        // Lang-aware: a Greek page (/el/…) sends the funnel to /el/search.html
+        const searchBase = document.documentElement.lang === 'el' ? '/el/search.html' : '/search.html';
+        window.location.href = `${searchBase}?${params.toString()}`;
       }, 100);
     });
 
@@ -1978,7 +1980,7 @@ function initBookingWidget() {
       btn.disabled = false;
       btn.style.opacity = '1';
       btn.innerHTML = `
-        <span>Search cars</span>
+        <span>${typeof t === 'function' ? t('searchCars') : 'Search cars'}</span>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
     });
 

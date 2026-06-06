@@ -126,7 +126,7 @@ document.getElementById('summaryAge').textContent = searchCtx.age;
 
 // Subtitle
 const subtitleEl = document.getElementById('resultsSubtitle');
-if (subtitleEl) subtitleEl.textContent = `for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'} in ${LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece'}`;
+if (subtitleEl) subtitleEl.textContent = t('resultsSubtitleFor', { n: rentalDays, unit: rentalDays === 1 ? t('day') : t('days'), place: LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece' });
 
 // ─── MODIFY PANEL ───
 const modifyPanel = document.getElementById('modifyPanel');
@@ -318,8 +318,8 @@ function renderVehicleCard(v) {
   return `
     <article class="vehicle-card" data-category="${escapeHtml(v.category)}" data-code="${escapeHtml(v.code)}" data-transmission="${escapeHtml(v.transmission)}" data-price="${escapeHtml(v.price)}">
       <div class="vehicle-image">
-        ${isAuto ? '<span class="vehicle-badge transmission-auto">Auto</span>' : '<span class="vehicle-badge">Manual</span>'}
-        ${v.admin_upon_request ? '<span class="vehicle-badge on-request">On request</span>' : ''}
+        ${isAuto ? `<span class="vehicle-badge transmission-auto">${t('auto')}</span>` : `<span class="vehicle-badge">${t('manual')}</span>`}
+        ${v.admin_upon_request ? `<span class="vehicle-badge on-request">${t('onRequest')}</span>` : ''}
         ${v.image_url
           ? `<img src="${escapeHtml(carImageSrc(v.image_url))}" alt="${escapeHtml(v.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
           : CAR_SVGS[v.category]}
@@ -334,17 +334,17 @@ function renderVehicleCard(v) {
           <div class="spec">${ICON_SEATS}<span class="spec-value">${escapeHtml(v.seats)}</span></div>
           <div class="spec">${ICON_BAGS}<span class="spec-value">${escapeHtml(v.bags)}</span></div>
           <div class="spec">${ICON_DOORS}<span class="spec-value">${escapeHtml(v.doors)}</span></div>
-          <div class="spec">${isAuto ? ICON_TRANS_AUTO : ICON_TRANS_MAN}<span class="spec-value">${isAuto ? 'Auto' : 'Man'}</span></div>
+          <div class="spec">${isAuto ? ICON_TRANS_AUTO : ICON_TRANS_MAN}<span class="spec-value">${isAuto ? t('autoSpec') : t('manSpec')}</span></div>
         </div>
         <div class="vehicle-footer">
           <div class="vehicle-price">
-            <span class="price-from">From</span>
-            <span><span class="price-amount">€${bestPrice(v).toFixed(2)}</span><span class="price-period">/day</span></span>
-            <span class="price-total-stay">€${totalForStay} total for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'}</span>
-            ${v.admin_upon_request ? '<span class="on-request-note">No payment now — pay only once we confirm</span>' : ''}
+            <span class="price-from">${t('from')}</span>
+            <span><span class="price-amount">€${bestPrice(v).toFixed(2)}</span><span class="price-period">${t('perDay')}</span></span>
+            <span class="price-total-stay">€${totalForStay} ${t('totalForDays', { n: rentalDays, unit: rentalDays === 1 ? t('day') : t('days') })}</span>
+            ${v.admin_upon_request ? `<span class="on-request-note">${t('noPaymentNow')}</span>` : ''}
           </div>
           <span class="vehicle-cta">
-            Select
+            ${t('select')}
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </span>
         </div>
@@ -415,8 +415,8 @@ function renderResults() {
         <div style="font-size:48px;margin-bottom:16px;">🕐</div>
         <h3 style="font-size:20px;font-weight:700;color:#093D5E;margin:0 0 10px;">${
           timing.warning.includes('closed')
-            ? "We're currently closed"
-            : 'Too soon to book'
+            ? t('closed_title')
+            : t('tooSoon_title')
         }</h3>
         <p style="color:#64748b;font-size:15px;line-height:1.5;max-width:400px;margin:0 auto;">${timing.warning.replace('⚠️ ', '')}</p>
       </div>`;
@@ -430,9 +430,9 @@ function renderResults() {
     resultsEmpty.innerHTML = `
       <div style="text-align:center;padding:60px 20px;">
         <div style="font-size:56px;margin-bottom:20px;">🚗</div>
-        <h3 style="font-size:22px;font-weight:700;color:#093D5E;margin:0 0 12px;font-family:'Bricolage Grotesque',sans-serif;">No cars available</h3>
+        <h3 style="font-size:22px;font-weight:700;color:#093D5E;margin:0 0 12px;font-family:'Bricolage Grotesque',sans-serif;">${t('empty_noCars')}</h3>
         <p style="color:#64748b;font-size:15px;line-height:1.6;max-width:440px;margin:0 auto;">
-          Unfortunately, there are no cars available for the selected location and dates. Please try different dates or another location.
+          ${t('empty_noCarsBody')}
         </p>
       </div>`;
     resultsEmpty.hidden = false;
@@ -453,7 +453,7 @@ function renderCategoryChips() {
   // Keep "All" chip, rebuild the rest
   container.innerHTML = `
     <button class="filter-chip ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" role="tab" aria-selected="${currentFilter === 'all'}">
-      All <span class="chip-count" data-count="all"></span>
+      ${t('filter_all')} <span class="chip-count" data-count="all"></span>
     </button>
     ${Object.entries(CATEGORY_LABELS).map(([code, label]) => `
       <button class="filter-chip ${currentFilter === code ? 'active' : ''}" data-filter="${escapeHtml(code)}" role="tab" aria-selected="${currentFilter === code}">
@@ -532,8 +532,8 @@ function openVehicleModal(v) {
     const bookingOpt = vehicleModal.querySelector('input[name="bookingOption"]:checked')?.value;
     const daily = bookingOpt === 'flex' ? v.price : bestPrice(v);
     const total = (daily * rentalDays).toFixed(2);
-    document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>/day</span>`;
-    document.getElementById('modalPriceTotal').textContent = `€${total} total for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'}`;
+    document.getElementById('modalPriceDay').innerHTML = `<strong>€${daily.toFixed(2)}</strong> <span>${t('perDay')}</span>`;
+    document.getElementById('modalPriceTotal').textContent = `€${total} ${t('totalForDays', { n: rentalDays, unit: rentalDays === 1 ? t('day') : t('days') })}`;
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
@@ -602,10 +602,10 @@ document.addEventListener('keydown', (e) => {
 
 // Map backend feature keys → display labels
 const FEATURE_LABELS = {
-  ldw:        'Loss Damage Waiver (including theft protection)',
-  tire:       'Tire Protection',
-  windshield: 'Windshield Protection',
-  roadside:   'Roadside Protection'
+  ldw:        t('feat_ldw'),
+  tire:       t('feat_tire'),
+  windshield: t('feat_windshield'),
+  roadside:   t('feat_roadside')
 };
 const FEATURE_ORDER = ['ldw', 'tire', 'windshield', 'roadside'];
 
@@ -625,9 +625,9 @@ function normalizeFeatures(features) {
 }
 
 const DEFAULT_PROTECTION_PACKAGES = [
-  { id: 'no_extra', name: 'No Protection',    coverage: 1, eyebrow: 'Included in rate', tag: 'TPL', tagTooltip: 'Third Party Liability — covers damage to other vehicles or people, but not your rental car.', riskLabel: 'If damage occurs', riskValue: 'You cover full repair cost', riskClass: 'bad',  pricePerDay: 0,    features: normalizeFeatures({ tpl:true,  ldw:false, tire:false, roadside:false }) },
-  { id: 'basic',    name: 'Basic Protection', coverage: 2, eyebrow: 'Reduced excess',   tag: 'CDW', tagTooltip: 'Collision Damage Waiver — your liability is capped at €800. Beyond that, we cover the damage.', riskLabel: 'If damage occurs', riskValue: 'You pay up to €800',         riskClass: 'mid',  pricePerDay: 8,    recommended: false, features: normalizeFeatures({ tpl:true,  ldw:true,  tire:false, roadside:false }) },
-  { id: 'full',     name: 'Full Protection',  coverage: 3, eyebrow: 'Zero excess',      tag: 'FDW', tagTooltip: 'Full Damage Waiver — zero excess. We cover all accidental damage, you pay nothing.',           riskLabel: 'If damage occurs', riskValue: 'You pay nothing',           riskClass: 'good', pricePerDay: 15,   recommended: true,  footnote: 'Card on file for excluded events only — see terms.', features: normalizeFeatures({ tpl:true, ldw:true, tire:true, roadside:true }) }
+  { id: 'no_extra', name: t('prot_name_no_extra'), coverage: 1, eyebrow: t('prot_eyebrow_included'), tag: 'TPL', tagTooltip: t('prot_tooltip_tpl'), riskLabel: t('prot_ifDamage'), riskValue: t('prot_risk_full'), riskClass: 'bad',  pricePerDay: 0,    features: normalizeFeatures({ tpl:true,  ldw:false, tire:false, roadside:false }) },
+  { id: 'basic',    name: t('prot_name_basic'),    coverage: 2, eyebrow: t('prot_eyebrow_reduced'),  tag: 'CDW', tagTooltip: t('prot_tooltip_cdw'), riskLabel: t('prot_ifDamage'), riskValue: t('prot_risk_800'),  riskClass: 'mid',  pricePerDay: 8,    recommended: false, features: normalizeFeatures({ tpl:true,  ldw:true,  tire:false, roadside:false }) },
+  { id: 'full',     name: t('prot_name_full'),     coverage: 3, eyebrow: t('prot_eyebrow_zero'),     tag: 'FDW', tagTooltip: t('prot_tooltip_fdw'), riskLabel: t('prot_ifDamage'), riskValue: t('prot_risk_nothing'),           riskClass: 'good', pricePerDay: 15,   recommended: true,  footnote: t('prot_footnote'), features: normalizeFeatures({ tpl:true, ldw:true, tire:true, roadside:true }) }
 ];
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
@@ -651,13 +651,13 @@ async function loadProtectionForCategory(category) {
             features = normalizeFeatures(raw);
           } catch(e) {}
         }
-        let excess = p.excess != null ? `Up to €${p.excess}` : (def.excess || '—');
+        let excess = p.excess != null ? t('prot_excess_upto', { amount: p.excess }) : (def.excess || '—');
         let excessClass = def.excessClass || 'warning';
-        if (Number(p.excess) === 0) { excess = 'Zero excess'; excessClass = 'good'; }
-        if (price === 0) { excess = def.excess || 'Up to full vehicle value'; excessClass = 'danger'; }
+        if (Number(p.excess) === 0) { excess = t('prot_excess_zero'); excessClass = 'good'; }
+        if (price === 0) { excess = def.excess || t('prot_excess_full'); excessClass = 'danger'; }
         const trueCount = Object.values(features).filter(Boolean).length;
         const derivedCoverage = def.coverage != null ? def.coverage : (code === 'no_extra' ? 1 : code === 'basic' ? 2 : code === 'full' ? 3 : Math.min(3, Math.max(1, Math.ceil(trueCount * 3 / 4))));
-        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', tag: def.tag || null, tagTooltip: def.tagTooltip || null, riskLabel: def.riskLabel || 'If damage occurs', riskValue: def.riskValue || '—', riskClass: def.riskClass || 'mid', pricePerDay: price, recommended: !!p.recommended || def.recommended || false, footnote: def.footnote || null, features };
+        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', tag: def.tag || null, tagTooltip: def.tagTooltip || null, riskLabel: def.riskLabel || t('prot_ifDamage'), riskValue: def.riskValue || '—', riskClass: def.riskClass || 'mid', pricePerDay: price, recommended: !!p.recommended || def.recommended || false, footnote: def.footnote || null, features };
       });
       // Filter out legacy packages, sort
       PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => !['smart','all_inclusive','all','none'].includes(p.id));
@@ -693,9 +693,9 @@ function renderProtectionCard(pkg, selectedId) {
 
   let priceHTML;
   if (pkg.pricePerDay === 0) {
-    priceHTML = `<div class="protection-price">Included <span>in rate</span></div>`;
+    priceHTML = `<div class="protection-price">${t('included')} <span>${t('inRate')}</span></div>`;
   } else {
-    priceHTML = `<div class="protection-price">+€${pkg.pricePerDay.toFixed(2)} <span>/day</span></div>`;
+    priceHTML = `<div class="protection-price">+€${pkg.pricePerDay.toFixed(2)} <span>${t('perDay')}</span></div>`;
   }
 
   // Tag with tooltip (TPL/CDW/FDW)
@@ -706,16 +706,16 @@ function renderProtectionCard(pkg, selectedId) {
   // Risk row — "If damage occurs"
   const riskHTML = pkg.riskValue
     ? `<div class="protection-risk ${escapeHtml(pkg.riskClass || 'mid')}">
-         <p class="protection-risk-label">${escapeHtml(pkg.riskLabel || 'If damage occurs')}</p>
+         <p class="protection-risk-label">${escapeHtml(pkg.riskLabel || t('prot_ifDamage'))}</p>
          <p class="protection-risk-value">${escapeHtml(pkg.riskValue)}</p>
        </div>`
     : '';
 
-  const badgeHTML = pkg.recommended ? '<span class="protection-badge">Most popular</span>' : '';
+  const badgeHTML = pkg.recommended ? `<span class="protection-badge">${t('mostPopular')}</span>` : '';
   const isLime = !!pkg.recommended;
   const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${escapeHtml(pkg.eyebrow)}</div>` : '';
   const footnoteHTML = pkg.footnote
-    ? `<p class="protection-footnote">${escapeHtml(pkg.footnote).replace('see terms', '<a href="#" class="excl-trigger">see terms</a>')}</p>`
+    ? `<p class="protection-footnote">${escapeHtml(pkg.footnote).replace(t('prot_seeTerms'), `<a href="#" class="excl-trigger">${t('prot_seeTerms')}</a>`)}</p>`
     : '';
 
   return `
@@ -755,10 +755,10 @@ async function openProtectionPage(v, days, rate) {
 
   if (overviewCancellation) {
     const cancelText = v.admin_upon_request
-      ? 'On request — no payment now, pay after confirmation'
+      ? t('cancelOnRequest')
       : rate === 'flex'
-        ? 'Pay Later — 10% deposit, balance at counter'
-        : 'Pay now — Free cancellation up to 72h before pick-up';
+        ? t('cancelPayLater')
+        : t('cancelBestPrice');
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
@@ -814,12 +814,12 @@ document.addEventListener('keydown', (e) => {
 const ICON_EXTRA_DEFAULT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
 
 const DEFAULT_EXTRAS = [
-  { id: 'additional-driver', name: 'Additional driver', priceLabel: '€6.66 / day per driver', pricePerDay: 6.66, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>', summary: 'Share the wheel with a friend or partner.', details: 'Planning to swap drivers during the trip? Add anyone you trust behind the wheel. They\'ll just need to bring a valid driving licence to the desk when you collect the car.' },
-  { id: 'gps', name: 'GPS navigation', priceLabel: '€8 / day', pricePerDay: 8, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>', summary: 'Pre-loaded with Greek maps and points of interest.', details: 'Stay on track even without mobile data. Our portable GPS unit comes pre-loaded with detailed maps of Greece and the Cyclades, plus suggested routes to beaches, viewpoints, and tavernas.' },
-  { id: 'child-seat', name: 'Child seat (4-7 years)', priceLabel: '€5 / day', pricePerDay: 5, perUnit: true, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>', summary: 'Forward-facing seat for kids 4-7 years old (15-25kg).', details: 'Approved booster-style seat that meets all EU safety standards. Installed by our team at pick-up, ready to go. Choose the quantity if you need more than one.' },
-  { id: 'baby-seat', name: 'Baby seat (0-3 years)', priceLabel: '€5 / day', pricePerDay: 5, perUnit: true, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 11h.01M15 11h.01M8 16s1.5 2 4 2 4-2 4-2"/></svg>', summary: 'Rear-facing seat for infants and toddlers (0-13kg).', details: 'A secure, comfortable rear-facing seat for your little one. Side-impact protection and adjustable harness included.' },
-  { id: 'wifi', name: 'Portable WiFi hotspot', priceLabel: '€7 / day', pricePerDay: 7, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>', summary: 'Unlimited 4G data for up to 10 devices.', details: 'Stay connected wherever you go. Our pocket-sized hotspot delivers fast 4G across Greece and supports up to 10 devices at once.' },
-  { id: 'roof-rack', name: 'Roof rack', priceLabel: '€4 / day', pricePerDay: 4, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="2"/><line x1="6" y1="6" x2="6" y2="14"/><line x1="18" y1="6" x2="18" y2="14"/><path d="M3 14h18v6H3z"/></svg>', summary: 'Extra cargo space for surf boards, bikes, or luggage.', details: 'Bringing surf gear, bikes, or extra suitcases? Our roof rack adds carrying capacity without crowding the cabin.' }
+  { id: 'additional-driver', name: t('ex_name_additional'), priceLabel: t('ex_price_additional'), pricePerDay: 6.66, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>', summary: t('ex_summary_additional'), details: t('ex_details_additional') },
+  { id: 'gps', name: t('ex_name_gps'), priceLabel: t('ex_perDay', { price: 8 }), pricePerDay: 8, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>', summary: t('ex_summary_gps'), details: t('ex_details_gps') },
+  { id: 'child-seat', name: t('ex_name_child'), priceLabel: t('ex_perDay', { price: 5 }), pricePerDay: 5, perUnit: true, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>', summary: t('ex_summary_child'), details: t('ex_details_child') },
+  { id: 'baby-seat', name: t('ex_name_baby'), priceLabel: t('ex_perDay', { price: 5 }), pricePerDay: 5, perUnit: true, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 11h.01M15 11h.01M8 16s1.5 2 4 2 4-2 4-2"/></svg>', summary: t('ex_summary_baby'), details: t('ex_details_baby') },
+  { id: 'wifi', name: t('ex_name_wifi'), priceLabel: t('ex_perDay', { price: 7 }), pricePerDay: 7, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>', summary: t('ex_summary_wifi'), details: t('ex_details_wifi') },
+  { id: 'roof-rack', name: t('ex_name_roofrack'), priceLabel: t('ex_perDay', { price: 4 }), pricePerDay: 4, perUnit: false, maxQty: 4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="2"/><line x1="6" y1="6" x2="6" y2="14"/><line x1="18" y1="6" x2="18" y2="14"/><path d="M3 14h18v6H3z"/></svg>', summary: t('ex_summary_roofrack'), details: t('ex_details_roofrack') }
 ];
 
 let EXTRAS = DEFAULT_EXTRAS.slice();
@@ -834,7 +834,7 @@ async function loadExtrasFromAPI() {
         const def = DEFAULT_EXTRAS.find(d => d.id === id) || {};
         const price = Number(e.price_per_day) || 0;
         const perUnit = !!e.per_unit;
-        return { id, name: e.name || def.name || id, priceLabel: perUnit ? `€${price.toFixed(2)} / day per item` : `€${price.toFixed(2)} / day`, pricePerDay: price, perUnit, maxQty: e.max_qty || 4, icon: def.icon || ICON_EXTRA_DEFAULT, summary: e.description || def.summary || '', details: def.details || e.description || '' };
+        return { id, name: e.name || def.name || id, priceLabel: perUnit ? t('ex_perDayItem', { price: price.toFixed(2) }) : t('ex_perDay', { price: price.toFixed(2) }), pricePerDay: price, perUnit, maxQty: e.max_qty || 4, icon: def.icon || ICON_EXTRA_DEFAULT, summary: e.description || def.summary || '', details: def.details || e.description || '' };
       });
     }
   } catch (err) {
@@ -881,7 +881,7 @@ function renderExtrasList() {
           </div>
         </div>
         <button type="button" class="extra-details-toggle" data-action="details" aria-expanded="false">
-          What's included
+          ${t('whatsIncluded')}
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="extra-details" hidden>
@@ -965,11 +965,11 @@ function populateSummarySidebar() {
   const sRate = document.getElementById('summaryRate');
   const sProt = document.getElementById('summaryProtection');
   if (sRate) sRate.textContent = currentProtection.vehicle?.admin_upon_request
-    ? 'On request · No payment until confirmed'
+    ? t('sum_rate_onrequest')
     : currentProtection.rate === 'flex'
-      ? 'Pay Later · 10% deposit + balance at counter'
-      : 'Pay now · Free cancellation up to 72h before';
-  if (sProt) sProt.textContent = pkg ? pkg.name : 'Protection package';
+      ? t('sum_rate_flex')
+      : t('sum_rate_best');
+  if (sProt) sProt.textContent = pkg ? pkg.name : t('sum_protectionFallback');
 }
 
 function closeExtrasPage() {
@@ -1044,21 +1044,21 @@ function renderDriverTotal(fullTotal) {
   if (isUponRequest) {
     // On-request: nothing is charged at request time; payment happens after
     // confirmation via the secure link.
-    driverTotalLabelEl.textContent = 'Pay now';
+    driverTotalLabelEl.textContent = t('payNow');
     driverTotalEl.textContent = '€0.00';
     if (currentProtection.rate === 'flex') {
       const deposit = fullTotal * 0.10;
-      driverTotalSubEl.textContent = `€${deposit.toFixed(2)} deposit after confirmation`;
+      driverTotalSubEl.textContent = t('depositAfterConfirm', { amount: deposit.toFixed(2) });
     } else {
-      driverTotalSubEl.textContent = `€${fullTotal.toFixed(2)} after confirmation`;
+      driverTotalSubEl.textContent = t('afterConfirm', { amount: fullTotal.toFixed(2) });
     }
   } else if (currentProtection.rate === 'flex') {
     const deposit = fullTotal * 0.10;
-    driverTotalLabelEl.textContent = 'Pay now';
+    driverTotalLabelEl.textContent = t('payNow');
     driverTotalEl.textContent = `€${deposit.toFixed(2)}`;
-    driverTotalSubEl.textContent = `of €${fullTotal.toFixed(2)} total`;
+    driverTotalSubEl.textContent = t('ofTotal', { amount: fullTotal.toFixed(2) });
   } else {
-    driverTotalLabelEl.textContent = 'Total';
+    driverTotalLabelEl.textContent = t('total');
     driverTotalEl.textContent = `€${fullTotal.toFixed(2)}`;
     driverTotalSubEl.textContent = '';
   }
@@ -1118,7 +1118,7 @@ async function openDriverPage() {
       const ageConfirm = document.getElementById('ageConfirm');
       if (ageConfirm) ageConfirm.closest('div')?.before(youngBanner);
     }
-    youngBanner.innerHTML = '⚠️ <strong>Young Driver Fee applies</strong> — drivers aged 21–25 are subject to an additional fee, payable at pick-up.';
+    youngBanner.innerHTML = t('youngDriverBanner');
     youngBanner.style.display = 'block';
   } else if (searchCtx.age === '70-75') {
     if (!youngBanner) {
@@ -1128,7 +1128,7 @@ async function openDriverPage() {
       const ageConfirm = document.getElementById('ageConfirm');
       if (ageConfirm) ageConfirm.closest('div')?.before(youngBanner);
     }
-    youngBanner.innerHTML = '⚠️ <strong>Senior Driver Fee applies</strong> — drivers aged 70–75 are subject to an additional fee, payable at pick-up.';
+    youngBanner.innerHTML = t('seniorDriverBanner');
     youngBanner.style.display = 'block';
   } else if (youngBanner) {
     youngBanner.style.display = 'none';
@@ -1191,11 +1191,11 @@ function populateDriverSummary() {
   document.getElementById('driverSummaryReturnDate').textContent = `${fmt(searchCtx.to)} · ${searchCtx.toTime}`;
 
   document.getElementById('driverSummaryRate').textContent = v.admin_upon_request
-    ? 'On request'
+    ? t('onRequest')
     : currentProtection.rate === 'flex'
-      ? 'Pay Later'
-      : 'Pay now';
-  document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : 'Protection package';
+      ? t('payLater')
+      : t('payNow');
+  document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : t('sum_protectionFallback');
 
   // Render dynamic info cards (Payment + Cancellation)
   renderInfoCards();
@@ -1285,9 +1285,9 @@ function checkPickupTiming() {
   let warning = null;
   if (afterHoursFee > 0) {
     const parts = [];
-    if (pickupOutside) parts.push(`pick-up at ${searchCtx.fromTime}`);
-    if (returnOutside) parts.push(`return at ${searchCtx.toTime}`);
-    warning = `⚠️ After-hours fee: +€${afterHoursFee} for ${parts.join(' and ')} (outside 09:00–21:00).`;
+    if (pickupOutside) parts.push(t('afterHoursPickupAt', { time: searchCtx.fromTime }));
+    if (returnOutside) parts.push(t('afterHoursReturnAt', { time: searchCtx.toTime }));
+    warning = t('afterHoursBanner', { fee: afterHoursFee, parts: parts.join(` ${t('and')} `) });
   }
 
   return { ok: true, afterHoursFee, warning };
@@ -1304,7 +1304,7 @@ function showOneWayBanner() {
     driverForm?.parentElement?.insertBefore(banner, driverForm);
   }
   if (isOneWay && oneWayFeeGross > 0) {
-    banner.textContent = `🚢 One-way rental — different island return. Includes €${oneWayFeeGross.toFixed(2)} one-way fee.`;
+    banner.textContent = t('oneWayBanner', { fee: oneWayFeeGross.toFixed(2) });
     banner.hidden = false;
   } else {
     banner.hidden = true;
@@ -1347,19 +1347,19 @@ function showThankYouPopup(ref, email, total) { // TODO: remove unused 'total' p
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:40px 36px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
       <div style="font-size:52px;margin-bottom:16px;">⏳</div>
-      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">Request received</h2>
-      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">We'll review your booking and respond within 12 hours.</p>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">${t('ty_title')}</h2>
+      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">${t('ty_body')}</p>
       <div style="background:#f0f7ff;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
-        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">Your request reference</p>
+        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">${t('ty_reference')}</p>
         <p style="font-size:22px;font-weight:800;color:#093D5E;letter-spacing:0.05em;margin:0;">${escapeHtml(ref)}</p>
       </div>
       <p style="font-size:14px;color:#64748b;margin:0 0 28px;line-height:1.5;">
-        We've sent a confirmation of your request to<br>
+        ${t('ty_sentTo')}<br>
         <strong style="color:#093D5E;">${escapeHtml(email)}</strong>
       </p>
-      <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">You'll receive a payment link once we approve your booking. No charge has been made yet.</p>
+      <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">${t('ty_noCharge')}</p>
       <button id="thankYouClose" style="width:100%;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
-        Back to Home
+        ${t('backToHome')}
       </button>
     </div>
   `;
@@ -1392,19 +1392,19 @@ function showFreeConfirmedPopup(ref, email) {
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:40px 36px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
       <div style="font-size:52px;margin-bottom:16px;">✅</div>
-      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">Booking confirmed</h2>
-      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">Your promo code covers the full amount — there's nothing to pay.</p>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:26px;font-weight:800;color:#093D5E;margin:0 0 8px;letter-spacing:-0.02em;">${t('fc_title')}</h2>
+      <p style="font-size:16px;color:#1C5875;font-weight:600;margin:0 0 20px;">${t('fc_body')}</p>
       <div style="background:#f0f7ff;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
-        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">Your booking reference</p>
+        <p style="font-size:13px;color:#64748b;margin:0 0 4px;font-weight:500;">${t('fc_reference')}</p>
         <p style="font-size:22px;font-weight:800;color:#093D5E;letter-spacing:0.05em;margin:0;">${escapeHtml(ref)}</p>
       </div>
       <p style="font-size:14px;color:#64748b;margin:0 0 28px;line-height:1.5;">
-        We've sent your confirmation and voucher to<br>
+        ${t('fc_sentTo')}<br>
         <strong style="color:#093D5E;">${escapeHtml(email)}</strong>
       </p>
-      <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">No payment is required. See you on the road!</p>
+      <p style="font-size:13px;color:#666;margin:0 0 28px;line-height:1.5;">${t('fc_noPayment')}</p>
       <button id="thankYouClose" style="width:100%;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
-        Back to Home
+        ${t('backToHome')}
       </button>
     </div>
   `;
@@ -1435,37 +1435,37 @@ function showOnRequestConfirmPopup(onProceed) {
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
       <div style="font-size:44px;margin-bottom:12px;">📋</div>
-      <h2 style="font-family:var(--font-display,sans-serif);font-size:22px;font-weight:800;color:#093D5E;margin:0 0 6px;letter-spacing:-0.02em;">How on-request bookings work</h2>
-      <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.5;">No payment is made now. Here's what happens next:</p>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:22px;font-weight:800;color:#093D5E;margin:0 0 6px;letter-spacing:-0.02em;">${t('or_title')}</h2>
+      <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.5;">${t('or_intro')}</p>
       <div style="text-align:left;background:#f0f7ff;border-radius:12px;padding:18px 20px;margin-bottom:24px;">
         <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
           <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">1</div>
           <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">Submit your request</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">No payment now — your card is not charged.</p>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step1Title')}</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${t('or_step1Body')}</p>
           </div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
           <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">2</div>
           <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">We review &amp; email you</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">We'll confirm availability and respond within 12 hours.</p>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step2Title')}</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${t('or_step2Body')}</p>
           </div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">3</div>
           <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">Secure payment link</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">Pay only after we confirm your booking.</p>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step3Title')}</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${t('or_step3Body')}</p>
           </div>
         </div>
       </div>
       <div style="display:flex;gap:10px;">
         <button id="onRequestCancel" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
-          Cancel
+          ${t('or_cancel')}
         </button>
         <button id="onRequestSubmit" style="flex:2;background:#CFDD28;color:#093D5E;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;">
-          Submit Request →
+          ${t('submitRequest')}
         </button>
       </div>
     </div>
@@ -1482,7 +1482,7 @@ function showOnRequestConfirmPopup(onProceed) {
 async function submitBooking(obj, timing) {
   const originalText = driverContinueBtn.textContent;
   driverContinueBtn.disabled = true;
-  driverContinueBtn.textContent = 'Processing…';
+  driverContinueBtn.textContent = t('processing');
 
   try {
     const payload = buildBookingPayload(obj, timing.afterHoursFee);
@@ -1758,7 +1758,7 @@ async function loadAvailabilityPrices() {
     // 2 billing days). The backend already applies max(1, ceil((hours-2)/24)).
     if (result.days != null) {
       rentalDays = result.days;
-      if (subtitleEl) subtitleEl.textContent = `for ${rentalDays} ${rentalDays === 1 ? 'day' : 'days'} in ${LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece'}`;
+      if (subtitleEl) subtitleEl.textContent = t('resultsSubtitleFor', { n: rentalDays, unit: rentalDays === 1 ? t('day') : t('days'), place: LOCATION_LABELS[searchCtx.pickup]?.split(' ')[0] || 'Greece' });
     }
 
     isOneWay = result.is_one_way === true;
@@ -1822,37 +1822,38 @@ function buildBreakdown() {
   const timing = checkPickupTiming();
   const afterHoursFee = timing.afterHoursFee || 0;
 
+  const dayUnit = days === 1 ? t('day') : t('days');
   let html = '';
-  html += `<div class="breakdown-section-title">Vehicle</div>`;
+  html += `<div class="breakdown-section-title">${t('bd_vehicle')}</div>`;
   html += `<div class="breakdown-line">
-    <span>${escapeHtml(v.name)}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+    <span>${escapeHtml(v.name)}<span class="breakdown-line-meta">€${vehicleDaily.toFixed(2)}${t('perDay')} × ${days} ${dayUnit}</span></span>
     <strong>€${(vehicleDaily * days).toFixed(2)}</strong>
   </div>`;
 
   if (pkg) {
     html += `<div class="breakdown-divider"></div>`;
-    html += `<div class="breakdown-section-title">Protection</div>`;
+    html += `<div class="breakdown-section-title">${t('bd_protection')}</div>`;
     if (pkg.pricePerDay > 0) {
       html += `<div class="breakdown-line">
-        <span>${escapeHtml(pkg.name)}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}/day × ${days} ${days===1?'day':'days'}</span></span>
+        <span>${escapeHtml(pkg.name)}<span class="breakdown-line-meta">€${pkg.pricePerDay.toFixed(2)}${t('perDay')} × ${days} ${dayUnit}</span></span>
         <strong>€${(pkg.pricePerDay * days).toFixed(2)}</strong>
       </div>`;
     } else {
-      html += `<div class="breakdown-line"><span>${escapeHtml(pkg.name)}</span><strong>Included</strong></div>`;
+      html += `<div class="breakdown-line"><span>${escapeHtml(pkg.name)}</span><strong>${t('included')}</strong></div>`;
     }
   }
 
   const extrasEntries = Object.entries(selectedExtras).filter(([, qty]) => qty > 0);
   if (extrasEntries.length > 0) {
     html += `<div class="breakdown-divider"></div>`;
-    html += `<div class="breakdown-section-title">Extras</div>`;
+    html += `<div class="breakdown-section-title">${t('bd_extras')}</div>`;
     extrasEntries.forEach(([id, qty]) => {
       const e = EXTRAS.find(x => x.id === id);
       if (!e) return;
       const lineTotal = e.pricePerDay * qty * days;
       const qtyLabel = qty > 1 ? ` × ${qty}` : '';
       html += `<div class="breakdown-line">
-        <span>${escapeHtml(e.name)}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}/day${qty > 1 ? ` × ${qty}` : ''} × ${days} ${days===1?'day':'days'}</span></span>
+        <span>${escapeHtml(e.name)}${qtyLabel}<span class="breakdown-line-meta">€${e.pricePerDay.toFixed(2)}${t('perDay')}${qty > 1 ? ` × ${qty}` : ''} × ${days} ${dayUnit}</span></span>
         <strong>€${lineTotal.toFixed(2)}</strong>
       </div>`;
     });
@@ -1860,16 +1861,16 @@ function buildBreakdown() {
 
   if (afterHoursFee > 0 || (isOneWay && oneWayFeeGross > 0)) {
     html += `<div class="breakdown-divider"></div>`;
-    html += `<div class="breakdown-section-title">Fees</div>`;
+    html += `<div class="breakdown-section-title">${t('bd_fees')}</div>`;
     if (afterHoursFee > 0) {
       html += `<div class="breakdown-line">
-        <span>After-hours service fee<span class="breakdown-line-meta">Outside 09:00–21:00</span></span>
+        <span>${t('bd_afterHours')}<span class="breakdown-line-meta">${t('bd_afterHoursSub')}</span></span>
         <strong>€${afterHoursFee.toFixed(2)}</strong>
       </div>`;
     }
     if (isOneWay && oneWayFeeGross > 0) {
       html += `<div class="breakdown-line">
-        <span>One-way fee<span class="breakdown-line-meta">Different island return</span></span>
+        <span>${t('bd_oneWay')}<span class="breakdown-line-meta">${t('bd_oneWaySub')}</span></span>
         <strong>€${oneWayFeeGross.toFixed(2)}</strong>
       </div>`;
     }
@@ -1879,7 +1880,7 @@ function buildBreakdown() {
   if (promoDiscount > 0) {
     html += `<div class="breakdown-divider"></div>`;
     html += `<div class="breakdown-line">
-      <span>Promo ${escapeHtml(promoState.code || '')}</span>
+      <span>${t('bd_promo', { code: escapeHtml(promoState.code || '') })}</span>
       <strong>−€${promoDiscount.toFixed(2)}</strong>
     </div>`;
   }
@@ -1980,89 +1981,89 @@ function renderInfoCards() {
     if (isFlex) {
       const deposit = total * 0.10;
       const balance = total - deposit;
-      payCardSub.textContent = 'Nothing today — deposit on confirmation, balance at counter';
+      payCardSub.textContent = t('ic_payNothingToday');
       payCardBody.innerHTML = `
         <div class="pay-row">
-          <span>Pay today</span>
-          <span><strong>€0.00</strong> <span class="pay-pill later">Nothing now</span></span>
+          <span>${t('ic_payToday')}</span>
+          <span><strong>€0.00</strong> <span class="pay-pill later">${t('ic_nothingNow')}</span></span>
         </div>
         <div class="pay-row">
-          <span>Deposit after confirmation</span>
-          <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill later">Secure link</span></span>
+          <span>${t('ic_depositAfterConfirm')}</span>
+          <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill later">${t('ic_secureLink')}</span></span>
         </div>
         <div class="pay-row">
-          <span>Balance at counter</span>
-          <span><strong>€${balance.toFixed(2)}</strong> <span class="pay-pill later">At counter</span></span>
+          <span>${t('ic_balanceAtCounter')}</span>
+          <span><strong>€${balance.toFixed(2)}</strong> <span class="pay-pill later">${t('ic_atCounter')}</span></span>
         </div>
         <div class="pay-row highlight">
-          <span>Total</span>
+          <span>${t('total')}</span>
           <span>€${total.toFixed(2)}</span>
         </div>
       `;
     } else {
-      payCardSub.textContent = 'No payment now — pay only after we confirm';
+      payCardSub.textContent = t('ic_noPaymentNowConfirm');
       payCardBody.innerHTML = `
         <div class="pay-row">
-          <span>Pay today</span>
-          <span><strong>€0.00</strong> <span class="pay-pill later">Nothing now</span></span>
+          <span>${t('ic_payToday')}</span>
+          <span><strong>€0.00</strong> <span class="pay-pill later">${t('ic_nothingNow')}</span></span>
         </div>
         <div class="pay-row">
-          <span>After confirmation</span>
-          <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">Secure link</span></span>
+          <span>${t('ic_afterConfirmation')}</span>
+          <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">${t('ic_secureLink')}</span></span>
         </div>
       `;
     }
-    cancelCardSub.textContent = 'No charge until we confirm your booking';
+    cancelCardSub.textContent = t('ic_noChargeUntil');
     cancelCardBody.innerHTML = `
-      <p class="cancel-row">We'll review your request and send you a secure payment link within 24 hours. You pay only after confirmation — nothing is charged today.</p>
+      <p class="cancel-row">${t('ic_reviewRequest')}</p>
     `;
   } else if (isFlex) {
     // PAY LATER
     const deposit  = total * 0.10;
     const balance  = total - deposit;
-    payCardSub.textContent = '10% deposit now · 90% balance at counter';
+    payCardSub.textContent = t('ic_depositNowBalance');
     payCardBody.innerHTML = `
       <div class="pay-row">
-        <span>Pay today (booking deposit)</span>
-        <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill now">Online now</span></span>
+        <span>${t('ic_payTodayDeposit')}</span>
+        <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill now">${t('ic_onlineNow')}</span></span>
       </div>
       <div class="pay-row">
-        <span>At pick-up (balance)</span>
-        <span><strong>€${balance.toFixed(2)}</strong> <span class="pay-pill later">At counter</span></span>
+        <span>${t('ic_atPickupBalance')}</span>
+        <span><strong>€${balance.toFixed(2)}</strong> <span class="pay-pill later">${t('ic_atCounter')}</span></span>
       </div>
       <div class="pay-row highlight">
-        <span>Total</span>
+        <span>${t('total')}</span>
         <span>€${total.toFixed(2)}</span>
       </div>
     `;
 
-    cancelCardSub.textContent = 'Flexible — cancel anytime, deposit non-refundable';
+    cancelCardSub.textContent = t('ic_flexibleCancel');
     cancelCardBody.innerHTML = `
-      <p class="cancel-row">Cancel anytime, even at the last minute. Your booking deposit of <strong>€${deposit.toFixed(2)}</strong> is <span class="warn">non-refundable</span>, but you owe nothing else.</p>
-      <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">Please contact us if you are running late — vehicles unclaimed after the pick-up time may be reallocated.</p>
+      <p class="cancel-row">${t('ic_cancelAnytimeFlex', { deposit: deposit.toFixed(2) })}</p>
+      <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">${t('ic_lateNotice')}</p>
     `;
   } else {
     // BEST PRICE — full pay now
-    payCardSub.textContent = '100% online today — secure checkout';
+    payCardSub.textContent = t('ic_fullOnlineToday');
     payCardBody.innerHTML = `
       <div class="pay-row">
-        <span>Pay today</span>
-        <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill now">Online now</span></span>
+        <span>${t('ic_payToday')}</span>
+        <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill now">${t('ic_onlineNow')}</span></span>
       </div>
       <div class="pay-row">
-        <span>At pick-up</span>
+        <span>${t('ic_atPickup')}</span>
         <span><strong>€0.00</strong></span>
       </div>
     `;
 
-    cancelCardSub.textContent = 'Free until 72 hours before pick-up';
+    cancelCardSub.textContent = t('ic_freeUntil72h');
     cancelCardBody.innerHTML = `
-      <p class="cancel-row">Cancel anytime up to <strong>3 days before pick-up</strong> for a full refund. After that, the booking becomes non-refundable.</p>
-      ${deadlineStr ? `<div class="cancel-deadline"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Free cancellation until ${deadlineStr}</div>` : ''}
-      <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">Please contact us if you are running late — vehicles unclaimed after the pick-up time may be reallocated.</p>
+      <p class="cancel-row">${t('ic_cancelBestPriceText')}</p>
+      ${deadlineStr ? `<div class="cancel-deadline"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${t('ic_freeCancelUntil', { deadline: deadlineStr })}</div>` : ''}
+      <p class="cancel-row" style="margin-top:10px;font-size:11.5px;color:#6B7280;">${t('ic_lateNotice')}</p>
     `;
   }
 
   const btn = document.getElementById('driverContinue');
-  if (btn) btn.textContent = v.admin_upon_request ? 'Submit Request →' : 'Confirm & Pay';
+  if (btn) btn.textContent = v.admin_upon_request ? t('submitRequest') : t('confirmAndPay');
 }

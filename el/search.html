@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
   <!-- Start cookieyes banner -->
   <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/f4f7fbe6f090baac12006f2f2bbca114/script.js"></script>
@@ -17,13 +17,13 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest" />
   <meta name="theme-color" content="#093D5E" />
 
-  <title>Search results — Wheelso</title>
+  <title>Αποτελέσματα αναζήτησης — Wheelso</title>
   <meta name="robots" content="noindex,follow" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
   <style>
     /* ── MODIFY PANEL (Sixt-style) ── */
     .modify-panel {
@@ -152,35 +152,35 @@
   <!-- ============ HEADER ============ -->
   <header class="site-header" id="siteHeader">
     <div class="container header-inner">
-      <a href="index.html" class="logo" aria-label="Wheelso Home">
-        <img src="assets/logo.png" alt="Wheelso" />
+      <a href="/el/" class="logo" aria-label="Wheelso Αρχική">
+        <img src="/assets/logo.png" alt="Wheelso" />
       </a>
-      <nav class="primary-nav" aria-label="Primary">
+      <nav class="primary-nav" aria-label="Κύρια πλοήγηση">
         <ul>
-          <li><a href="index.html" class="nav-link">Rent a Car</a></li>
+          <li><a href="/el/" class="nav-link">Ενοικίαση Αυτοκινήτου</a></li>
           <li class="nav-dropdown">
             <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">
-              Destinations
+              Προορισμοί
               <svg class="nav-dropdown-arrow" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
                 <path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
               </svg>
             </button>
             <ul class="nav-dropdown-menu" role="menu">
-              <li role="none"><a role="menuitem" href="car-rental/naxos/">Naxos</a></li>
-              <li role="none"><a role="menuitem" href="car-rental/paros/">Paros</a></li>
-              <li role="none"><a role="menuitem" href="car-rental/mykonos/">Mykonos</a></li>
+              <li role="none"><a role="menuitem" href="/el/car-rental/naxos/">Νάξος</a></li>
+              <li role="none"><a role="menuitem" href="/el/car-rental/paros/">Πάρος</a></li>
+              <li role="none"><a role="menuitem" href="/el/car-rental/mykonos/">Μύκονος</a></li>
             </ul>
           </li>
         </ul>
       </nav>
       <div class="header-actions">
-        <div class="lang-switcher" role="group" aria-label="Language">
-          <button class="lang-btn active" data-lang="en">EN</button>
+        <div class="lang-switcher" role="group" aria-label="Γλώσσα">
+          <button class="lang-btn" data-lang="en">EN</button>
           <span class="lang-divider">|</span>
-          <button class="lang-btn" data-lang="el">GR</button>
+          <button class="lang-btn active" data-lang="el">GR</button>
         </div>
-        <a href="my-booking.html" class="btn btn-ghost">My Booking</a>
-        <button class="menu-toggle" aria-label="Open menu" id="menuToggle">
+        <a href="/my-booking.html" class="btn btn-ghost">Η Κράτησή μου</a>
+        <button class="menu-toggle" aria-label="Άνοιγμα μενού" id="menuToggle">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -194,7 +194,7 @@
         <div class="search-summary-item">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <div>
-            <span class="summary-label">Pick-up</span>
+            <span class="summary-label">Παραλαβή</span>
             <span class="summary-value" id="summaryPickup">—</span>
           </div>
         </div>
@@ -202,7 +202,7 @@
         <div class="search-summary-item">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <div>
-            <span class="summary-label">Dates</span>
+            <span class="summary-label">Ημερομηνίες</span>
             <span class="summary-value" id="summaryDates">—</span>
           </div>
         </div>
@@ -210,12 +210,12 @@
         <div class="search-summary-item">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
           <div>
-            <span class="summary-label">Driver age</span>
+            <span class="summary-label">Ηλικία οδηγού</span>
             <span class="summary-value" id="summaryAge">26–69</span>
           </div>
         </div>
         <span class="search-modify">
-          Modify
+          Τροποποίηση
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </span>
       </button>
@@ -227,22 +227,22 @@
         <div class="modify-row">
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Pick-up</span>
+            <span class="modify-cell-label">Παραλαβή</span>
             <select id="modifyPickup"></select>
           </div>
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Drop-off</span>
+            <span class="modify-cell-label">Επιστροφή</span>
             <select id="modifyReturn"></select>
           </div>
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Pick-up date</span>
+            <span class="modify-cell-label">Ημ. παραλαβής</span>
             <input type="date" id="modifyFrom">
           </div>
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Pick-up time</span>
+            <span class="modify-cell-label">Ώρα παραλαβής</span>
             <select id="modifyFromTime">
               <option value="09:00">09:00</option><option value="10:00">10:00</option>
               <option value="11:00">11:00</option><option value="12:00">12:00</option>
@@ -255,12 +255,12 @@
           </div>
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Return date</span>
+            <span class="modify-cell-label">Ημ. επιστροφής</span>
             <input type="date" id="modifyTo">
           </div>
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Return time</span>
+            <span class="modify-cell-label">Ώρα επιστροφής</span>
             <select id="modifyToTime">
               <option value="09:00">09:00</option><option value="10:00">10:00</option>
               <option value="11:00">11:00</option><option value="12:00">12:00</option>
@@ -273,7 +273,7 @@
           </div>
 
           <div class="modify-cell">
-            <span class="modify-cell-label">Driver age</span>
+            <span class="modify-cell-label">Ηλικία οδηγού</span>
             <select id="modifyAge">
               <option value="21-25">21–25</option>
               <option value="26-69" selected>26–69</option>
@@ -282,7 +282,7 @@
           </div>
 
           <div class="modify-cell modify-cell--btn">
-            <button type="button" class="modify-search-btn" id="modifySearchBtn">Search</button>
+            <button type="button" class="modify-search-btn" id="modifySearchBtn">Αναζήτηση</button>
           </div>
 
         </div>
@@ -295,31 +295,31 @@
     <div class="container">
       <div class="results-head">
         <h1 class="results-title">
-          <span id="resultsCount">15</span> cars available
-          <span class="results-subtitle" id="resultsSubtitle">for your dates</span>
+          <span id="resultsCount">15</span> διαθέσιμα αυτοκίνητα
+          <span class="results-subtitle" id="resultsSubtitle">για τις ημερομηνίες σας</span>
         </h1>
         <div class="results-sort">
-          <label for="sortBy">Sort by:</label>
+          <label for="sortBy">Ταξινόμηση:</label>
           <select id="sortBy" class="sort-select">
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-            <option value="category">Category</option>
+            <option value="price-asc">Τιμή: αύξουσα</option>
+            <option value="price-desc">Τιμή: φθίνουσα</option>
+            <option value="category">Κατηγορία</option>
           </select>
         </div>
       </div>
 
       <!-- Filter chips — rendered dynamically from API categories -->
-      <div class="fleet-filters results-filters" role="tablist" aria-label="Vehicle category" id="categoryChips">
+      <div class="fleet-filters results-filters" role="tablist" aria-label="Κατηγορία οχήματος" id="categoryChips">
         <button class="filter-chip active" data-filter="all" role="tab" aria-selected="true">
-          All <span class="chip-count" data-count="all"></span>
+          Όλα <span class="chip-count" data-count="all"></span>
         </button>
       </div>
 
       <!-- Secondary filters (transmission) -->
       <div class="secondary-filters">
-        <button class="pill-filter" data-trans="all">All transmissions</button>
-        <button class="pill-filter" data-trans="auto">Automatic only</button>
-        <button class="pill-filter" data-trans="manual">Manual only</button>
+        <button class="pill-filter" data-trans="all">Όλα τα σασμάν</button>
+        <button class="pill-filter" data-trans="auto">Μόνο αυτόματα</button>
+        <button class="pill-filter" data-trans="manual">Μόνο χειροκίνητα</button>
       </div>
 
       <!-- Grid -->
@@ -327,8 +327,8 @@
 
       <div class="results-empty" id="resultsEmpty" hidden>
         <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <h3>No cars match your filters</h3>
-        <p>Try adjusting the category or transmission filters above.</p>
+        <h3>Κανένα αυτοκίνητο δεν ταιριάζει στα φίλτρα σας</h3>
+        <p>Δοκιμάστε να προσαρμόσετε τα φίλτρα κατηγορίας ή σασμάν παραπάνω.</p>
       </div>
     </div>
   </main>
@@ -337,7 +337,7 @@
   <div class="vehicle-modal" id="vehicleModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="vehicle-modal-backdrop" data-close></div>
     <div class="vehicle-modal-panel" role="document">
-      <button type="button" class="vehicle-modal-close" data-close aria-label="Close">
+      <button type="button" class="vehicle-modal-close" data-close aria-label="Κλείσιμο">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
 
@@ -354,9 +354,9 @@
 
       <div class="modal-options">
         <div class="modal-step-indicator">
-          <span class="step-badge">Step 1 of 2</span>
-          <h3 class="modal-section-title">Choose your rate</h3>
-          <p class="modal-section-sub">Pick the flexibility that fits your trip. You'll choose protection next.</p>
+          <span class="step-badge">Βήμα 1 από 2</span>
+          <h3 class="modal-section-title">Επιλέξτε τιμή</h3>
+          <p class="modal-section-sub">Επιλέξτε την ευελιξία που ταιριάζει στο ταξίδι σας. Θα επιλέξετε προστασία στη συνέχεια.</p>
         </div>
 
         <div class="modal-option-group">
@@ -365,13 +365,13 @@
             <span class="modal-option-radio"></span>
             <span class="modal-option-content">
               <span class="modal-option-row">
-                <span class="modal-option-name" style="font-weight:700;">Best price</span>
+                <span class="modal-option-name" style="font-weight:700;">Καλύτερη τιμή</span>
                 <span class="modal-option-right">
-                  <span style="background:#CFDD28;color:#093D5E;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">Popular</span>
+                  <span style="background:#CFDD28;color:#093D5E;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">Δημοφιλές</span>
                   <span class="modal-option-price" id="modalBestPriceDay"></span>
                 </span>
               </span>
-              <span class="modal-option-desc">Pay 100% today. Free cancellation up to 72h before pick-up.</span>
+              <span class="modal-option-desc">Πληρωμή 100% σήμερα. Δωρεάν ακύρωση έως 72 ώρες πριν την παραλαβή.</span>
             </span>
           </label>
           <label class="modal-option">
@@ -379,20 +379,20 @@
             <span class="modal-option-radio"></span>
             <span class="modal-option-content">
               <span class="modal-option-row">
-                <span class="modal-option-name">Pay Later</span>
+                <span class="modal-option-name">Πληρωμή αργότερα</span>
                 <span class="modal-option-right">
                   <span class="modal-option-price" id="modalFlexPriceDay"></span>
                 </span>
               </span>
-              <span class="modal-option-desc">10% deposit now, pay the rest at the counter. Cancel anytime — deposit non-refundable.</span>
+              <span class="modal-option-desc">10% προκαταβολή τώρα, το υπόλοιπο στο γραφείο. Ακύρωση οποτεδήποτε — η προκαταβολή δεν επιστρέφεται.</span>
             </span>
           </label>
         </div>
 
         <div class="modal-features">
-          <span class="modal-feature">✓ Unlimited mileage</span>
-          <span class="modal-feature">✓ 24/7 roadside</span>
-          <span class="modal-feature">✓ Basic insurance included</span>
+          <span class="modal-feature">✓ Απεριόριστα χιλιόμετρα</span>
+          <span class="modal-feature">✓ 24/7 οδική βοήθεια</span>
+          <span class="modal-feature">✓ Βασική ασφάλεια περιλαμβάνεται</span>
         </div>
       </div>
       </div>
@@ -403,7 +403,7 @@
           <span class="modal-price-total" id="modalPriceTotal"></span>
         </div>
         <button type="button" class="modal-cta" id="modalContinue">
-          <span id="modalContinueLabel">Continue</span>
+          <span id="modalContinueLabel">Συνέχεια</span>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </div>
@@ -414,20 +414,20 @@
   <div class="protection-page" id="protectionPage" hidden>
     <header class="protection-header">
       <div class="container protection-header-inner">
-        <button type="button" class="protection-back" id="protectionBack" aria-label="Back">
+        <button type="button" class="protection-back" id="protectionBack" aria-label="Πίσω">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <a href="index.html" class="protection-home-logo" aria-label="Back to home">
-          <img src="assets/logo.png" alt="Wheelso" />
+        <a href="/el/" class="protection-home-logo" aria-label="Επιστροφή στην αρχική">
+          <img src="/assets/logo.png" alt="Wheelso" />
         </a>
-        <h1 class="protection-title">Choose your protection package</h1>
+        <h1 class="protection-title">Επιλέξτε το πακέτο προστασίας σας</h1>
         <div class="protection-summary">
           <div class="protection-total">
-            <span class="protection-total-label">Total</span>
+            <span class="protection-total-label">Σύνολο</span>
             <span class="protection-total-amount" id="protectionTotal">€0</span>
-            <a href="#" class="protection-breakdown">Price breakdown</a>
+            <a href="#" class="protection-breakdown">Ανάλυση κόστους</a>
           </div>
-          <button type="button" class="btn btn-primary protection-continue" id="protectionContinue">Continue</button>
+          <button type="button" class="btn btn-primary protection-continue" id="protectionContinue">Συνέχεια</button>
         </div>
       </div>
     </header>
@@ -435,42 +435,42 @@
       <div class="container">
         <div class="protection-notice">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          Drivers must hold their driving licence for at least 2 years.
+          Οι οδηγοί πρέπει να κατέχουν δίπλωμα οδήγησης για τουλάχιστον 2 χρόνια.
         </div>
-        <p class="protection-subtitle">No deposit on any plan. The difference is what happens if there's damage.</p>
+        <p class="protection-subtitle">Καμία εγγύηση σε κανένα πακέτο. Η διαφορά είναι τι συμβαίνει σε περίπτωση ζημιάς.</p>
         <div class="protection-grid" id="protectionGrid"></div>
         <div class="protection-trust-strip">
           <span class="trust-strip-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            No hidden fees
+            Χωρίς κρυφές χρεώσεις
           </span>
           <span class="trust-strip-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Debit card accepted
+            Δεκτές χρεωστικές κάρτες
           </span>
           <span class="trust-strip-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Free additional driver
+            Δωρεάν επιπλέον οδηγός
           </span>
           <span class="trust-strip-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Free cancellation
+            Δωρεάν ακύρωση
           </span>
         </div>
         <div class="protection-overview">
-          <h2 class="protection-overview-title">Your booking includes:</h2>
+          <h2 class="protection-overview-title">Η κράτησή σας περιλαμβάνει:</h2>
           <ul class="protection-overview-list">
             <li>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Third party insurance
+              Ασφάλεια τρίτων
             </li>
             <li>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Unlimited mileage
+              Απεριόριστα χιλιόμετρα
             </li>
             <li id="overviewCancellation">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Best price — Free cancellation up to 48h before pick-up
+              Καλύτερη τιμή — Δωρεάν ακύρωση έως 48 ώρες πριν την παραλαβή
             </li>
           </ul>
         </div>
@@ -482,20 +482,20 @@
   <div class="extras-page" id="extrasPage" hidden>
     <header class="protection-header">
       <div class="container protection-header-inner">
-        <button type="button" class="protection-back" id="extrasBack" aria-label="Back">
+        <button type="button" class="protection-back" id="extrasBack" aria-label="Πίσω">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <a href="index.html" class="protection-home-logo" aria-label="Back to home">
-          <img src="assets/logo.png" alt="Wheelso" />
+        <a href="/el/" class="protection-home-logo" aria-label="Επιστροφή στην αρχική">
+          <img src="/assets/logo.png" alt="Wheelso" />
         </a>
-        <h1 class="protection-title">Add extras to your trip</h1>
+        <h1 class="protection-title">Προσθέστε πρόσθετα στο ταξίδι σας</h1>
         <div class="protection-summary">
           <div class="protection-total">
-            <span class="protection-total-label">Total</span>
+            <span class="protection-total-label">Σύνολο</span>
             <span class="protection-total-amount" id="extrasTotal">€0</span>
-            <a href="#" class="protection-breakdown">Price breakdown</a>
+            <a href="#" class="protection-breakdown">Ανάλυση κόστους</a>
           </div>
-          <button type="button" class="btn btn-primary protection-continue" id="extrasContinue">Continue</button>
+          <button type="button" class="btn btn-primary protection-continue" id="extrasContinue">Συνέχεια</button>
         </div>
       </div>
     </header>
@@ -505,34 +505,34 @@
         <div class="extras-layout">
           <div class="extras-list" id="extrasList"></div>
           <aside class="extras-sidebar">
-            <h2 class="extras-sidebar-title">Your booking</h2>
+            <h2 class="extras-sidebar-title">Η κράτησή σας</h2>
             <div class="summary-vehicle" id="summaryVehicle"></div>
             <div class="summary-section">
-              <span class="summary-label">Pick-up</span>
+              <span class="summary-label">Παραλαβή</span>
               <span class="summary-value-line" id="summaryPickupLocation">—</span>
               <span class="summary-meta" id="summaryPickupDate">—</span>
             </div>
             <div class="summary-section">
-              <span class="summary-label">Return</span>
+              <span class="summary-label">Επιστροφή</span>
               <span class="summary-value-line" id="summaryReturnLocation">—</span>
               <span class="summary-meta" id="summaryReturnDate">—</span>
             </div>
             <div class="summary-section summary-options">
               <div class="summary-option-row">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span id="summaryRate">Best price rate</span>
+                <span id="summaryRate">Καλύτερη τιμή</span>
               </div>
               <div class="summary-option-row">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span id="summaryProtection">Basic Protection</span>
+                <span id="summaryProtection">Βασική Προστασία</span>
               </div>
               <div class="summary-option-row">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Unlimited mileage</span>
+                <span>Απεριόριστα χιλιόμετρα</span>
               </div>
               <div class="summary-option-row">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Third party insurance</span>
+                <span>Ασφάλεια τρίτων</span>
               </div>
             </div>
           </aside>
@@ -545,21 +545,21 @@
   <div class="driver-page" id="driverPage" hidden>
     <header class="protection-header">
       <div class="container protection-header-inner">
-        <button type="button" class="protection-back" id="driverBack" aria-label="Back">
+        <button type="button" class="protection-back" id="driverBack" aria-label="Πίσω">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <a href="index.html" class="protection-home-logo" aria-label="Back to home">
-          <img src="assets/logo.png" alt="Wheelso" />
+        <a href="/el/" class="protection-home-logo" aria-label="Επιστροφή στην αρχική">
+          <img src="/assets/logo.png" alt="Wheelso" />
         </a>
-        <h1 class="protection-title">Complete your booking</h1>
+        <h1 class="protection-title">Ολοκληρώστε την κράτησή σας</h1>
         <div class="protection-summary">
           <div class="protection-total">
-            <span class="protection-total-label" id="driverTotalLabel">Total</span>
+            <span class="protection-total-label" id="driverTotalLabel">Σύνολο</span>
             <span class="protection-total-amount" id="driverTotal">€0</span>
             <span class="protection-total-sub" id="driverTotalSub"></span>
-            <a href="#" class="protection-breakdown">Price breakdown</a>
+            <a href="#" class="protection-breakdown">Ανάλυση κόστους</a>
           </div>
-          <button type="button" class="btn btn-primary protection-continue" id="driverContinue">Confirm & Pay</button>
+          <button type="button" class="btn btn-primary protection-continue" id="driverContinue">Επιβεβαίωση & Πληρωμή</button>
         </div>
       </div>
     </header>
@@ -568,17 +568,17 @@
       <div class="container">
         <div class="driver-layout">
           <div class="driver-form-card">
-            <h2 class="driver-section-title">Driver details</h2>
-            <p class="driver-section-sub">We'll send your booking confirmation here. Please make sure everything matches the driver's licence.</p>
+            <h2 class="driver-section-title">Στοιχεία οδηγού</h2>
+            <p class="driver-section-sub">Θα στείλουμε εδώ την επιβεβαίωση κράτησης. Βεβαιωθείτε ότι όλα ταιριάζουν με το δίπλωμα οδήγησης.</p>
 
             <form id="driverForm" class="driver-form" novalidate>
               <div class="form-row">
                 <div class="form-field">
-                  <label for="firstName">First name <span class="req">*</span></label>
+                  <label for="firstName">Όνομα <span class="req">*</span></label>
                   <input type="text" id="firstName" name="firstName" required autocomplete="given-name" />
                 </div>
                 <div class="form-field">
-                  <label for="lastName">Last name <span class="req">*</span></label>
+                  <label for="lastName">Επώνυμο <span class="req">*</span></label>
                   <input type="text" id="lastName" name="lastName" required autocomplete="family-name" />
                 </div>
               </div>
@@ -586,29 +586,29 @@
               <div class="form-field">
                 <label for="email">Email <span class="req">*</span></label>
                 <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" />
-                <span class="form-hint">We'll send the confirmation and receipt to this email.</span>
+                <span class="form-hint">Θα στείλουμε την επιβεβαίωση και την απόδειξη σε αυτό το email.</span>
               </div>
 
               <div class="form-row">
                 <div class="form-field form-field-country">
-                  <label for="country">Country code</label>
+                  <label for="country">Κωδικός χώρας</label>
                   <input type="tel" id="country" name="country" value="+30" placeholder="+30" pattern="\+\d{1,4}" required maxlength="5">
                 </div>
                 <div class="form-field form-field-phone">
-                  <label for="phone">Phone <span class="req">*</span></label>
+                  <label for="phone">Τηλέφωνο <span class="req">*</span></label>
                   <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="6912345678" />
                 </div>
               </div>
 
               <div class="form-field">
-                <label for="flight">Flight or ferry number <span class="optional">(optional)</span></label>
-                <input type="text" id="flight" name="flight" placeholder="e.g. A3 612 or Blue Star 12:30" />
-                <span class="form-hint">If you're flying or arriving by ferry, we'll know when to expect you.</span>
+                <label for="flight">Αριθμός πτήσης ή πλοίου <span class="optional">(προαιρετικό)</span></label>
+                <input type="text" id="flight" name="flight" placeholder="π.χ. A3 612 ή Blue Star 12:30" />
+                <span class="form-hint">Αν ταξιδεύετε με αεροπλάνο ή πλοίο, θα ξέρουμε πότε να σας περιμένουμε.</span>
               </div>
 
               <div class="form-field">
-                <label for="notes">Notes for the team <span class="optional">(optional)</span></label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Travelling with kids? Need help with luggage? Tell us anything that helps make pick-up smooth."></textarea>
+                <label for="notes">Σχόλια για την ομάδα <span class="optional">(προαιρετικό)</span></label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Ταξιδεύετε με παιδιά; Χρειάζεστε βοήθεια με αποσκευές; Πείτε μας ό,τι διευκολύνει την παραλαβή."></textarea>
               </div>
 
               <!-- ============ INFO CARDS (Payment / Cancellation / Documents) ============ -->
@@ -621,7 +621,7 @@
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                     </div>
                     <div>
-                      <p class="info-title">Payment</p>
+                      <p class="info-title">Πληρωμή</p>
                       <p class="info-sub" id="payCardSub">—</p>
                     </div>
                   </div>
@@ -635,7 +635,7 @@
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div>
-                      <p class="info-title">Cancellation</p>
+                      <p class="info-title">Ακύρωση</p>
                       <p class="info-sub" id="cancelCardSub">—</p>
                     </div>
                   </div>
@@ -649,47 +649,47 @@
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h3M15 12h3M5 16h14"/></svg>
                     </div>
                     <div>
-                      <p class="info-title">What you'll need at pick-up</p>
-                      <p class="info-sub">Bring the original documents — required for the rental contract</p>
+                      <p class="info-title">Τι θα χρειαστείτε στην παραλαβή</p>
+                      <p class="info-sub">Φέρτε τα πρωτότυπα έγγραφα — απαιτούνται για το συμβόλαιο ενοικίασης</p>
                     </div>
                   </div>
                   <ul class="doc-list">
                     <li class="doc-item">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       <div>
-                        <strong>Valid driving licence</strong>
-                        <span>Held for at least 2 years. EU, UK, US and most international licences accepted. Must be the physical card.</span>
+                        <strong>Έγκυρο δίπλωμα οδήγησης</strong>
+                        <span>Σε ισχύ τουλάχιστον 2 χρόνια. Δεκτά διπλώματα ΕΕ, ΗΒ, ΗΠΑ και τα περισσότερα διεθνή. Πρέπει να είναι η φυσική κάρτα.</span>
                       </div>
                     </li>
                     <li class="doc-item">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       <div>
-                        <strong>Identity document <span class="doc-badge gr">Greek residents</span></strong>
-                        <span>Greek ID card (ταυτότητα) or passport. Digital ID via gov.gr Wallet is also accepted.</span>
+                        <strong>Έγγραφο ταυτότητας <span class="doc-badge gr">Κάτοικοι Ελλάδας</span></strong>
+                        <span>Ελληνική ταυτότητα ή διαβατήριο. Δεκτή και η ψηφιακή ταυτότητα μέσω gov.gr Wallet.</span>
                       </div>
                     </li>
                     <li class="doc-item">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       <div>
-                        <strong>Identity document <span class="doc-badge intl">Visitors</span></strong>
-                        <span>Original passport or national ID card. Photos, scans or digital copies are not accepted.</span>
+                        <strong>Έγγραφο ταυτότητας <span class="doc-badge intl">Επισκέπτες</span></strong>
+                        <span>Πρωτότυπο διαβατήριο ή εθνική ταυτότητα. Φωτογραφίες, σαρώσεις ή ψηφιακά αντίγραφα δεν γίνονται δεκτά.</span>
                       </div>
                     </li>
                     <li class="doc-item">
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       <div>
-                        <strong>Booking confirmation</strong>
-                        <span>Emailed to you after booking. Can be shown from your phone.</span>
+                        <strong>Επιβεβαίωση κράτησης</strong>
+                        <span>Αποστέλλεται με email μετά την κράτηση. Μπορείτε να την δείξετε από το κινητό σας.</span>
                       </div>
                     </li>
                   </ul>
                   <div class="docs-callout">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <span>We cannot release a vehicle without physical ID and licence — please bring the originals, not copies.</span>
+                    <span>Δεν μπορούμε να παραδώσουμε όχημα χωρίς φυσική ταυτότητα και δίπλωμα — φέρτε τα πρωτότυπα, όχι αντίγραφα.</span>
                   </div>
                   <div class="extras-note">
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    Extras (baby seat, GPS, etc.) are subject to availability at pick-up.
+                    Τα πρόσθετα (κάθισμα μωρού, GPS κ.λπ.) υπόκεινται σε διαθεσιμότητα κατά την παραλαβή.
                   </div>
                 </div>
 
@@ -697,26 +697,26 @@
 
               <div class="form-checkbox">
                 <input type="checkbox" id="ageConfirm" required />
-                <label for="ageConfirm">I confirm I'm 21 or older (max 75) and hold a valid driving licence for at least 2 years.</label>
+                <label for="ageConfirm">Επιβεβαιώνω ότι είμαι 21 ετών ή άνω (έως 75) και κατέχω έγκυρο δίπλωμα οδήγησης για τουλάχιστον 2 χρόνια.</label>
               </div>
 
               <div class="form-checkbox">
                 <input type="checkbox" id="termsAgree" required />
-                <label for="termsAgree">I've read and agree to the <a href="#" class="link-inline">rental terms</a> and <a href="#" class="link-inline">privacy policy</a>.</label>
+                <label for="termsAgree">Έχω διαβάσει και αποδέχομαι τους <a href="#" class="link-inline">όρους ενοικίασης</a> και την <a href="#" class="link-inline">πολιτική απορρήτου</a>.</label>
               </div>
             </form>
           </div>
 
           <aside class="extras-sidebar">
-            <h2 class="extras-sidebar-title">Your booking</h2>
+            <h2 class="extras-sidebar-title">Η κράτησή σας</h2>
             <div class="summary-vehicle" id="driverSummaryVehicle"></div>
             <div class="summary-section">
-              <span class="summary-label">Pick-up</span>
+              <span class="summary-label">Παραλαβή</span>
               <span class="summary-value-line" id="driverSummaryPickupLoc">—</span>
               <span class="summary-meta" id="driverSummaryPickupDate">—</span>
             </div>
             <div class="summary-section">
-              <span class="summary-label">Return</span>
+              <span class="summary-label">Επιστροφή</span>
               <span class="summary-value-line" id="driverSummaryReturnLoc">—</span>
               <span class="summary-meta" id="driverSummaryReturnDate">—</span>
             </div>
@@ -744,13 +744,13 @@
   <div class="breakdown-modal" id="breakdownModal" hidden role="dialog" aria-modal="true" aria-labelledby="breakdownTitle">
     <div class="breakdown-backdrop" data-close-breakdown></div>
     <div class="breakdown-panel" role="document">
-      <button type="button" class="breakdown-close" data-close-breakdown aria-label="Close">
+      <button type="button" class="breakdown-close" data-close-breakdown aria-label="Κλείσιμο">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <h2 class="breakdown-title" id="breakdownTitle">Price breakdown</h2>
+      <h2 class="breakdown-title" id="breakdownTitle">Ανάλυση κόστους</h2>
       <div class="breakdown-content" id="breakdownContent"></div>
       <div class="breakdown-total">
-        <span>Total</span>
+        <span>Σύνολο</span>
         <span class="breakdown-total-amount" id="breakdownTotal">€0</span>
       </div>
     </div>
@@ -760,51 +760,51 @@
   <div class="excl-modal" id="exclModal" hidden role="dialog" aria-modal="true" aria-labelledby="exclModalTitle">
     <div class="excl-backdrop" id="exclBackdrop"></div>
     <div class="excl-panel">
-      <button type="button" class="excl-close" id="exclClose" aria-label="Close">
+      <button type="button" class="excl-close" id="exclClose" aria-label="Κλείσιμο">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
       <div class="excl-header">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <h2 id="exclModalTitle">What's not covered — Full Protection</h2>
+        <h2 id="exclModalTitle">Τι δεν καλύπτεται — Πλήρης Προστασία</h2>
       </div>
-      <p class="excl-intro">Full Protection covers all accidental damage during normal use. The following events fall outside coverage and may be charged to your card on file.</p>
+      <p class="excl-intro">Η Πλήρης Προστασία καλύπτει κάθε τυχαία ζημιά κατά τη φυσιολογική χρήση. Τα παρακάτω περιστατικά εξαιρούνται και ενδέχεται να χρεωθούν στην κάρτα σας.</p>
       <ul class="excl-list">
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Driving under the influence</strong><span>Alcohol, drugs, or any substance that impairs driving ability.</span></div>
+          <div><strong>Οδήγηση υπό την επήρεια</strong><span>Αλκοόλ, ναρκωτικά ή οποιαδήποτε ουσία που μειώνει την ικανότητα οδήγησης.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Off-road or unpaved roads</strong><span>Damage caused by driving on dirt tracks, fields, beaches, or any road not paved.</span></div>
+          <div><strong>Εκτός δρόμου ή σε μη ασφαλτοστρωμένους δρόμους</strong><span>Ζημιά από οδήγηση σε χωματόδρομους, χωράφια, παραλίες ή οποιονδήποτε μη ασφαλτοστρωμένο δρόμο.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Undercarriage damage</strong><span>Damage to the underside of the vehicle caused by road hazards, curbs, or improper use.</span></div>
+          <div><strong>Ζημιά στο κάτω μέρος του οχήματος</strong><span>Ζημιά στο κάτω μέρος του οχήματος από εμπόδια δρόμου, κράσπεδα ή ακατάλληλη χρήση.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Excessive interior soiling</strong><span>Cleaning costs if the vehicle is returned in an unusually dirty condition.</span></div>
+          <div><strong>Υπερβολική ρύπανση εσωτερικού</strong><span>Κόστος καθαρισμού αν το όχημα επιστραφεί ασυνήθιστα βρώμικο.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Lost or damaged keys</strong><span>Replacement cost of vehicle keys if lost, broken, or locked inside.</span></div>
+          <div><strong>Απώλεια ή ζημιά κλειδιών</strong><span>Κόστος αντικατάστασης κλειδιών αν χαθούν, σπάσουν ή κλειδωθούν μέσα.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Wrong fuel type</strong><span>Damage caused by filling diesel in a petrol vehicle or vice versa.</span></div>
+          <div><strong>Λάθος τύπος καυσίμου</strong><span>Ζημιά από βάλσιμο πετρελαίου σε βενζινοκίνητο όχημα ή το αντίστροφο.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Undeclared additional driver</strong><span>Any damage caused by a driver not listed on the rental agreement.</span></div>
+          <div><strong>Μη δηλωμένος επιπλέον οδηγός</strong><span>Οποιαδήποτε ζημιά από οδηγό που δεν αναγράφεται στο συμβόλαιο ενοικίασης.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <div><strong>Gross negligence or wilful damage</strong><span>Any intentional or reckless act that results in damage to the vehicle.</span></div>
+          <div><strong>Βαριά αμέλεια ή εκ προθέσεως ζημιά</strong><span>Οποιαδήποτε εκ προθέσεως ή απερίσκεπτη ενέργεια που προκαλεί ζημιά στο όχημα.</span></div>
         </li>
       </ul>
       <div class="excl-footer">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        Your card on file will only be charged if one of the above events occurs and is verified. No charge is made at pick-up.
+        Η κάρτα σας θα χρεωθεί μόνο αν συμβεί και επιβεβαιωθεί ένα από τα παραπάνω περιστατικά. Καμία χρέωση δεν γίνεται στην παραλαβή.
       </div>
     </div>
   </div>
@@ -813,38 +813,34 @@
   <footer class="site-footer">
     <div class="container site-footer-inner">
       <div class="site-footer-brand">
-        <img src="assets/logo.png" alt="Wheelso" class="site-footer-logo" />
+        <img src="/assets/logo.png" alt="Wheelso" class="site-footer-logo" />
         <p class="site-footer-tagline">
-          <span data-lang-block="en">Premium island car rental — no deposit, no hidden fees.</span>
-          <span data-lang-block="el" hidden>Premium ενοικίαση αυτοκινήτων στα νησιά — χωρίς εγγύηση, χωρίς κρυφές χρεώσεις.</span>
+          Premium ενοικίαση αυτοκινήτων στα νησιά — χωρίς εγγύηση, χωρίς κρυφές χρεώσεις.
         </p>
       </div>
       <div class="site-footer-cols">
         <div class="site-footer-col">
-          <h4 data-lang-block="en">Rent</h4>
-          <h4 data-lang-block="el" hidden>Ενοικίαση</h4>
+          <h4>Ενοικίαση</h4>
           <ul>
-            <li><a href="index.html"><span data-lang-block="en">Search a car</span><span data-lang-block="el" hidden>Αναζήτηση αυτοκινήτου</span></a></li>
-            <li><a href="my-booking.html"><span data-lang-block="en">My booking</span><span data-lang-block="el" hidden>Η κράτησή μου</span></a></li>
+            <li><a href="/el/">Αναζήτηση αυτοκινήτου</a></li>
+            <li><a href="/my-booking.html">Η κράτησή μου</a></li>
           </ul>
         </div>
         <div class="site-footer-col">
-          <h4 data-lang-block="en">Legal</h4>
-          <h4 data-lang-block="el" hidden>Νομικά</h4>
+          <h4>Νομικά</h4>
           <ul>
-            <li><a href="terms.html"><span data-lang-block="en">Terms &amp; Conditions</span><span data-lang-block="el" hidden>Όροι &amp; Προϋποθέσεις</span></a></li>
-            <li><a href="privacy.html"><span data-lang-block="en">Privacy Policy</span><span data-lang-block="el" hidden>Πολιτική Απορρήτου</span></a></li>
-            <li><a href="cookies.html"><span data-lang-block="en">Cookies Policy</span><span data-lang-block="el" hidden>Πολιτική Cookies</span></a></li>
+            <li><a href="/terms.html">Όροι &amp; Προϋποθέσεις</a></li>
+            <li><a href="/privacy.html">Πολιτική Απορρήτου</a></li>
+            <li><a href="/cookies.html">Πολιτική Cookies</a></li>
           </ul>
         </div>
         <div class="site-footer-col">
-          <h4 data-lang-block="en">Stations</h4>
-          <h4 data-lang-block="el" hidden>Σταθμοί</h4>
+          <h4>Σταθμοί</h4>
           <ul>
-            <li><a href="mailto:athens@wheelso.gr">Athens · athens@wheelso.gr</a></li>
-            <li><a href="mailto:mykonos@wheelso.gr">Mykonos · mykonos@wheelso.gr</a></li>
-            <li><a href="mailto:paros@wheelso.gr">Paros · paros@wheelso.gr</a></li>
-            <li><a href="mailto:naxos@wheelso.gr">Naxos · naxos@wheelso.gr</a></li>
+            <li><a href="mailto:athens@wheelso.gr">Αθήνα · athens@wheelso.gr</a></li>
+            <li><a href="mailto:mykonos@wheelso.gr">Μύκονος · mykonos@wheelso.gr</a></li>
+            <li><a href="mailto:paros@wheelso.gr">Πάρος · paros@wheelso.gr</a></li>
+            <li><a href="mailto:naxos@wheelso.gr">Νάξος · naxos@wheelso.gr</a></li>
           </ul>
         </div>
       </div>
@@ -852,79 +848,59 @@
   <!-- LEGAL IMPRINT -->
   <div class="footer-imprint">
     <div class="footer-imprint-inner">
-      <span data-lang-block="en">
-        © 2026 <strong>Georgios Bogdanis &amp; Co. L.P.</strong> (trading as Wheelso) &nbsp;·&nbsp;
-        Leof. Syngrou 22, 117 42 Athens, Greece &nbsp;·&nbsp;
-        Tax ID (ΑΦΜ): 801074744 · GEMI: 148485501000 &nbsp;·&nbsp;
-        <a href="mailto:hello@wheelso.gr">hello@wheelso.gr</a> &nbsp;·&nbsp;
-        <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">EU ODR Platform</a> &nbsp;·&nbsp;
-        <a href="#" onclick="event.preventDefault(); if(window.revisitCkyConsent) window.revisitCkyConsent(); else if(window.CookieYes) window.CookieYes.openPreferenceCenter();">Cookie preferences</a>
-      </span>
-      <span data-lang-block="el" hidden>
-        © 2026 <strong>Γεώργιος Μπογδάνης και Σια Ε.Ε.</strong> (δ.τ. Wheelso) &nbsp;·&nbsp;
-        Λεωφ. Συγγρού 22, 117 42 Αθήνα &nbsp;·&nbsp;
-        ΑΦΜ: 801074744 · ΓΕΜΗ: 148485501000 &nbsp;·&nbsp;
-        <a href="mailto:hello@wheelso.gr">hello@wheelso.gr</a> &nbsp;·&nbsp;
-        <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">Πλατφόρμα ΗΕΔ ΕΕ</a> &nbsp;·&nbsp;
-        <a href="#" onclick="event.preventDefault(); if(window.revisitCkyConsent) window.revisitCkyConsent(); else if(window.CookieYes) window.CookieYes.openPreferenceCenter();">Προτιμήσεις cookies</a>
-      </span>
+      © 2026 <strong>Γεώργιος Μπογδάνης και Σια Ε.Ε.</strong> (δ.τ. Wheelso) &nbsp;·&nbsp;
+      Λεωφ. Συγγρού 22, 117 42 Αθήνα &nbsp;·&nbsp;
+      ΑΦΜ: 801074744 · ΓΕΜΗ: 148485501000 &nbsp;·&nbsp;
+      <a href="mailto:hello@wheelso.gr">hello@wheelso.gr</a> &nbsp;·&nbsp;
+      <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">Πλατφόρμα ΗΕΔ ΕΕ</a> &nbsp;·&nbsp;
+      <a href="#" onclick="event.preventDefault(); if(window.revisitCkyConsent) window.revisitCkyConsent(); else if(window.CookieYes) window.CookieYes.openPreferenceCenter();">Προτιμήσεις cookies</a>
     </div>
   </div>
   </footer>
 
   <script src="/i18n.js"></script>
-  <script src="search.js"></script>
+  <script src="/search.js"></script>
   <script>
-    // Language switcher with localStorage persistence (toggles [data-lang-block] elements; main booking copy is currently English-only)
+    // EL search: force Greek lang + EN button navigates to EN search (keeping params)
     (function () {
-      const STORAGE_KEY = 'wh-lang';
-      const validLangs = ['en', 'el'];
-      function applyLang(lang) {
-        if (!validLangs.includes(lang)) lang = 'en';
-        document.documentElement.lang = lang;
-        document.querySelectorAll('[data-lang-block]').forEach(el => {
-          el.hidden = (el.getAttribute('data-lang-block') !== lang);
+      document.documentElement.lang = 'el';
+      try { localStorage.setItem('wh-lang', 'el'); } catch (e) {}
+      document.querySelectorAll('.lang-btn').forEach(function (btn) {
+        var l = btn.getAttribute('data-lang');
+        btn.classList.toggle('active', l === 'el');
+        btn.addEventListener('click', function () {
+          if (l === 'en') window.location.href = '/search.html' + window.location.search;
         });
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-          btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-        });
-        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
-      }
-      let initial = 'en';
-      try { const saved = localStorage.getItem(STORAGE_KEY); if (saved && validLangs.includes(saved)) initial = saved; } catch (e) {}
-      applyLang(initial);
-      document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
       });
     })();
   </script>
 
   <!-- ============ MOBILE NAV ============ -->
   <div class="mobile-nav-overlay" id="mobileNavOverlay" aria-hidden="true"></div>
-  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" aria-hidden="true">
+  <nav class="mobile-nav" id="mobileNav" aria-label="Κινητή πλοήγηση" aria-hidden="true">
     <div class="mobile-nav-header">
-      <img src="assets/logo.png" alt="Wheelso" style="height:30px;" />
-      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
+      <img src="/assets/logo.png" alt="Wheelso" style="height:30px;" />
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Κλείσιμο μενού">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <ul class="mobile-nav-links">
-      <li><a href="index.html" class="mobile-nav-link">Rent a Car</a></li>
-      <li class="mobile-nav-section">DESTINATIONS</li>
-      <li><a href="car-rental/naxos/" class="mobile-nav-link">Naxos</a></li>
-      <li><a href="car-rental/paros/" class="mobile-nav-link">Paros</a></li>
-      <li><a href="car-rental/mykonos/" class="mobile-nav-link">Mykonos</a></li>
+      <li><a href="/el/" class="mobile-nav-link">Ενοικίαση Αυτοκινήτου</a></li>
+      <li class="mobile-nav-section">ΠΡΟΟΡΙΣΜΟΙ</li>
+      <li><a href="/el/car-rental/naxos/" class="mobile-nav-link">Νάξος</a></li>
+      <li><a href="/el/car-rental/paros/" class="mobile-nav-link">Πάρος</a></li>
+      <li><a href="/el/car-rental/mykonos/" class="mobile-nav-link">Μύκονος</a></li>
       <li class="mobile-nav-divider"></li>
-      <li><a href="my-booking.html" class="mobile-nav-link">My Booking</a></li>
-      <li><a href="terms.html" class="mobile-nav-link"><span data-lang-block="en">Terms</span><span data-lang-block="el" hidden>Όροι</span></a></li>
-      <li><a href="privacy.html" class="mobile-nav-link"><span data-lang-block="en">Privacy</span><span data-lang-block="el" hidden>Απόρρητο</span></a></li>
-      <li><a href="cookies.html" class="mobile-nav-link"><span data-lang-block="en">Cookies</span><span data-lang-block="el" hidden>Cookies</span></a></li>
+      <li><a href="/my-booking.html" class="mobile-nav-link">Η Κράτησή μου</a></li>
+      <li><a href="/terms.html" class="mobile-nav-link">Όροι</a></li>
+      <li><a href="/privacy.html" class="mobile-nav-link">Απόρρητο</a></li>
+      <li><a href="/cookies.html" class="mobile-nav-link">Cookies</a></li>
     </ul>
     <div class="mobile-nav-footer">
-      <div class="lang-switcher" role="group" aria-label="Language">
-        <button class="lang-btn active" data-lang="en">EN</button>
+      <div class="lang-switcher" role="group" aria-label="Γλώσσα">
+        <button class="lang-btn" data-lang="en">EN</button>
         <span class="lang-divider">|</span>
-        <button class="lang-btn" data-lang="el">GR</button>
+        <button class="lang-btn active" data-lang="el">GR</button>
       </div>
     </div>
   </nav>
@@ -945,6 +921,6 @@
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
     })();
   </script>
-  <script src="nav.js" defer></script>
+  <script src="/nav.js" defer></script>
 </body>
 </html>
