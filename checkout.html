@@ -46,14 +46,14 @@
         <form class="checkout-form" id="checkoutForm" novalidate>
           <section class="checkout-section">
             <h2>Driver details</h2>
-            <label class="field full"><span>Email address</span><input type="email" id="email" placeholder="Enter your email" required><small class="error">Please enter a valid email address</small></label>
+            <label class="field full"><span>Email address</span><input type="email" id="email" name="email" autocomplete="email" placeholder="Enter your email" required><small class="error">Please enter a valid email address</small></label>
             <div class="two-cols">
-              <label class="field"><span>First name</span><input type="text" id="firstName" placeholder="First name" required><small class="error">Required field</small></label>
-              <label class="field"><span>Last name</span><input type="text" id="lastName" placeholder="Last name" required><small class="error">Required field</small></label>
+              <label class="field"><span>First name</span><input type="text" id="firstName" name="first_name" autocomplete="given-name" placeholder="First name" required><small class="error">Required field</small></label>
+              <label class="field"><span>Last name</span><input type="text" id="lastName" name="last_name" autocomplete="family-name" placeholder="Last name" required><small class="error">Required field</small></label>
             </div>
             <div class="phone-row">
-              <label class="field country"><span>Country code</span><select id="countryCode"></select></label>
-              <label class="field phone"><span>Phone number</span><input type="tel" id="phone" placeholder="Enter your phone number" required><small class="error">Please enter a valid phone number</small></label>
+              <label class="field country"><span>Country code</span><select id="countryCode" name="country_code" autocomplete="tel-country-code"></select></label>
+              <label class="field phone"><span>Phone number</span><input type="tel" id="phone" name="phone" autocomplete="tel-national" placeholder="Enter your phone number" required><small class="error">Please enter a valid phone number</small></label>
             </div>
             <label class="check-row"><input type="checkbox" id="ageConfirm" checked required><span>I am 23 years or older</span></label>
             <div class="info-note"><strong>i</strong><span>Drivers must hold a valid driving license for at least 1 year.</span></div>
