@@ -2008,14 +2008,25 @@ html, body {
   .field-row { grid-template-columns: 1fr; }
   .booking-tab { padding: 10px 14px; font-size: 13px; }
 
+  /* Home hero uses a light photo on mobile — darken the overlay so the white
+     copy (eyebrow + title + subtitle) stays readable. Landing pages already
+     have a dark navy .hero-bg, so this only makes them marginally darker. */
+  .hero-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(9, 61, 94, 0.78) 0%,
+      rgba(9, 61, 94, 0.55) 45%,
+      var(--wh-blue-dark) 100%
+    );
+  }
   .hero-title {
     font-size: clamp(32px, 9vw, 44px);
-    text-shadow: none;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.35);
   }
   .hero-sub {
     font-size: 16px;
-    color: rgba(255,255,255,0.78);
-    text-shadow: none;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.3);
   }
   .eyebrow { font-size: 12px; padding: 6px 12px; }
 
