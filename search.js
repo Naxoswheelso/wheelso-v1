@@ -277,6 +277,19 @@ const CAR_SVGS = {
   van: `<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><path d="M12 72 L28 72 C28 81 36 89 46 89 C56 89 64 81 64 72 L136 72 C136 81 144 89 154 89 C164 89 172 81 172 72 L192 72 L192 28 C192 22 187 18 181 18 L30 18 C22 18 16 24 16 32 L16 50 L8 53 C4 55 2 58 2 62 L2 70 Z" fill="#1C5875"/><path d="M30 25 L80 25 L80 45 L30 45 Z M85 25 L130 25 L130 45 L85 45 Z M135 25 L180 25 L180 45 L135 45 Z" fill="#a8c9d9" opacity="0.6"/><circle cx="46" cy="80" r="12" fill="#093D5E"/><circle cx="46" cy="80" r="5" fill="#CFDD28"/><circle cx="154" cy="80" r="12" fill="#093D5E"/><circle cx="154" cy="80" r="5" fill="#CFDD28"/></svg>`
 };
 
+// Returns the inline SVG illustration for a category, with a safe default
+// (e.g. 'mini' has no dedicated SVG → fall back to economy).
+function carSvg(category) {
+  return CAR_SVGS[category] || CAR_SVGS.economy;
+}
+
+// If a real (Cloudinary) car photo fails to load, swap the broken <img> for
+// the category SVG so the user never sees a broken-image placeholder.
+function onCarImgError(img, category) {
+  img.insertAdjacentHTML('afterend', carSvg(category));
+  img.remove();
+}
+
 // Car categories — loaded dynamically from API (fallback to hardcoded)
 let CATEGORY_LABELS = {
   mini: 'Mini', economy: 'Economy', compact: 'Compact',
@@ -321,8 +334,8 @@ function renderVehicleCard(v) {
         ${isAuto ? `<span class="vehicle-badge transmission-auto">${t('auto')}</span>` : `<span class="vehicle-badge">${t('manual')}</span>`}
         ${v.admin_upon_request ? `<span class="vehicle-badge on-request">${t('onRequest')}</span>` : ''}
         ${v.image_url
-          ? `<img src="${escapeHtml(carImageSrc(v.image_url))}" alt="${escapeHtml(v.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
-          : CAR_SVGS[v.category]}
+          ? `<img src="${escapeHtml(carImageSrc(v.image_url))}" alt="${escapeHtml(v.name)}" loading="lazy" decoding="async" onerror="onCarImgError(this, '${escapeHtml(v.category)}')" style="width:100%;height:100%;object-fit:contain;">`
+          : carSvg(v.category)}
       </div>
       <div class="vehicle-body">
         <div class="vehicle-header">
@@ -537,8 +550,8 @@ function openVehicleModal(v) {
   }
 
   document.getElementById('modalPreviewImage').innerHTML = v.image_url
-    ? `<img src="${escapeHtml(carImageSrc(v.image_url))}" alt="${escapeHtml(v.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;">`
-    : CAR_SVGS[v.category];
+    ? `<img src="${escapeHtml(carImageSrc(v.image_url))}" alt="${escapeHtml(v.name)}" loading="lazy" decoding="async" onerror="onCarImgError(this, '${escapeHtml(v.category)}')" style="width:100%;height:100%;object-fit:contain;">`
+    : carSvg(v.category);
   document.getElementById('modalCategory').textContent = `${CATEGORY_LABELS[v.category]} · ${v.code}`;
   document.getElementById('modalTitle').textContent = v.name;
   document.getElementById('modalSimilar').textContent = v.similar;
@@ -932,7 +945,7 @@ function populateSummarySidebar() {
   const sv = document.getElementById('summaryVehicle');
   if (sv) {
     sv.innerHTML = `
-      <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
+      <div class="summary-vehicle-image">${carSvg(v.category)}</div>
       <div class="summary-vehicle-info">
         <span class="summary-vehicle-cat">${escapeHtml(CATEGORY_LABELS[v.category])}</span>
         <span class="summary-vehicle-name">${escapeHtml(v.name)}</span>
@@ -1164,7 +1177,7 @@ function populateDriverSummary() {
   const sv = document.getElementById('driverSummaryVehicle');
   if (sv) {
     sv.innerHTML = `
-      <div class="summary-vehicle-image">${CAR_SVGS[v.category]}</div>
+      <div class="summary-vehicle-image">${carSvg(v.category)}</div>
       <div class="summary-vehicle-info">
         <span class="summary-vehicle-cat">${escapeHtml(CATEGORY_LABELS[v.category])}</span>
         <span class="summary-vehicle-name">${escapeHtml(v.name)}</span>
