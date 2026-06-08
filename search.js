@@ -33,6 +33,32 @@ function frontendValueToStationCode(v) {
   return (v || '').toUpperCase();
 }
 
+// ============================================
+// GA4 ANALYTICS (funnel events + client_id capture)
+// ============================================
+const GA_MEASUREMENT_ID = 'G-JW04MNN2T0';
+let gaClientId = null;
+let gaSessionId = null;
+
+// Fire a GA4 event only if gtag exists (no-op without consent / on payment pages).
+function gaEvent(name, params) {
+  try { if (window.gtag) window.gtag('event', name, params || {}); } catch (_) {}
+}
+
+// Read client_id + session_id from GA so they're ready to attach to the booking.
+// Best-effort: if gtag isn't ready or analytics consent is denied, they stay null
+// and the backend simply skips the server-side purchase event (no error).
+function captureGaIds() {
+  try {
+    if (!window.gtag) return;
+    window.gtag('get', GA_MEASUREMENT_ID, 'client_id', (id) => { if (id) gaClientId = id; });
+    window.gtag('get', GA_MEASUREMENT_ID, 'session_id', (id) => { if (id) gaSessionId = id; });
+  } catch (_) {}
+}
+captureGaIds();
+setTimeout(captureGaIds, 1500);
+setTimeout(captureGaIds, 4000);
+
 // Sticky header
 const header = document.getElementById('siteHeader');
 window.addEventListener('scroll', () => {
@@ -452,6 +478,14 @@ function renderResults() {
   } else {
     resultsEmpty.hidden = true;
     fleetGrid.innerHTML = list.map(renderVehicleCard).join('');
+    gaEvent('view_item_list', {
+      item_list_id: (searchCtx.pickup || 'search').toLowerCase(),
+      item_list_name: `Search ${searchCtx.pickup || ''}`.trim(),
+      items: list.slice(0, 20).map(v => ({
+        item_id: v.code, item_name: v.name, item_category: v.category,
+        price: bestPrice(v), quantity: 1,
+      })),
+    });
   }
 }
 
@@ -588,6 +622,11 @@ function openVehicleModal(v) {
     closeVehicleModal();
   };
   recalc();
+  gaEvent('view_item', {
+    currency: 'EUR',
+    value: bestPrice(v) * rentalDays,
+    items: [{ item_id: v.code, item_name: v.name, item_category: v.category, price: bestPrice(v), quantity: rentalDays }],
+  });
   vehicleModal.hidden = false;
   const modalScrollArea = vehicleModal.querySelector('.modal-scroll-area');
   if (modalScrollArea) modalScrollArea.scrollTop = 0;
@@ -1116,6 +1155,14 @@ async function openDriverPage() {
   document.body.classList.add('protection-open');
   driverPage.scrollTop = 0;
 
+  const cpv = currentProtection && currentProtection.vehicle;
+  if (cpv) {
+    gaEvent('begin_checkout', {
+      currency: 'EUR',
+      items: [{ item_id: cpv.code, item_name: cpv.name, item_category: cpv.category, price: bestPrice(cpv), quantity: currentProtection.days || 1 }],
+    });
+  }
+
   // Show after-hours warning if applicable
   showAfterHoursWarning(timing.warning);
   showOneWayBanner();
@@ -1597,7 +1644,9 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     driver_age: searchCtx.age || null,
     flight_ferry: formObj.flight || null,
     notes: formObj.notes || null,
-    extras_json: extrasArr
+    extras_json: extrasArr,
+    ga_client_id: gaClientId,
+    ga_session_id: gaSessionId
   };
 }
 
