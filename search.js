@@ -1531,6 +1531,15 @@ if (driverContinueBtn) {
   });
 }
 
+// Single phone input: split the full number into country code (+CC) + national part
+// so the API payload (phone / country_code) stays unchanged. Defaults to Greece if no +CC typed.
+function splitPhone(raw) {
+  const s = (raw || '').trim().replace(/^00/, '+');
+  const m = s.match(/^(\+\d{1,4})[\s-]*(.*)$/);
+  if (m) return { countryCode: m[1], national: m[2].replace(/\s+/g, '') };
+  return { countryCode: '+30', national: s.replace(/\s+/g, '') };
+}
+
 function buildBookingPayload(formObj, afterHoursFee = 0) {
   const v = currentProtection.vehicle;
   const days = currentProtection.days;
@@ -1552,12 +1561,14 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     .filter(([, qty]) => qty > 0)
     .map(([id, qty]) => ({ code: id, quantity: qty }));
 
+  const phoneParts = splitPhone(formObj.phone);
+
   return {
     first_name: formObj.firstName || '',
     last_name: formObj.lastName || '',
     email: formObj.email || '',
-    phone: formObj.phone || '',
-    country_code: formObj.country || null,
+    phone: phoneParts.national,
+    country_code: phoneParts.countryCode,
     pickup_station: pickupStation,
     return_station: returnStation,
     pickup_datetime: `${searchCtx.from}T${searchCtx.fromTime}:00`,

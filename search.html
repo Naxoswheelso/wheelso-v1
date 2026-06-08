@@ -589,15 +589,10 @@
                 <span class="form-hint">We'll send the confirmation and receipt to this email.</span>
               </div>
 
-              <div class="form-row">
-                <div class="form-field form-field-country">
-                  <label for="country">Country code</label>
-                  <input type="tel" id="country" name="country" value="+30" placeholder="+30" pattern="\+\d{1,4}" required maxlength="5" autocomplete="tel-country-code">
-                </div>
-                <div class="form-field form-field-phone">
-                  <label for="phone">Phone <span class="req">*</span></label>
-                  <input type="tel" id="phone" name="phone" required autocomplete="tel-national" placeholder="6912345678" />
-                </div>
+              <div class="form-field">
+                <label for="phone">Phone <span class="req">*</span></label>
+                <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="+30 691 234 5678" />
+                <span class="form-hint">Include your country code (e.g. +30 for Greece).</span>
               </div>
 
               <div class="form-field">
