@@ -1644,11 +1644,20 @@ function initCountryCombo() {
   all.filter(c => !PRIORITY.includes(c.iso)).forEach(c => ordered.push(c));
   if (!ordered.length) ordered.push({ iso: 'GR', name: 'Greece', dial: '+30' }); // fallback if country-codes.js missing
 
+  // Preserve the localized placeholder text from the HTML ('Country code' / 'Κωδικός χώρας').
+  const placeholderText = valueEl.textContent;
+
   function setSelection(c) {
     hidden.value = c.dial;
     valueEl.textContent = `${isoToFlag(c.iso)} ${c.dial}`;
+    valueEl.classList.remove('country-combo-placeholder');
+    toggle.classList.remove('invalid');
   }
-  setSelection(byIso['GR'] || ordered[0]); // default Greece
+  // No default selection — start empty so the customer must pick their own country
+  // (the old +30 default was silently kept, mislabeling foreign numbers as Greek).
+  hidden.value = '';
+  valueEl.textContent = placeholderText;
+  valueEl.classList.add('country-combo-placeholder');
 
   function render(filter) {
     const f = (filter || '').trim().toLowerCase();
@@ -1761,6 +1770,14 @@ function validateDriverForm() {
     populateDriverSummary();
     updateDriverTotal(checkPickupTiming().afterHoursFee);
     showFdwDowngradeNotice();
+    return false;
+  }
+
+  // Country code is now mandatory (no silent +30 default) — block submit if unset.
+  const countryHidden = document.getElementById('country');
+  if (countryHidden && !countryHidden.value) {
+    document.getElementById('countryComboToggle')?.classList.add('invalid');
+    document.getElementById('countryCombo')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return false;
   }
 

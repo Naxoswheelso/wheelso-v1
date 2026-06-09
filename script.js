@@ -1907,7 +1907,7 @@ function initBookingWidget() {
 
     document.getElementById('promoCode')?.addEventListener('blur', validatePromo);
     document.getElementById('driverAge')?.addEventListener('change', (e) => {
-      if (e.target.value) e.target.classList.remove('invalid');
+      if (e.target.value) e.target.closest('.select-wrap')?.classList.remove('invalid');
     });
 
     bookingForm.addEventListener('submit', async (e) => {
@@ -1929,12 +1929,12 @@ function initBookingWidget() {
       // be blocked for young (21-25) / senior (70-75) drivers downstream.
       const ageEl = document.getElementById('driverAge');
       if (ageEl && !ageEl.value) {
-        ageEl.classList.add('invalid');
+        ageEl.closest('.select-wrap')?.classList.add('invalid');
         ageEl.focus();
         ageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-      if (ageEl) ageEl.classList.remove('invalid');
+      if (ageEl) ageEl.closest('.select-wrap')?.classList.remove('invalid');
 
       // Validate dates
       if (!pickupDate || !returnDate) {

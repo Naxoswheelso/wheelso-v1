@@ -470,12 +470,11 @@ html, body {
 .field-select:focus,
 .field-input:focus { outline: none; }
 
-/* Invalid state for mandatory hero selects (e.g. driver age not chosen) */
-.field-select.invalid {
-  color: #c0392b;
-  outline: 2px solid #c0392b;
-  outline-offset: 2px;
-  border-radius: 6px;
+/* Invalid state for mandatory hero selects (e.g. driver age not chosen).
+   Outline the wrapper (not the bare <select>) so the red ring hugs the field. */
+.select-wrap.invalid {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
 }
 
 .field-input-text {
@@ -3500,7 +3499,12 @@ body.breakdown-open { overflow: hidden; }
   border-color: var(--wh-blue-mid);
   box-shadow: 0 0 0 3px rgba(28, 88, 117, 0.12);
 }
+.country-combo-toggle.invalid {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+}
 .country-combo-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.country-combo-placeholder { color: var(--wh-gray-400); }
 .country-combo-panel {
   position: absolute;
   top: calc(100% + 4px);
