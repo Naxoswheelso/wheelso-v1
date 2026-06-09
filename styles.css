@@ -470,6 +470,14 @@ html, body {
 .field-select:focus,
 .field-input:focus { outline: none; }
 
+/* Invalid state for mandatory hero selects (e.g. driver age not chosen) */
+.field-select.invalid {
+  color: #c0392b;
+  outline: 2px solid #c0392b;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .field-input-text {
   cursor: text;
   padding-left: 14px;
@@ -3467,6 +3475,100 @@ body.breakdown-open { overflow: hidden; }
 .form-field-country { max-width: 130px; }
 .form-row:has(.form-field-country) {
   grid-template-columns: 130px 1fr;
+}
+
+/* Searchable country-code combobox (booking driver form) */
+.country-combo { position: relative; }
+.country-combo-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 12px 12px;
+  border: 1.5px solid var(--wh-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--wh-white);
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--wh-blue-dark);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.country-combo-toggle:hover { border-color: var(--wh-gray-300); }
+.country-combo-toggle[aria-expanded="true"] {
+  border-color: var(--wh-blue-mid);
+  box-shadow: 0 0 0 3px rgba(28, 88, 117, 0.12);
+}
+.country-combo-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.country-combo-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 60;
+  width: 300px;
+  max-width: 78vw;
+  background: var(--wh-white);
+  border: 1.5px solid var(--wh-gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 28px rgba(9, 61, 94, 0.16);
+  padding: 8px;
+}
+.country-combo-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  border: 1.5px solid var(--wh-gray-200);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 14px;
+  color: var(--wh-blue-dark);
+  margin-bottom: 6px;
+}
+.country-combo-search:focus {
+  outline: none;
+  border-color: var(--wh-blue-mid);
+  box-shadow: 0 0 0 3px rgba(28, 88, 117, 0.12);
+}
+.country-combo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.country-combo-option {
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--wh-blue-dark);
+  cursor: pointer;
+}
+.country-combo-option:hover { background: #f0f4f8; }
+.country-combo-empty {
+  padding: 10px;
+  font-size: 13px;
+  color: var(--wh-gray-500);
+  text-align: center;
+}
+
+/* Protection card disabled — Full Damage Waiver blocked for young/senior drivers */
+.protection-card--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+.protection-card--disabled .protection-card-radio { visibility: hidden; }
+.protection-fdw-note {
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #B45309;
+  background: #fff8e1;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 8px 10px;
+  line-height: 1.4;
 }
 
 .form-checkbox {

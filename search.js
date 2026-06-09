@@ -82,6 +82,12 @@ const searchCtx = {
 };
 let promoState = { applied: false, discountAmount: 0, code: null };
 
+// Young (21-25) and senior (70-75) drivers cannot take Full Protection (FDW / zero excess).
+// Used to gate the protection step and as a submit-time safety net (backend also enforces).
+function isRestrictedAge(age) {
+  return age === '21-25' || age === '70-75';
+}
+
 // Compute days
 function computeDays() {
   if (!searchCtx.from || !searchCtx.to) return 3;
@@ -735,7 +741,7 @@ function renderCoverageBar(filled, total = 3, isLime = false) {
   return html + '</div>';
 }
 
-function renderProtectionCard(pkg, selectedId) {
+function renderProtectionCard(pkg, selectedId, disabled = false) {
   const featuresHTML = Object.entries(pkg.features).map(([name, included]) => `
     <div class="protection-feature ${included ? 'included' : 'excluded'}">
       ${included ? ICON_CHECK : ICON_X}
@@ -744,7 +750,9 @@ function renderProtectionCard(pkg, selectedId) {
   `).join('');
 
   let priceHTML;
-  if (pkg.pricePerDay === 0) {
+  if (disabled) {
+    priceHTML = `<div class="protection-fdw-note">${escapeHtml(t('prot_fdwAgeBlocked'))}</div>`;
+  } else if (pkg.pricePerDay === 0) {
     priceHTML = `<div class="protection-price">${t('included')} <span>${t('inRate')}</span></div>`;
   } else {
     priceHTML = `<div class="protection-price">+€${pkg.pricePerDay.toFixed(2)} <span>${t('perDay')}</span></div>`;
@@ -763,15 +771,15 @@ function renderProtectionCard(pkg, selectedId) {
        </div>`
     : '';
 
-  const badgeHTML = pkg.recommended ? `<span class="protection-badge">${t('mostPopular')}</span>` : '';
-  const isLime = !!pkg.recommended;
+  const badgeHTML = (pkg.recommended && !disabled) ? `<span class="protection-badge">${t('mostPopular')}</span>` : '';
+  const isLime = !!pkg.recommended && !disabled;
   const eyebrowHTML = pkg.eyebrow ? `<div class="protection-eyebrow">${escapeHtml(pkg.eyebrow)}</div>` : '';
   const footnoteHTML = pkg.footnote
     ? `<p class="protection-footnote">${escapeHtml(pkg.footnote).replace(t('prot_seeTerms'), `<a href="#" class="excl-trigger">${t('prot_seeTerms')}</a>`)}</p>`
     : '';
 
   return `
-    <div class="protection-card ${selectedId === pkg.id ? 'selected' : ''} ${pkg.recommended ? 'recommended' : ''}" data-pkg="${escapeHtml(pkg.id)}">
+    <div class="protection-card ${(!disabled && selectedId === pkg.id) ? 'selected' : ''} ${(pkg.recommended && !disabled) ? 'recommended' : ''} ${disabled ? 'protection-card--disabled' : ''}" data-pkg="${escapeHtml(pkg.id)}"${disabled ? ' aria-disabled="true"' : ''}>
       ${badgeHTML}
       <div class="protection-card-radio"></div>
       ${renderCoverageBar(pkg.coverage || 1, 3, isLime)}
@@ -818,6 +826,10 @@ async function openProtectionPage(v, days, rate) {
   if (!PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected)) {
     currentProtection.selected = PROTECTION_PACKAGES[0]?.id || 'basic';
   }
+  // Young/senior drivers may not have Full Protection — coerce to Basic if it slipped through.
+  if (isRestrictedAge(searchCtx.age) && currentProtection.selected === 'full') {
+    currentProtection.selected = 'basic';
+  }
   renderProtectionGrid();
   updateProtectionTotal();
 }
@@ -828,7 +840,8 @@ function closeProtectionPage() {
 }
 
 function renderProtectionGrid() {
-  protectionGrid.innerHTML = PROTECTION_PACKAGES.map(p => renderProtectionCard(p, currentProtection.selected)).join('');
+  const blockFull = isRestrictedAge(searchCtx.age);
+  protectionGrid.innerHTML = PROTECTION_PACKAGES.map(p => renderProtectionCard(p, currentProtection.selected, blockFull && p.id === 'full')).join('');
 }
 
 function updateProtectionTotal() {
@@ -844,7 +857,7 @@ function updateProtectionTotal() {
 
 protectionGrid.addEventListener('click', (e) => {
   const card = e.target.closest('.protection-card');
-  if (!card) return;
+  if (!card || card.classList.contains('protection-card--disabled')) return;
   currentProtection.selected = card.dataset.pkg;
   renderProtectionGrid();
   updateProtectionTotal();
@@ -1563,6 +1576,17 @@ async function submitBooking(obj, timing) {
     showThankYouPopup(ref, obj.email, driverTotalEl.textContent);
   } catch (err) {
     console.error('[Wheelso] Booking failed:', err);
+    if (err.data?.error === 'fdw_age_restricted') {
+      // Backend rejected Full Protection for a young/senior driver — downgrade locally,
+      // re-sync every price display, and let the customer review + resubmit.
+      currentProtection.selected = 'basic';
+      populateDriverSummary();
+      updateDriverTotal(checkPickupTiming().afterHoursFee);
+      showFdwDowngradeNotice();
+      driverContinueBtn.disabled = false;
+      driverContinueBtn.textContent = originalText;
+      return;
+    }
     alert(`Sorry, we couldn't complete your booking:\n\n${err.message}\n\nPlease try again or contact us.`);
     driverContinueBtn.disabled = false;
     driverContinueBtn.textContent = originalText;
@@ -1591,14 +1615,73 @@ if (driverContinueBtn) {
   });
 }
 
-// Single phone input: split the full number into country code (+CC) + national part
-// so the API payload (phone / country_code) stays unchanged. Defaults to Greece if no +CC typed.
-function splitPhone(raw) {
-  const s = (raw || '').trim().replace(/^00/, '+');
-  const m = s.match(/^(\+\d{1,4})[\s-]*(.*)$/);
-  if (m) return { countryCode: m[1], national: m[2].replace(/\s+/g, '') };
-  return { countryCode: '+30', national: s.replace(/\s+/g, '') };
+// ─── Country-code combobox (searchable, with flags + country names) ───
+// Replaces the old single-field splitPhone() which silently defaulted to +30.
+// The selected dial code is stored in the hidden #country input; #phone holds the
+// national number only. country_code + phone are sent unchanged to the API.
+function isoToFlag(iso) {
+  if (!iso || iso.length !== 2) return '';
+  const A = 0x1F1E6; // regional indicator 'A'
+  return String.fromCodePoint(A + (iso.charCodeAt(0) - 65), A + (iso.charCodeAt(1) - 65));
 }
+
+function initCountryCombo() {
+  const combo = document.getElementById('countryCombo');
+  if (!combo) return;
+  const toggle = document.getElementById('countryComboToggle');
+  const valueEl = document.getElementById('countryComboValue');
+  const panel = document.getElementById('countryComboPanel');
+  const search = document.getElementById('countrySearch');
+  const list = document.getElementById('countryComboList');
+  const hidden = document.getElementById('country');
+
+  const PRIORITY = ['GR', 'GB', 'DE', 'FR', 'IT', 'ES', 'US', 'NL', 'AT', 'CH'];
+  const all = Array.isArray(window.COUNTRY_CODES) ? window.COUNTRY_CODES.slice() : [];
+  const byIso = {};
+  all.forEach(c => { byIso[c.iso] = c; });
+  const ordered = [];
+  PRIORITY.forEach(iso => { if (byIso[iso]) ordered.push(byIso[iso]); });
+  all.filter(c => !PRIORITY.includes(c.iso)).forEach(c => ordered.push(c));
+  if (!ordered.length) ordered.push({ iso: 'GR', name: 'Greece', dial: '+30' }); // fallback if country-codes.js missing
+
+  function setSelection(c) {
+    hidden.value = c.dial;
+    valueEl.textContent = `${isoToFlag(c.iso)} ${c.dial}`;
+  }
+  setSelection(byIso['GR'] || ordered[0]); // default Greece
+
+  function render(filter) {
+    const f = (filter || '').trim().toLowerCase();
+    const items = f
+      ? ordered.filter(c => c.name.toLowerCase().includes(f) || c.dial.includes(f) || c.iso.toLowerCase() === f)
+      : ordered;
+    list.innerHTML = items.length
+      ? items.map(c => `<li class="country-combo-option" role="option" data-dial="${c.dial}" data-iso="${c.iso}" data-name="${escapeHtml(c.name)}">${isoToFlag(c.iso)} ${escapeHtml(c.name)} (${c.dial})</li>`).join('')
+      : `<li class="country-combo-empty">No match</li>`;
+  }
+  function open() {
+    render('');
+    panel.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+    search.value = '';
+    setTimeout(() => search.focus(), 0);
+  }
+  function close() {
+    panel.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+  toggle.addEventListener('click', () => { panel.hidden ? open() : close(); });
+  search.addEventListener('input', () => render(search.value));
+  list.addEventListener('click', (e) => {
+    const li = e.target.closest('.country-combo-option');
+    if (!li) return;
+    setSelection({ iso: li.dataset.iso, name: li.dataset.name, dial: li.dataset.dial });
+    close();
+  });
+  document.addEventListener('click', (e) => { if (!combo.contains(e.target)) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) close(); });
+}
+initCountryCombo();
 
 function buildBookingPayload(formObj, afterHoursFee = 0) {
   const v = currentProtection.vehicle;
@@ -1621,14 +1704,12 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     .filter(([, qty]) => qty > 0)
     .map(([id, qty]) => ({ code: id, quantity: qty }));
 
-  const phoneParts = splitPhone(formObj.phone);
-
   return {
     first_name: formObj.firstName || '',
     last_name: formObj.lastName || '',
     email: formObj.email || '',
-    phone: phoneParts.national,
-    country_code: phoneParts.countryCode,
+    phone: (formObj.phone || '').replace(/\s+/g, ''),
+    country_code: formObj.country || '+30',
     pickup_station: pickupStation,
     return_station: returnStation,
     pickup_datetime: `${searchCtx.from}T${searchCtx.fromTime}:00`,
@@ -1650,11 +1731,38 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
   };
 }
 
+// Shows the "switched to Basic Protection" notice on the driver page.
+function showFdwDowngradeNotice() {
+  const id = 'fdwDowngradeNotice';
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.style.cssText = 'background:#fff8e1;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-size:14px;color:#92400e;';
+    const form = document.getElementById('driverForm');
+    if (form) form.prepend(el);
+  }
+  el.textContent = t('prot_fdwDowngraded');
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function validateDriverForm() {
   let valid = true;
 
   const checkboxError = document.getElementById('checkboxError');
   if (checkboxError) checkboxError.hidden = true;
+
+  // FDW safety net: young (21-25) / senior (70-75) drivers cannot keep Full Protection.
+  // (Normally unreachable — the card is disabled at the protection step — but this guards
+  // back-navigation / tampering and keeps the displayed total in sync before any charge.)
+  if (isRestrictedAge(searchCtx.age) && currentProtection.selected === 'full') {
+    currentProtection.selected = 'basic';
+    populateDriverSummary();
+    updateDriverTotal(checkPickupTiming().afterHoursFee);
+    showFdwDowngradeNotice();
+    return false;
+  }
 
   const required = ['firstName', 'lastName', 'email', 'phone'];
   required.forEach(id => {

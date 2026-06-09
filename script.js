@@ -1906,6 +1906,9 @@ function initBookingWidget() {
     }
 
     document.getElementById('promoCode')?.addEventListener('blur', validatePromo);
+    document.getElementById('driverAge')?.addEventListener('change', (e) => {
+      if (e.target.value) e.target.classList.remove('invalid');
+    });
 
     bookingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1920,6 +1923,18 @@ function initBookingWidget() {
         return;
       }
       if (locationError) locationError.hidden = true;
+
+      // Validate driver age — mandatory (the form is novalidate, so enforce in JS).
+      // This makes the age known before the protection step so Full Damage Waiver can
+      // be blocked for young (21-25) / senior (70-75) drivers downstream.
+      const ageEl = document.getElementById('driverAge');
+      if (ageEl && !ageEl.value) {
+        ageEl.classList.add('invalid');
+        ageEl.focus();
+        ageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (ageEl) ageEl.classList.remove('invalid');
 
       // Validate dates
       if (!pickupDate || !returnDate) {

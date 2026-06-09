@@ -589,10 +589,25 @@
                 <span class="form-hint">Θα στείλουμε την επιβεβαίωση και την απόδειξη σε αυτό το email.</span>
               </div>
 
-              <div class="form-field">
-                <label for="phone">Τηλέφωνο <span class="req">*</span></label>
-                <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="+30 691 234 5678" />
-                <span class="form-hint">Συμπεριέλαβε τον κωδικό χώρας (π.χ. +30 για Ελλάδα).</span>
+              <div class="form-row">
+                <div class="form-field form-field-country">
+                  <label for="countryComboToggle">Κωδικός χώρας</label>
+                  <div class="country-combo" id="countryCombo">
+                    <button type="button" class="country-combo-toggle" id="countryComboToggle" aria-haspopup="listbox" aria-expanded="false">
+                      <span class="country-combo-value" id="countryComboValue">🇬🇷 +30</span>
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="country-combo-panel" id="countryComboPanel" hidden>
+                      <input type="text" class="country-combo-search" id="countrySearch" placeholder="Αναζήτηση χώρας…" autocomplete="off" />
+                      <ul class="country-combo-list" id="countryComboList" role="listbox"></ul>
+                    </div>
+                    <input type="hidden" id="country" name="country" value="+30" />
+                  </div>
+                </div>
+                <div class="form-field form-field-phone">
+                  <label for="phone">Τηλέφωνο <span class="req">*</span></label>
+                  <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="6912345678" />
+                </div>
               </div>
 
               <div class="form-field">
@@ -854,6 +869,7 @@
   </footer>
 
   <script src="/i18n.js"></script>
+  <script src="/country-codes.js"></script>
   <script src="/search.js"></script>
   <script>
     // EL search: force Greek lang + EN button navigates to EN search (keeping params)

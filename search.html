@@ -589,10 +589,25 @@
                 <span class="form-hint">We'll send the confirmation and receipt to this email.</span>
               </div>
 
-              <div class="form-field">
-                <label for="phone">Phone <span class="req">*</span></label>
-                <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="+30 691 234 5678" />
-                <span class="form-hint">Include your country code (e.g. +30 for Greece).</span>
+              <div class="form-row">
+                <div class="form-field form-field-country">
+                  <label for="countryComboToggle">Country code</label>
+                  <div class="country-combo" id="countryCombo">
+                    <button type="button" class="country-combo-toggle" id="countryComboToggle" aria-haspopup="listbox" aria-expanded="false">
+                      <span class="country-combo-value" id="countryComboValue">🇬🇷 +30</span>
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="country-combo-panel" id="countryComboPanel" hidden>
+                      <input type="text" class="country-combo-search" id="countrySearch" placeholder="Search country…" autocomplete="off" />
+                      <ul class="country-combo-list" id="countryComboList" role="listbox"></ul>
+                    </div>
+                    <input type="hidden" id="country" name="country" value="+30" />
+                  </div>
+                </div>
+                <div class="form-field form-field-phone">
+                  <label for="phone">Phone <span class="req">*</span></label>
+                  <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="6912345678" />
+                </div>
               </div>
 
               <div class="form-field">
@@ -868,6 +883,7 @@
   </footer>
 
   <script src="/i18n.js"></script>
+  <script src="country-codes.js"></script>
   <script src="search.js"></script>
   <script>
     // Language switcher with localStorage persistence (toggles [data-lang-block] elements; main booking copy is currently English-only)

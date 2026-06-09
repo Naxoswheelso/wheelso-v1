@@ -762,6 +762,21 @@
             <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#093D5E;">${formatPrice(b.one_way_fee)}</td>
           </tr>`;
       }
+      // Young/Senior Driver Fee — informational only (collected at pick-up, NOT part of total)
+      const ageInt = b.driver_age != null ? (parseInt(String(b.driver_age)) || null) : null;
+      const isYoungDriver  = ageInt != null && ageInt >= 21 && ageInt <= 25;
+      const isSeniorDriver = ageInt != null && ageInt >= 70 && ageInt <= 75;
+      if (isYoungDriver || isSeniorDriver) {
+        const feeLabel = isYoungDriver ? 'Young Driver Fee' : 'Senior Driver Fee';
+        html += `
+          <tr>
+            <td style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#92400e;">
+              ⚠️ ${feeLabel} <span style="color:#b45309;">— €5/day × ${days} = ${formatPrice(5 * days)}, payable at pick-up (not included in total)</span>
+            </td>
+            <td align="right" style="padding:6px 18px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; color:#92400e; white-space:nowrap;">at desk</td>
+          </tr>`;
+      }
+
       // Bottom spacer
       html += `<tr><td colspan="2" style="padding:0 18px 8px;">&nbsp;</td></tr>`;
       rows.innerHTML = html;
