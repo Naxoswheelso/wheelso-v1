@@ -14,6 +14,16 @@
   function gtag() { dataLayer.push(arguments); }
   window.gtag = gtag;
 
+  // First-touch landing page of this tab's visit — attached to the booking and sent
+  // with the server-side GA4 purchase so conversions are attributable to the entry
+  // page (e.g. /car-rental/naxos/). First page wins; never overwritten. Functional,
+  // first-party, stays in the browser unless the visitor consents and books.
+  try {
+    if (!sessionStorage.getItem('wls_landing')) {
+      sessionStorage.setItem('wls_landing', location.href);
+    }
+  } catch (_) {}
+
   var s = document.createElement('script');
   s.async = true;
   s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;

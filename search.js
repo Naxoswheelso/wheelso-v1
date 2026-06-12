@@ -1736,7 +1736,8 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     notes: formObj.notes || null,
     extras_json: extrasArr,
     ga_client_id: gaClientId,
-    ga_session_id: gaSessionId
+    ga_session_id: gaSessionId,
+    ga_page_location: (function () { try { return sessionStorage.getItem('wls_landing'); } catch (_) { return null; } })() || location.href
   };
 }
 
