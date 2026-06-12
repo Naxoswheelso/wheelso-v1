@@ -1846,14 +1846,24 @@ function initBookingWidget() {
   if (bookingForm) {
     // Inject error message div under the location field
     (function injectSearchErrors() {
+      const isEl = document.documentElement.lang === 'el';
       const locationField = document.querySelector('.field-location');
       if (locationField && !document.getElementById('locationError')) {
         const err = document.createElement('p');
         err.id = 'locationError';
         err.hidden = true;
         err.style.cssText = 'color:#e03c3c;font-size:13px;font-weight:600;margin:6px 0 0;padding:8px 12px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
-        err.textContent = 'Please select a pick-up location.';
+        err.textContent = isEl ? 'Παρακαλούμε επιλέξτε τοποθεσία παραλαβής.' : 'Please select a pick-up location.';
         locationField.after(err);
+      }
+      const ageField = document.querySelector('.field-age');
+      if (ageField && !document.getElementById('ageError')) {
+        const err = document.createElement('p');
+        err.id = 'ageError';
+        err.hidden = true;
+        err.style.cssText = 'color:#e03c3c;font-size:13px;font-weight:600;margin:6px 0 0;padding:8px 12px;background:#fff0f0;border:1.5px solid #e03c3c;border-radius:8px;';
+        err.textContent = isEl ? 'Παρακαλούμε επιλέξτε την ηλικία του οδηγού.' : "Please select the driver's age.";
+        ageField.after(err);
       }
       const searchBtn = bookingForm.querySelector('.btn-search');
       if (searchBtn && !document.getElementById('datesError')) {
@@ -1907,7 +1917,11 @@ function initBookingWidget() {
 
     document.getElementById('promoCode')?.addEventListener('blur', validatePromo);
     document.getElementById('driverAge')?.addEventListener('change', (e) => {
-      if (e.target.value) e.target.closest('.select-wrap')?.classList.remove('invalid');
+      if (e.target.value) {
+        e.target.closest('.select-wrap')?.classList.remove('invalid');
+        const ageError = document.getElementById('ageError');
+        if (ageError) ageError.hidden = true;
+      }
     });
 
     bookingForm.addEventListener('submit', async (e) => {
@@ -1928,13 +1942,16 @@ function initBookingWidget() {
       // This makes the age known before the protection step so Full Damage Waiver can
       // be blocked for young (21-25) / senior (70-75) drivers downstream.
       const ageEl = document.getElementById('driverAge');
+      const ageError = document.getElementById('ageError');
       if (ageEl && !ageEl.value) {
         ageEl.closest('.select-wrap')?.classList.add('invalid');
+        if (ageError) ageError.hidden = false;
         ageEl.focus();
         ageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
       if (ageEl) ageEl.closest('.select-wrap')?.classList.remove('invalid');
+      if (ageError) ageError.hidden = true;
 
       // Validate dates
       if (!pickupDate || !returnDate) {
