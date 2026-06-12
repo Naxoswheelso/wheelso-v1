@@ -771,7 +771,7 @@ function renderPaymentStatus(b) {
     return;
   }
 
-  // Pending → payment not completed; offer retry if the payment link is still valid (48h window).
+  // Pending → payment not completed; offer retry if the payment link is still valid (2h window).
   if (b.status === 'pending') {
     const token = b.payment_link_token;
     const exp   = b.payment_link_expires_at ? new Date(b.payment_link_expires_at) : null;
@@ -828,7 +828,7 @@ function renderCancelSection(b) {
   }
   if (b.status === 'pending') {
     // Not paid yet → no refund-based cancellation; the reservation auto-releases if unpaid.
-    card.innerHTML = `<div class="mb-no-cancel-notice">No payment has been taken yet. If you don't complete the payment, this reservation is released automatically after 48 hours — there is nothing to cancel.</div>`;
+    card.innerHTML = `<div class="mb-no-cancel-notice">No payment has been taken yet. If you don't complete the payment, this reservation is released automatically after 2 hours — there is nothing to cancel.</div>`;
     return;
   }
 

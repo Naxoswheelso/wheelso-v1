@@ -77,8 +77,11 @@ function fmtDate(dt){
          ' ' + new Date(dt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 
-function hoursUntil(dt){
-  return Math.max(0, Math.floor((new Date(dt) - new Date()) / 36e5));
+function timeUntil(dt){
+  const mins = Math.max(0, Math.ceil((new Date(dt) - new Date()) / 6e4));
+  const h = Math.floor(mins / 60), m = mins % 60;
+  if (h > 0) return m > 0 ? `${h}h ${m}min` : `${h}h`;
+  return `${m} minutes`;
 }
 
 function renderError(title, body){
@@ -92,7 +95,7 @@ function renderError(title, body){
 
 function renderBooking(b){
   window.__wlsRef = b.reference || '';
-  const hrs           = hoursUntil(b.expires_at);
+  const expiresIn     = timeUntil(b.expires_at);
   const total         = Number(b.total_price);
   const dueNow        = b.amount_due_now != null ? Number(b.amount_due_now) : total;
   const balanceAtDesk = Math.max(0, total - dueNow);
@@ -126,7 +129,7 @@ function renderBooking(b){
       <span class="total-amount">€${total.toFixed(2)}</span>
     </div>
     `}
-    <div class="expiry">⏰ Payment link expires in <strong>${hrs} hours</strong></div>
+    <div class="expiry">⏰ Payment link expires in <strong>${expiresIn}</strong></div>
     <button class="btn" id="payBtn" onclick="initiate()">Complete Payment — €${dueNow.toFixed(2)}</button>
     <p class="footer">Payment processed securely by Viva.com</p>`;
 }
