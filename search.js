@@ -1115,16 +1115,24 @@ const driverForm = document.getElementById('driverForm');
 
 function renderDriverTotal(fullTotal) {
   const isUponRequest = !!currentProtection.vehicle?.admin_upon_request;
+  const isFlexRate = currentProtection.rate === 'flex';
   if (isUponRequest) {
-    // On-request: nothing is charged at request time; payment happens after
-    // confirmation via the secure link.
-    driverTotalLabelEl.textContent = t('payNow');
-    driverTotalEl.textContent = '€0.00';
-    if (currentProtection.rate === 'flex') {
-      const deposit = fullTotal * 0.10;
-      driverTotalSubEl.textContent = t('depositAfterConfirm', { amount: deposit.toFixed(2) });
+    if (CARD_ON_FILE) {
+      // Card-on-file (Airbnb-style): show the amount that WILL be charged on confirmation —
+      // NOT "€0". Nothing is charged now; we charge automatically only if we confirm.
+      const due = isFlexRate ? fullTotal * 0.10 : fullTotal;
+      driverTotalLabelEl.textContent = t('dueWhenConfirmed');
+      driverTotalEl.textContent = `€${due.toFixed(2)}`;
+      driverTotalSubEl.textContent = isFlexRate
+        ? t('cofNotChargedYetFlex', { amount: (fullTotal - due).toFixed(2) })
+        : t('cofNotChargedYet');
     } else {
-      driverTotalSubEl.textContent = t('afterConfirm', { amount: fullTotal.toFixed(2) });
+      // Legacy upon-request (flag off): no card now, pay-by-link after confirmation.
+      driverTotalLabelEl.textContent = t('payNow');
+      driverTotalEl.textContent = '€0.00';
+      driverTotalSubEl.textContent = isFlexRate
+        ? t('depositAfterConfirm', { amount: (fullTotal * 0.10).toFixed(2) })
+        : t('afterConfirm', { amount: fullTotal.toFixed(2) });
     }
   } else if (currentProtection.rate === 'flex') {
     const deposit = fullTotal * 0.10;
@@ -2193,7 +2201,7 @@ function renderInfoCards() {
       payCardBody.innerHTML = `
         <div class="pay-row">
           <span>${t('ic_payToday')}</span>
-          <span><strong>€0.00</strong> <span class="pay-pill later">${t('ic_nothingNow')}</span></span>
+          <span><strong>${CARD_ON_FILE ? '—' : '€0.00'}</strong> <span class="pay-pill later">${t('ic_nothingNow')}</span></span>
         </div>
         <div class="pay-row">
           <span>${t('ic_depositAfterConfirm')}</span>
@@ -2213,7 +2221,7 @@ function renderInfoCards() {
       payCardBody.innerHTML = `
         <div class="pay-row">
           <span>${t('ic_payToday')}</span>
-          <span><strong>€0.00</strong> <span class="pay-pill later">${t('ic_nothingNow')}</span></span>
+          <span><strong>${CARD_ON_FILE ? '—' : '€0.00'}</strong> <span class="pay-pill later">${t('ic_nothingNow')}</span></span>
         </div>
         <div class="pay-row">
           <span>${t('ic_afterConfirmation')}</span>

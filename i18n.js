@@ -277,19 +277,26 @@
     or_cancel:       { en: 'Cancel', el: 'Άκυρο' },
 
     // ---- card-on-file variants (shown only when /api/config card_on_file_enabled = true) ----
-    // Customer saves their card now (Viva verification, €0) and is auto-charged on confirmation —
-    // no payment link to click. These replace the legacy "secure payment link" copy.
-    or_intro_cof:        { en: "No charge now — you'll securely save your card. Here's what happens next:",
-                           el: 'Καμία χρέωση τώρα — αποθηκεύετε με ασφάλεια την κάρτα σας. Δείτε τι ακολουθεί:' },
-    or_step1Body_cof:    { en: 'Enter your card now — €0, nothing is charged or held.',
-                           el: 'Καταχωρείτε την κάρτα σας τώρα — €0, καμία χρέωση ή δέσμευση.' },
+    // The card is collected on Viva (verification, no charge) and auto-charged on confirmation — no
+    // payment link. NO "save/store your card" wording (bad marketing) and NO "€0"; frame around
+    // "you won't be charged until we confirm → then €X automatically → else nothing".
+    or_intro_cof:        { en: "You won't be charged now. Here's what happens next:",
+                           el: 'Δεν θα χρεωθείτε τώρα. Δείτε τι ακολουθεί:' },
+    or_step1Body_cof:    { en: "You won't be charged now.",
+                           el: 'Δεν θα χρεωθείτε τώρα.' },
     or_step3Title_cof:   { en: 'Automatic charge on confirmation',
                            el: 'Αυτόματη χρέωση με την επιβεβαίωση' },
-    or_step3Body_cof:    { en: 'If we confirm, your saved card is charged automatically and you get a confirmation email — no extra step. If not, you are not charged.',
-                           el: 'Αν επιβεβαιώσουμε, η κάρτα σας χρεώνεται αυτόματα και λαμβάνετε επιβεβαιωτικό email — χωρίς άλλο βήμα. Αν όχι, δεν χρεώνεστε.' },
+    or_step3Body_cof:    { en: 'If we confirm, your booking is charged automatically and you get a confirmation email. If not, you are not charged.',
+                           el: 'Αν επιβεβαιώσουμε, η κράτηση χρεώνεται αυτόματα και λαμβάνετε επιβεβαιωτικό email. Αν όχι, δεν χρεώνεστε.' },
     ic_secureLink_cof:   { en: 'Auto-charge', el: 'Αυτόματη χρέωση' },
-    ic_reviewRequest_cof:{ en: "We'll review your request within 12 hours. Your card is saved but not charged — we charge it automatically only if we confirm. Nothing is charged today.",
-                           el: 'Θα ελέγξουμε το αίτημά σας εντός 12 ωρών. Η κάρτα σας αποθηκεύεται αλλά δεν χρεώνεται — τη χρεώνουμε αυτόματα μόνο αν επιβεβαιώσουμε. Δεν χρεώνεται τίποτα σήμερα.' }
+    ic_reviewRequest_cof:{ en: "We'll review your request within 12 hours. You won't be charged unless we confirm — then your booking is charged automatically. Nothing is charged today.",
+                           el: 'Θα ελέγξουμε το αίτημά σας εντός 12 ωρών. Δεν θα χρεωθείτε αν δεν επιβεβαιώσουμε — τότε η κράτηση χρεώνεται αυτόματα. Δεν χρεώνεται τίποτα σήμερα.' },
+    // driver-total (card-on-file): show what WILL be charged on confirmation, not "€0".
+    dueWhenConfirmed:    { en: 'Due when confirmed', el: 'Με την επιβεβαίωση' },
+    cofNotChargedYet:    { en: "You won't be charged until we confirm your booking",
+                           el: 'Δεν θα χρεωθείτε μέχρι να επιβεβαιώσουμε την κράτηση' },
+    cofNotChargedYetFlex:{ en: 'Charged only when we confirm · €{amount} balance at the desk',
+                           el: 'Χρέωση μόνο με την επιβεβαίωση · €{amount} υπόλοιπο στο γραφείο' }
   };
 
   function t(key, vars) {
