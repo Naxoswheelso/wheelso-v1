@@ -260,34 +260,23 @@
     fc_noPayment:    { en: 'No payment is required. See you on the road!',
                        el: 'Δεν απαιτείται πληρωμή. Καλό δρόμο!' },
 
-    // ---- on-request "how it works" popup ----
-    or_title:        { en: 'How on-request bookings work',
-                       el: 'Πώς λειτουργούν οι κρατήσεις κατόπιν ζήτησης' },
-    or_intro:        { en: "No payment is made now. Here's what happens next:",
-                       el: 'Δεν γίνεται καμία πληρωμή τώρα. Δείτε τι ακολουθεί:' },
-    or_step1Title:   { en: 'Submit your request', el: 'Υποβάλετε το αίτημά σας' },
-    or_step1Body:    { en: 'No payment now — your card is not charged.',
-                       el: 'Καμία πληρωμή τώρα — η κάρτα σας δεν χρεώνεται.' },
-    or_step2Title:   { en: 'We review & email you', el: 'Ελέγχουμε & σας ενημερώνουμε' },
-    or_step2Body:    { en: "We'll confirm availability and respond within 12 hours.",
-                       el: 'Θα επιβεβαιώσουμε τη διαθεσιμότητα και θα απαντήσουμε εντός 12 ωρών.' },
-    or_step3Title:   { en: 'Secure payment link', el: 'Ασφαλής σύνδεσμος πληρωμής' },
-    or_step3Body:    { en: 'Pay only after we confirm your booking.',
-                       el: 'Πληρώνετε μόνο αφού επιβεβαιώσουμε την κράτηση.' },
+    // ---- on-request "how it works" popup (compact: title + one review line + two ✓ bullets) ----
+    or_title:        { en: 'No payment yet', el: 'Καμία πληρωμή ακόμη' },
+    or_reviewLine:   { en: 'We review your request and reply within 12 hours.',
+                       el: 'Ελέγχουμε το αίτημά σας και απαντάμε εντός 12 ωρών.' },
+    or_ifConfirm:    { en: 'If we confirm, we send a secure link to pay.',
+                       el: 'Αν επιβεβαιώσουμε, στέλνουμε ασφαλή σύνδεσμο πληρωμής.' },
+    or_ifNot:        { en: "If not, you're not charged.",
+                       el: 'Αν όχι, δεν χρεώνεστε.' },
     or_cancel:       { en: 'Cancel', el: 'Άκυρο' },
 
     // ---- card-on-file variants (shown only when /api/config card_on_file_enabled = true) ----
     // The card is collected on Viva (verification, no charge) and auto-charged on confirmation — no
     // payment link. NO "save/store your card" wording (bad marketing) and NO "€0"; frame around
-    // "you won't be charged until we confirm → then €X automatically → else nothing".
-    or_intro_cof:        { en: "You won't be charged now. Here's what happens next:",
-                           el: 'Δεν θα χρεωθείτε τώρα. Δείτε τι ακολουθεί:' },
-    or_step1Body_cof:    { en: "You won't be charged now.",
-                           el: 'Δεν θα χρεωθείτε τώρα.' },
-    or_step3Title_cof:   { en: 'Automatic charge on confirmation',
-                           el: 'Αυτόματη χρέωση με την επιβεβαίωση' },
-    or_step3Body_cof:    { en: 'If we confirm, your booking is charged automatically and you get a confirmation email. If not, you are not charged.',
-                           el: 'Αν επιβεβαιώσουμε, η κράτηση χρεώνεται αυτόματα και λαμβάνετε επιβεβαιωτικό email. Αν όχι, δεν χρεώνεστε.' },
+    // "you won't be charged until we confirm → then automatically → else nothing".
+    or_title_cof:        { en: 'No charge yet', el: 'Καμία χρέωση ακόμη' },
+    or_ifConfirm_cof:    { en: 'If we confirm, your card is charged automatically + you get a confirmation email.',
+                           el: 'Αν επιβεβαιώσουμε, η κάρτα χρεώνεται αυτόματα + λαμβάνετε επιβεβαιωτικό email.' },
     ic_secureLink_cof:   { en: 'Auto-charge', el: 'Αυτόματη χρέωση' },
     ic_reviewRequest_cof:{ en: "We'll review your request within 12 hours. You won't be charged unless we confirm — then your booking is charged automatically. Nothing is charged today.",
                            el: 'Θα ελέγξουμε το αίτημά σας εντός 12 ωρών. Δεν θα χρεωθείτε αν δεν επιβεβαιώσουμε — τότε η κράτηση χρεώνεται αυτόματα. Δεν χρεώνεται τίποτα σήμερα.' },

@@ -1523,31 +1523,18 @@ function showOnRequestConfirmPopup(onProceed) {
   `;
 
   overlay.innerHTML = `
-    <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
-      <div style="font-size:44px;margin-bottom:12px;">📋</div>
-      <h2 style="font-family:var(--font-display,sans-serif);font-size:22px;font-weight:800;color:#093D5E;margin:0 0 6px;letter-spacing:-0.02em;">${t('or_title')}</h2>
-      <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.5;">${tCof('or_intro')}</p>
-      <div style="text-align:left;background:#f0f7ff;border-radius:12px;padding:18px 20px;margin-bottom:24px;">
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-          <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">1</div>
-          <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step1Title')}</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${tCof('or_step1Body')}</p>
-          </div>
+    <div style="background:#fff;border-radius:20px;padding:30px 26px;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
+      <div style="font-size:40px;margin-bottom:8px;">📋</div>
+      <h2 style="font-family:var(--font-display,sans-serif);font-size:20px;font-weight:800;color:#093D5E;margin:0 0 6px;letter-spacing:-0.02em;">${tCof('or_title')}</h2>
+      <p style="font-size:14px;color:#64748b;margin:0 0 18px;line-height:1.5;">${t('or_reviewLine')}</p>
+      <div style="text-align:left;background:#f0f7ff;border-radius:12px;padding:14px 16px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">
+          <span style="color:#16a34a;font-weight:800;font-size:15px;line-height:1.4;flex-shrink:0;">✓</span>
+          <p style="margin:0;color:#334155;font-size:13.5px;line-height:1.45;">${tCof('or_ifConfirm')}</p>
         </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-          <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">2</div>
-          <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step2Title')}</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${t('or_step2Body')}</p>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">3</div>
-          <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${tCof('or_step3Title')}</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${tCof('or_step3Body')}</p>
-          </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="color:#16a34a;font-weight:800;font-size:15px;line-height:1.4;flex-shrink:0;">✓</span>
+          <p style="margin:0;color:#334155;font-size:13.5px;line-height:1.45;">${t('or_ifNot')}</p>
         </div>
       </div>
       <div style="display:flex;gap:10px;">
