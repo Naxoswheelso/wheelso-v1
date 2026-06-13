@@ -29,6 +29,15 @@ async function apiPost(path, body) {
   return data;
 }
 
+// ─── Card-on-file runtime flag ───
+// When the backend has CARD_ON_FILE_ENABLED, upon-request bookings collect the card now
+// (Viva verification, €0) and auto-charge on confirmation — so the copy must say that instead
+// of "we'll send a payment link". Until /api/config resolves we assume OFF (legacy copy) — the
+// safe default. tCof(key) returns the '<key>_cof' variant when card-on-file is active.
+let CARD_ON_FILE = false;
+apiGet('/api/config').then(c => { CARD_ON_FILE = !!(c && c.card_on_file_enabled); }).catch(() => {});
+function tCof(key, vars) { return t(CARD_ON_FILE ? key + '_cof' : key, vars); }
+
 function frontendValueToStationCode(v) {
   return (v || '').toUpperCase();
 }
@@ -1509,13 +1518,13 @@ function showOnRequestConfirmPopup(onProceed) {
     <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:460px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.25);">
       <div style="font-size:44px;margin-bottom:12px;">📋</div>
       <h2 style="font-family:var(--font-display,sans-serif);font-size:22px;font-weight:800;color:#093D5E;margin:0 0 6px;letter-spacing:-0.02em;">${t('or_title')}</h2>
-      <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.5;">${t('or_intro')}</p>
+      <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.5;">${tCof('or_intro')}</p>
       <div style="text-align:left;background:#f0f7ff;border-radius:12px;padding:18px 20px;margin-bottom:24px;">
         <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
           <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">1</div>
           <div>
             <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step1Title')}</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${t('or_step1Body')}</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${tCof('or_step1Body')}</p>
           </div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
@@ -1528,8 +1537,8 @@ function showOnRequestConfirmPopup(onProceed) {
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="background:#CFDD28;color:#093D5E;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">3</div>
           <div>
-            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${t('or_step3Title')}</p>
-            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${t('or_step3Body')}</p>
+            <p style="margin:0;font-weight:700;color:#093D5E;font-size:14px;">${tCof('or_step3Title')}</p>
+            <p style="margin:3px 0 0;color:#64748b;font-size:13px;">${tCof('or_step3Body')}</p>
           </div>
         </div>
       </div>
@@ -2188,7 +2197,7 @@ function renderInfoCards() {
         </div>
         <div class="pay-row">
           <span>${t('ic_depositAfterConfirm')}</span>
-          <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill later">${t('ic_secureLink')}</span></span>
+          <span><strong>€${deposit.toFixed(2)}</strong> <span class="pay-pill later">${tCof('ic_secureLink')}</span></span>
         </div>
         <div class="pay-row">
           <span>${t('ic_balanceAtCounter')}</span>
@@ -2208,13 +2217,13 @@ function renderInfoCards() {
         </div>
         <div class="pay-row">
           <span>${t('ic_afterConfirmation')}</span>
-          <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">${t('ic_secureLink')}</span></span>
+          <span><strong>€${total.toFixed(2)}</strong> <span class="pay-pill later">${tCof('ic_secureLink')}</span></span>
         </div>
       `;
     }
     cancelCardSub.textContent = t('ic_noChargeUntil');
     cancelCardBody.innerHTML = `
-      <p class="cancel-row">${t('ic_reviewRequest')}</p>
+      <p class="cancel-row">${tCof('ic_reviewRequest')}</p>
     `;
   } else if (isFlex) {
     // PAY LATER

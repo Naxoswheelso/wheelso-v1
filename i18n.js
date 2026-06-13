@@ -274,7 +274,22 @@
     or_step3Title:   { en: 'Secure payment link', el: 'Ασφαλής σύνδεσμος πληρωμής' },
     or_step3Body:    { en: 'Pay only after we confirm your booking.',
                        el: 'Πληρώνετε μόνο αφού επιβεβαιώσουμε την κράτηση.' },
-    or_cancel:       { en: 'Cancel', el: 'Άκυρο' }
+    or_cancel:       { en: 'Cancel', el: 'Άκυρο' },
+
+    // ---- card-on-file variants (shown only when /api/config card_on_file_enabled = true) ----
+    // Customer saves their card now (Viva verification, €0) and is auto-charged on confirmation —
+    // no payment link to click. These replace the legacy "secure payment link" copy.
+    or_intro_cof:        { en: "No charge now — you'll securely save your card. Here's what happens next:",
+                           el: 'Καμία χρέωση τώρα — αποθηκεύετε με ασφάλεια την κάρτα σας. Δείτε τι ακολουθεί:' },
+    or_step1Body_cof:    { en: 'Enter your card now — €0, nothing is charged or held.',
+                           el: 'Καταχωρείτε την κάρτα σας τώρα — €0, καμία χρέωση ή δέσμευση.' },
+    or_step3Title_cof:   { en: 'Automatic charge on confirmation',
+                           el: 'Αυτόματη χρέωση με την επιβεβαίωση' },
+    or_step3Body_cof:    { en: 'If we confirm, your saved card is charged automatically and you get a confirmation email — no extra step. If not, you are not charged.',
+                           el: 'Αν επιβεβαιώσουμε, η κάρτα σας χρεώνεται αυτόματα και λαμβάνετε επιβεβαιωτικό email — χωρίς άλλο βήμα. Αν όχι, δεν χρεώνεστε.' },
+    ic_secureLink_cof:   { en: 'Auto-charge', el: 'Αυτόματη χρέωση' },
+    ic_reviewRequest_cof:{ en: "We'll review your request within 12 hours. Your card is saved but not charged — we charge it automatically only if we confirm. Nothing is charged today.",
+                           el: 'Θα ελέγξουμε το αίτημά σας εντός 12 ωρών. Η κάρτα σας αποθηκεύεται αλλά δεν χρεώνεται — τη χρεώνουμε αυτόματα μόνο αν επιβεβαιώσουμε. Δεν χρεώνεται τίποτα σήμερα.' }
   };
 
   function t(key, vars) {
