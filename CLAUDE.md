@@ -45,3 +45,5 @@ Any fee/price rule must match the **backend (`wheelso-backend`)** exactly: after
 ## Done recently
 - After-hours fee free at exactly 21:00 — minute-precision boundary (`70f2b8c`; backend match `173a4f9`).
 - BUG-A: promo discount in display + payload (`39955bf`), confirmed-free popup (`2550e52`). BUG-01..04 closed; max-28-day guard; home-form promo validation.
+- Hero forms: missing driver age now shows an inline error (same pattern as the pick-up location error), EL on `/el/` pages via `<html lang>`; logic in `script.js` submit handler (`fca08da`).
+- Payment-window copy → 6h (`payment-fail.html`, `my-booking.html`); `payment.html` countdown is dynamic from `expires_at`. Free-cancellation labels corrected `48h → 72h` on home/search EN+EL + `script.js` (`cdfcf6e`).
