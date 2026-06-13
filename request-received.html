@@ -21,13 +21,17 @@
   .header{background:#093D5E;border-radius:12px 12px 0 0;padding:24px;text-align:center;}
   .header h1{color:#CFDD28;font-size:28px;font-weight:800;margin:0;}
   .card{background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;padding:32px;text-align:center;}
-  .icon{width:72px;height:72px;border-radius:50%;background:#FFF4E5;display:inline-flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px;}
-  h2{color:#093D5E;font-size:24px;margin-bottom:8px;}
-  .sub{color:#6b7280;font-size:14px;margin-bottom:20px;}
-  p{color:#374151;font-size:14px;margin:14px 0;}
-  .info{background:#ecfdf5;border-left:4px solid #16a34a;padding:14px;border-radius:8px;margin:20px 0;text-align:left;font-size:13px;color:#14532d;}
-  .steps{text-align:left;background:#f0f4f8;border-radius:8px;padding:16px 16px 16px 8px;margin:20px 0;}
-  .steps ol{margin:0;padding-left:24px;color:#334155;font-size:13px;line-height:1.8;}
+  /* Neutral/amber "pending" treatment — deliberately NOT a green "paid" checkmark. */
+  .icon{width:72px;height:72px;border-radius:50%;background:#FFF4E5;display:inline-flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:20px;}
+  h2{color:#093D5E;font-size:24px;margin-bottom:6px;}
+  .sub{color:#6b7280;font-size:14px;margin-bottom:22px;}
+  .attention{background:#FFF4E5;border:1px solid #FBBF24;border-radius:10px;padding:16px;margin:0 0 22px;text-align:left;}
+  .attention .t{color:#B45309;font-weight:700;font-size:15px;margin-bottom:4px;}
+  .attention .s{color:#92400e;font-size:13px;}
+  .steps{text-align:left;background:#f0f4f8;border-radius:10px;padding:16px 16px 16px 8px;margin:0 0 8px;}
+  .steps .label{font-size:11px;font-weight:700;color:#093D5E;text-transform:uppercase;letter-spacing:.04em;padding:0 0 8px 16px;}
+  .steps ol{margin:0;padding-left:28px;color:#334155;font-size:13.5px;line-height:1.85;}
+  .foot{color:#6b7280;font-size:12px;margin:18px 0 0;}
   .btn{display:inline-block;margin-top:20px;padding:14px 28px;background:#CFDD28;color:#093D5E;border-radius:8px;text-decoration:none;font-weight:800;}
   .btn:hover{opacity:.9;}
 </style>
@@ -36,21 +40,25 @@
 <div class="wrap">
   <div class="header"><h1>Wheelso</h1></div>
   <div class="card">
-    <div class="icon">📝</div>
-    <h2>Request received</h2>
-    <div class="sub">Λάβαμε το αίτημά σας</div>
-    <div class="info">
-      ✓ <strong>No charge has been made</strong> and nothing is held on your card.<br>
-      <span style="color:#166534;">Δεν έχει γίνει καμία χρέωση — δεν δεσμεύτηκε κανένα ποσό στην κάρτα σας.</span>
+    <div class="icon">📩</div>
+    <h2>Request sent</h2>
+    <div class="sub">Το αίτημά σας στάλθηκε · we'll get back to you shortly</div>
+
+    <div class="attention">
+      <div class="t">⏳ Your card has not been charged</div>
+      <div class="s">We'll charge it <strong>only if we confirm</strong> your booking — and we'll email you straight away. Η κάρτα σας <strong>δεν χρεώθηκε</strong>· θα χρεωθεί μόνο αν επιβεβαιώσουμε την κράτηση.</div>
     </div>
+
     <div class="steps">
+      <div class="label">What happens next</div>
       <ol>
         <li>We review availability and reply within 12 hours.</li>
-        <li>If we confirm, your card is charged automatically and you receive a confirmation email.</li>
+        <li>If we confirm, your card is charged automatically and you get a confirmation email.</li>
         <li>If we can't confirm, you are <strong>not charged</strong>.</li>
       </ol>
     </div>
-    <p style="color:#6b7280;font-size:12px;">A confirmation email with your booking reference is on its way.</p>
+
+    <p class="foot">A confirmation email with your booking reference is on its way. If you don't see it within a few minutes, check your spam folder.</p>
     <a href="https://wheelso.gr/" class="btn">Back to Wheelso</a>
   </div>
 </div>

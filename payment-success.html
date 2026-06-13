@@ -31,7 +31,8 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<!-- Hidden until we confirm this is a real payment (not a €0 card verification). -->
+<div class="wrap" id="wrap" style="visibility:hidden;">
   <div class="header"><h1>Wheelso</h1></div>
   <div class="card">
     <div class="icon">✅</div>
@@ -45,5 +46,28 @@
     <a href="https://wheelso.gr/" class="btn">Back to Wheelso</a>
   </div>
 </div>
+<script>
+  // Viva uses one source-level Success URL for both real payments and €0 card verifications.
+  // Ask the backend which one this is: a verification (a booking REQUEST, nothing charged) is sent
+  // to the neutral "request received" page instead of this green "Payment Complete!" screen.
+  (function () {
+    var API_BASE = 'https://wheelso-backend-production.up.railway.app';
+    var wrap = document.getElementById('wrap');
+    var reveal = function () { if (wrap) wrap.style.visibility = 'visible'; };
+    // Fallback: never leave the page blank if the lookup is slow or fails.
+    var timer = setTimeout(reveal, 2500);
+    try {
+      var s = new URLSearchParams(location.search).get('s'); // Viva appends ?s=<orderCode>
+      if (!s) { clearTimeout(timer); reveal(); return; }
+      fetch(API_BASE + '/api/payment/return-info/' + encodeURIComponent(s))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.kind === 'verification') { location.replace('/request-received.html'); return; }
+          clearTimeout(timer); reveal();
+        })
+        .catch(function () { clearTimeout(timer); reveal(); });
+    } catch (e) { clearTimeout(timer); reveal(); }
+  })();
+</script>
 </body>
 </html>
