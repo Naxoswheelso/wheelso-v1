@@ -208,9 +208,12 @@
                     <td class="wh-trip-cell wh-stack" style="padding:18px; vertical-align:top; width:45%;">
                       <p style="margin:0 0 6px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.08em; text-transform:uppercase;">Pickup</p>
                       <p style="margin:0 0 2px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:700; color:#093D5E; line-height:1.3;">📍 <span id="vPickupStation">—</span></p>
-                      <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
+                      <p style="margin:0 0 8px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#374151; line-height:1.5;">
                         <span id="vPickupDate">—</span><br />
                         <strong style="color:#093D5E;" id="vPickupTime">—</strong>
+                      </p>
+                      <p id="vPickupDirectionsWrap" style="margin:0; display:none;">
+                        <a id="vPickupDirections" href="#" target="_blank" rel="noopener" style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#1C5875; text-decoration:none;">🧭 Get directions</a>
                       </p>
                     </td>
                     <td class="wh-no-print" style="padding:18px 0; vertical-align:middle; width:10%; text-align:center;">
@@ -230,6 +233,26 @@
                       <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151;">
                         <strong style="color:#093D5E;" id="vTripDays">—</strong> · <span id="vTripCustomer">—</span> · <span id="vTripRate">—</span>
                       </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- MEET & GREET (only shown for stations with meetGreet, e.g. Mykonos) -->
+            <tr id="vMeetGreetSection" style="display:none;">
+              <td style="padding:0 32px 24px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f1f6c2; border:1px solid #CFDD28; border-radius:12px;">
+                  <tr>
+                    <td style="padding:14px 18px; border-bottom:1px solid #CFDD28;">
+                      <span style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.1em; text-transform:uppercase;">🪧 <span id="vMeetGreetTitle">Meet &amp; greet</span></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p id="vMeetGreetBody" style="margin:0 0 10px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; color:#093D5E; font-weight:700; line-height:1.5;">—</p>
+                      <p id="vMeetGreetAsk" style="margin:0 0 12px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.55;">—</p>
+                      <div id="vArrivalDetails" style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;"></div>
                     </td>
                   </tr>
                 </table>
@@ -538,6 +561,9 @@
 
   </div>
 
+  <!-- Shared booking content (protection catalog, station directions, meet-&-greet copy) -->
+  <script src="../booking-content.js"></script>
+
   <!-- ============ VOUCHER DATA LOADER ============ -->
   <script>
   (function () {
@@ -570,6 +596,7 @@
     function $(id) { return document.getElementById(id); }
     function show(id) { $(id).style.display = ''; }
     function hide(id) { $(id).style.display = 'none'; }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
     function showError(msg) {
       hide('voucherLoading');
@@ -865,67 +892,72 @@
       $('vMyBookingLink').setAttribute('href', myBookingUrl);
       $('vFooterMyBooking').setAttribute('href', myBookingUrl);
 
-      // Protection section
-      const snap = b.protection_snapshot;
-      if (snap) {
-        // Parse features if it's still a string (backend double-encodes)
-        let feat = {};
-        if (snap.features && typeof snap.features === 'object') {
-          feat = snap.features;
-        } else if (typeof snap.features === 'string') {
-          try { feat = JSON.parse(snap.features); } catch { feat = {}; }
+      const WB = window.WHEELSO_BOOKING;
+
+      // ─── Directions + meet-&-greet (station-driven via shared content) ───
+      if (WB && WB.getStation) {
+        const station = WB.getStation(b.pickup_station, b.pickup_station_name);
+        if (station && station.mapsUrl) {
+          $('vPickupDirections').setAttribute('href', station.mapsUrl);
+          $('vPickupDirectionsWrap').style.display = '';
         }
+        if (station && station.meetGreet) {
+          const mg = WB.meetGreet;
+          $('vMeetGreetTitle').textContent = mg.title;
+          $('vMeetGreetBody').textContent = WB.meetGreetBody(station.pointType);
+          $('vMeetGreetAsk').textContent = mg.ask;
+          const ff = (b.flight_ferry || '').trim();
+          $('vArrivalDetails').innerHTML = ff
+            ? `<span style="display:inline-block; background:#e8f5ec; color:#0E7C3A; font-weight:700; padding:8px 14px; border-radius:8px;">✓ Your arrival details: ${esc(ff)}</span>`
+            : `<span style="display:inline-block; background:#FEF3C7; color:#B45309; font-weight:700; padding:8px 14px; border-radius:8px; line-height:1.5;">⚠️ ${esc(mg.missing)}</span>`;
+          $('vMeetGreetSection').style.display = '';
+        }
+      }
 
-        const excessText = snap.excess === null || snap.excess === undefined
-          ? 'Up to full vehicle value (unlimited)'
-          : Number(snap.excess) === 0
-            ? '€0 (no excess)'
-            : `€${snap.excess}`;
+      // ─── Protection section (always shown — covers TP-only & old bookings) ───
+      const snap = b.protection_snapshot;
+      const P = (WB && WB.getProtection) ? WB.getProtection(b.protection_code, snap) : null;
+      if (P) {
+        const sevColor = { bad: '#DC2626', mid: '#B45309', good: '#0E7C3A' };
+        const badgeColor = sevColor[P.liability.severity] || '#093D5E';
 
-        const excessNote = snap.excess === null || snap.excess === undefined
-          ? 'You are liable for the full cost of any damage or theft.'
-          : Number(snap.excess) === 0
-            ? 'You pay nothing in case of damage or theft.'
-            : 'This is the maximum you will be charged in case of damage or theft.';
-
-        const featureMap = [
-          { key: 'ldw',      label: 'Loss / Damage Waiver (LDW) — covers accidental damage to the vehicle' },
-          { key: 'tire',     label: 'Tire Protection' },
-          { key: 'tire',     label: 'Windshield Protection' },
-          { key: 'roadside', label: '24/7 Emergency roadside assistance &amp; towing' },
-        ];
-
-        const featureRows = featureMap.map(f => {
-          const on = !!feat[f.key];
-          return `
+        const featureRows = P.features.map(f => `
       <tr>
-        <td style="padding:3px 0; vertical-align:top; width:20px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:${on ? '#0E7C3A' : '#9ca3af'};">${on ? '✓' : '✗'}</td>
-        <td style="padding:3px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:${on ? '#374151' : '#9ca3af'}; line-height:1.5;">${f.label}</td>
-      </tr>`;
-        }).join('');
+        <td style="padding:3px 0; vertical-align:top; width:20px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:${f.included ? '#0E7C3A' : '#9ca3af'};">${f.included ? '✓' : '✗'}</td>
+        <td style="padding:3px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:${f.included ? '#374151' : '#9ca3af'}; line-height:1.5;">${f.label}</td>
+      </tr>`).join('');
 
-        const upgradeNudge = snap.code === 'no_extra'
-          ? `<p style="margin:14px 0 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">ⓘ Want damage cover? Upgrade to Basic or Full Protection at the counter.</p>`
-          : snap.code === 'basic'
-            ? `<p style="margin:14px 0 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">ⓘ Want zero excess? Upgrade to Full Protection at the counter.</p>`
-            : '';
+        const warningBox = P.warning ? `
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:8px; margin:0 0 14px;">
+          <tr><td style="padding:12px 14px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#991B1B; line-height:1.5;">⚠️ <strong>${esc(P.warning)}</strong></td></tr>
+        </table>` : '';
+
+        const excludedNote = P.excludedNote ? `
+        <p style="margin:12px 0 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">${esc(P.excludedNote)}</p>` : '';
+
+        const upgradeNudge = P.upgradeNudge ? `
+        <p style="margin:14px 0 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">ⓘ ${esc(P.upgradeNudge)}</p>` : '';
 
         $('vProtectionRows').innerHTML = `
     <tr>
       <td colspan="2" style="padding:14px 18px 6px;">
-        <p style="margin:0 0 2px; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#093D5E;">${snap.name}</p>
+        <span style="display:inline-block; background:${badgeColor}; color:#ffffff; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:3px 9px; border-radius:5px;">${esc(P.badge)}</span>
+        <p style="margin:8px 0 2px; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#093D5E;">${esc(P.title)}</p>
+        <p style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.55;">${esc(P.whatItIs)}</p>
       </td>
     </tr>
     <tr>
-      <td colspan="2" style="padding:0 18px 18px;">
+      <td colspan="2" style="padding:12px 18px 18px;">
+        ${warningBox}
         <p style="margin:0 0 2px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.5;">
-          Excess if damage/theft: <strong style="color:#093D5E;">${excessText}</strong>
+          Excess if damage/theft: <strong style="color:${badgeColor};">${esc(P.excessText)}</strong>
         </p>
-        <p style="margin:0 0 14px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">${excessNote}</p>
+        <p style="margin:0 0 14px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280; line-height:1.5;">${esc(P.liability.text)}</p>
         <p style="margin:0 0 8px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.08em; text-transform:uppercase;">Includes:</p>
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
           ${featureRows}
         </table>
+        ${excludedNote}
         ${upgradeNudge}
         <p style="margin:14px 0 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12px; color:#6b7280;">
           Full coverage details at <a href="https://wheelso.gr/terms" style="color:#1C5875;">wheelso.gr/terms</a>
