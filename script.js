@@ -958,7 +958,7 @@ async function openProtectionPage(v, days, rate) {
   if (overviewCancellation) {
     const cancelText = rate === 'flex'
       ? 'Total flexibility — Free cancellation any time before pick-up'
-      : 'Best price — Free cancellation up to 48h before pick-up';
+      : 'Best price — Free cancellation up to 72h before pick-up';
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
@@ -1251,7 +1251,7 @@ function populateSummarySidebar() {
   // Rate + protection
   const sRate = document.getElementById('summaryRate');
   const sProt = document.getElementById('summaryProtection');
-  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Total flexibility · Free cancellation anytime' : 'Best price · Free cancellation up to 48h before';
+  if (sRate) sRate.textContent = currentProtection.rate === 'flex' ? 'Total flexibility · Free cancellation anytime' : 'Best price · Free cancellation up to 72h before';
   if (sProt) sProt.textContent = pkg ? pkg.name : 'Protection package';
 }
 
@@ -1393,7 +1393,7 @@ function populateDriverSummary() {
 
   document.getElementById('driverSummaryRate').textContent = currentProtection.rate === 'flex'
     ? 'Total flexibility'
-    : 'Best price · Free cancellation up to 48h before';
+    : 'Best price · Free cancellation up to 72h before';
   document.getElementById('driverSummaryProtection').textContent = pkg ? pkg.name : 'Protection package';
 
   // Extras summary
