@@ -272,7 +272,7 @@ let VEHICLES = [
 
 function mapBackendCarToVehicle(c) {
   const cat = (c.category || '').toLowerCase();
-  const knownCats = ['economy', 'compact', 'intermediate', 'suv', 'premium', 'van'];
+  const knownCats = ['mini', 'economy', 'compact', 'intermediate', 'suv', 'premium', 'van'];
   const category = knownCats.includes(cat) ? cat : 'compact';
   return {
     code: c.code,
@@ -446,7 +446,7 @@ function filterAndSort() {
   if (currentSort === 'price-asc') list.sort((a, b) => a.price - b.price);
   else if (currentSort === 'price-desc') list.sort((a, b) => b.price - a.price);
   else if (currentSort === 'category') {
-    const order = ['economy', 'compact', 'intermediate', 'suv', 'premium', 'van'];
+    const order = ['mini', 'economy', 'compact', 'intermediate', 'suv', 'premium', 'van'];
     list.sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category));
   }
   return list;
