@@ -108,6 +108,10 @@ function computeDays() {
 let rentalDays = computeDays();
 let isOneWay = false;
 let oneWayFeeGross = 0;
+// Price provenance state (fail-safe): 'loading' → skeletons; 'loaded' → real prices applied
+// from the availability search; 'failed' → API error. renderResults() never shows vehicle
+// cards unless prices are 'loaded', so the hardcoded placeholder prices can never be shown.
+let priceState = 'loading';
 
 // ─── MAX RENTAL DAYS ───
 const MAX_RENTAL_DAYS = 28;
@@ -456,7 +460,27 @@ const fleetGrid = document.getElementById('fleetGrid');
 const resultsEmpty = document.getElementById('resultsEmpty');
 const resultsCount = document.getElementById('resultsCount');
 
+// Fail-safe state shown when the availability/pricing API fails — instead of stale
+// placeholder prices. Mirrors the timing-error branch; Retry does a clean reload
+// (skeleton → fetch), avoiding the VEHICLES-mutation compounding of a bare re-fetch.
+function renderPriceError() {
+  if (fleetGrid) fleetGrid.innerHTML = '';
+  if (resultsCount) resultsCount.textContent = '0';
+  if (!resultsEmpty) return;
+  resultsEmpty.innerHTML = `
+    <div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+      <h3 style="font-size:20px;font-weight:700;color:#093D5E;margin:0 0 10px;">${t('pricesUnavailable_title')}</h3>
+      <p style="color:#64748b;font-size:15px;line-height:1.5;max-width:400px;margin:0 auto 18px;">${t('pricesUnavailable_body')}</p>
+      <button onclick="location.reload()" style="background:#093D5E;color:#fff;border:none;border-radius:10px;padding:12px 26px;font-size:15px;font-weight:700;cursor:pointer;">${t('pricesUnavailable_retry')}</button>
+    </div>`;
+  resultsEmpty.hidden = false;
+}
+
 function renderResults() {
+  // Fail-safe price gate: only render cards once REAL prices are loaded (see priceState).
+  if (priceState === 'loading') return;                 // keep the loading skeletons
+  if (priceState === 'failed')  { renderPriceError(); return; }
   const list = filterAndSort();
 
   // Timing check — show error instead of results if not bookable
@@ -1936,7 +1960,7 @@ async function loadStationsFromAPI() {
 // AVAILABILITY PRICING — real prices from backend
 // ============================================
 async function loadAvailabilityPrices() {
-  if (!searchCtx.pickup || !searchCtx.from || !searchCtx.to) return;
+  if (!searchCtx.pickup || !searchCtx.from || !searchCtx.to) { priceState = 'loaded'; return; }
 
   try {
     const payload = {
@@ -1983,15 +2007,20 @@ async function loadAvailabilityPrices() {
           if (item.available === false) v.upon_request = true;
         }
       });
-      renderResults();
-      // console.log('[Wheelso] Availability prices loaded for', cars.length, 'cars');
+      priceState = 'loaded';
+      // renderResults() runs in initFromAPI once this resolves.
     } else {
-      // No cars returned (no pricing for this station/dates) → clear all vehicles
+      // No cars returned (no pricing for this station/dates) → clear all vehicles.
+      // The API DID respond, so this is a legitimate empty result, not a failure.
       VEHICLES = [];
+      priceState = 'loaded';
       console.warn('[Wheelso] Availability returned 0 cars:', result.message || 'no message');
     }
   } catch (err) {
-    console.warn('[Wheelso] Availability API failed, using default prices:', err.message);
+    // API failure → fail safe: mark prices unavailable so renderResults() shows the Retry
+    // state instead of the hardcoded placeholder prices (the cause of the €10-20 incident).
+    priceState = 'failed';
+    console.warn('[Wheelso] Availability API failed — showing price-unavailable state:', err.message);
   }
 }
 
