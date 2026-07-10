@@ -54,6 +54,11 @@ function gaEvent(name, params) {
   try { if (window.gtag) window.gtag('event', name, params || {}); } catch (_) {}
 }
 
+// Fire a Meta Pixel event only if fbq exists (no-op without ad consent / on payment pages).
+function fbqTrack(name, params) {
+  try { if (window.fbq) window.fbq('track', name, params || {}); } catch (_) {}
+}
+
 // Read client_id + session_id from GA so they're ready to attach to the booking.
 // Best-effort: if gtag isn't ready or analytics consent is denied, they stay null
 // and the backend simply skips the server-side purchase event (no error).
@@ -525,6 +530,11 @@ function renderResults() {
         price: bestPrice(v), quantity: 1,
       })),
     });
+    fbqTrack('Search', {
+      content_type: 'product',
+      content_ids: list.slice(0, 20).map(v => v.code),
+      contents: list.slice(0, 20).map(v => ({ id: v.code, quantity: 1, item_price: bestPrice(v) })),
+    });
   }
 }
 
@@ -665,6 +675,13 @@ function openVehicleModal(v) {
     currency: 'EUR',
     value: bestPrice(v) * rentalDays,
     items: [{ item_id: v.code, item_name: v.name, item_category: v.category, price: bestPrice(v), quantity: rentalDays }],
+  });
+  fbqTrack('ViewContent', {
+    content_type: 'product',
+    content_ids: [v.code],
+    content_name: v.name,
+    currency: 'EUR',
+    value: bestPrice(v) * rentalDays,
   });
   vehicleModal.hidden = false;
   const modalScrollArea = vehicleModal.querySelector('.modal-scroll-area');
@@ -1214,6 +1231,13 @@ async function openDriverPage() {
     gaEvent('begin_checkout', {
       currency: 'EUR',
       items: [{ item_id: cpv.code, item_name: cpv.name, item_category: cpv.category, price: bestPrice(cpv), quantity: currentProtection.days || 1 }],
+    });
+    fbqTrack('InitiateCheckout', {
+      content_type: 'product',
+      content_ids: [cpv.code],
+      currency: 'EUR',
+      value: bestPrice(cpv) * (currentProtection.days || 1),
+      num_items: 1,
     });
   }
 
