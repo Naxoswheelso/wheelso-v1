@@ -195,6 +195,38 @@
               </td>
             </tr>
 
+            <!-- QUICK CONTACT + LOCATION STRIP -->
+            <tr>
+              <td style="padding:0 32px 20px;" class="wh-px-32">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f1f6c2; border:1px solid #CFDD28; border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px 18px 12px;">
+                      <p style="margin:0 0 3px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.08em; text-transform:uppercase;">📍 Pickup point</p>
+                      <p id="vQuickLocation" style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; font-weight:800; color:#093D5E; line-height:1.35;">—</p>
+                      <p id="vQuickMeetNote" style="margin:4px 0 0; display:none; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12.5px; color:#374151; line-height:1.4;">🪧 Meet &amp; greet — we'll find you there, no office to look for.</p>
+                      <p style="margin:8px 0 0;">
+                        <a id="vQuickDirections" href="#" target="_blank" rel="noopener" style="display:none; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#1C5875; text-decoration:none;">🧭 Get directions</a>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr class="wh-no-print">
+                    <td style="padding:0 18px 16px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td class="wh-stack" width="50%" style="padding:0 5px 0 0; vertical-align:top;">
+                            <a id="vQuickCall" href="#" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; color:#093D5E; text-decoration:none; border:2px solid #093D5E; border-radius:8px; padding:15px 8px;">📞 Call us</a>
+                          </td>
+                          <td class="wh-stack wh-stack-pad" width="50%" style="padding:0 0 0 5px; vertical-align:top;">
+                            <a id="vQuickWhatsapp" href="#" target="_blank" rel="noopener" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; color:#093D5E; text-decoration:none; background:#25D366; border-radius:8px; padding:15px 8px;">💬 WhatsApp</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
             <!-- TRIP CARD -->
             <tr>
               <td style="padding:0 32px 24px;" class="wh-px-32">
@@ -572,17 +604,8 @@
       ? 'https://wheelso.gr'
       : window.location.origin;
 
-    // Per-island contacts keyed by 3-char station code prefix (MYK, PAR, NAX, …)
-    // WhatsApp in display format — stripped to digits for wa.me links via whatsappLink()
-    function getStationContact(stationCode) {
-      const prefix = (stationCode || '').substring(0, 3).toUpperCase();
-      const map = {
-        'MYK': { email: 'mykonos@wheelso.gr', whatsapp: '+30 697 744 8607', label: 'Mykonos team' },
-        'PAR': { email: 'paros@wheelso.gr',   whatsapp: '+30 698 507 7803', label: 'Paros team' },
-        'NAX': { email: 'naxos@wheelso.gr',   whatsapp: '+30 697 157 8697', label: 'Naxos team' },
-      };
-      return map[prefix] || { email: 'hello@wheelso.gr', whatsapp: null, label: 'Wheelso team' };
-    }
+    // Station contact data now lives in booking-content.js (window.WHEELSO_BOOKING.getContact) —
+    // single source of truth shared with my-booking.html and the backend confirmation email.
 
     function whatsappLink(displayPhone, refForMessage) {
       if (!displayPhone) return null;
@@ -657,6 +680,8 @@
     }
 
     function renderVoucher(b, customerEmail) {
+      const WB = window.WHEELSO_BOOKING;
+
       // Cancelled banner
       if (b.status === 'cancelled') {
         $('vCancelledRow').style.display = '';
@@ -692,6 +717,41 @@
       const fullName = [b.first_name, b.last_name].filter(Boolean).join(' ') || b.first_name || '—';
       $('vTripCustomer').textContent = fullName;
       $('vTripRate').textContent = rateLabel(b.rate_type) + ' rate';
+
+      // Station + contact — resolved once here, reused by the quick strip below, the
+      // meet-&-greet section, the cancellation card and the bottom "Need us?" block.
+      const station = (WB && WB.getStation) ? WB.getStation(b.pickup_station, b.pickup_station_name) : null;
+      const contact = (WB && WB.getContact)
+        ? WB.getContact(b.pickup_station_name || b.pickup_station)
+        : { call: null, whatsapp: null, email: 'bookings@wheelso.gr', label: 'Wheelso team' };
+
+      // Quick contact + location strip (top of voucher, right under the hero)
+      $('vQuickLocation').textContent = b.pickup_station_name || b.pickup_station || '—';
+      if (station && station.mapsUrl) {
+        $('vQuickDirections').setAttribute('href', station.mapsUrl);
+        $('vQuickDirections').style.display = 'inline-block';
+      }
+      if (station && station.meetGreet) {
+        $('vQuickMeetNote').style.display = 'block';
+      }
+      if (contact.call) {
+        $('vQuickCall').setAttribute('href', `tel:${contact.call.replace(/\s+/g, '')}`);
+        $('vQuickCall').style.display = 'inline-block';
+      } else {
+        $('vQuickCall').setAttribute('href', '#');
+        $('vQuickCall').style.display = 'none';
+      }
+      if (contact.whatsapp) {
+        $('vQuickWhatsapp').setAttribute('href', whatsappLink(contact.whatsapp, b.reference));
+        $('vQuickWhatsapp').style.display = 'inline-block';
+      } else if (contact.email) {
+        const waBtn = $('vQuickWhatsapp');
+        waBtn.setAttribute('href', `mailto:${contact.email}`);
+        waBtn.textContent = '✉️ Email us';
+        waBtn.style.background = '#093D5E';
+        waBtn.style.color = '#ffffff'; // base button color is navy (for the #25D366 WhatsApp state) — white here keeps this navy-background fallback readable
+        waBtn.style.display = 'inline-block';
+      }
 
       // Vehicle
       $('vCarName').textContent = b.car_name || b.car_code || '—';
@@ -838,9 +898,6 @@
           </span>`;
       }
 
-      // Station contact — resolved early so cancellation card can reference it
-      const contact = getStationContact(b.pickup_station);
-
       // Cancellation card
       if (b.status === 'cancelled' || b.status === 'completed') {
         $('vCancellationRow').style.display = 'none';
@@ -861,23 +918,30 @@
       }
       $('vContactTeam').textContent = contact.label;
 
+      // Cell width must reflect how many cells actually render (Email is always present; Phone/WhatsApp
+      // are conditional) — a hardcoded 33% would leave dead space for the fallback (1 cell) or a
+      // phone-only/whatsapp-only station (2 cells). Mirrors the buttonCount → cellWidth pattern in
+      // wheelso-backend/src/services/email.js buildContactStripHtml.
+      const contactCellCount = 1 + (contact.call ? 1 : 0) + (contact.whatsapp ? 1 : 0);
+      const contactCellWidth = contactCellCount === 1 ? '100%' : contactCellCount === 2 ? '50%' : '33%';
+
       const contactCells = [];
       contactCells.push(`
-        <td class="wh-stack" style="padding:8px 0; vertical-align:top; width:33%; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
+        <td class="wh-stack" style="padding:8px 0; vertical-align:top; width:${contactCellWidth}; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
           <span style="display:block; color:rgba(255,255,255,0.55); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Email</span>
           <a href="mailto:${contact.email}?subject=Booking%20${encodeURIComponent(b.reference)}" style="color:#ffffff; text-decoration:none; font-weight:600;">${contact.email}</a>
         </td>`);
-      if (contact.phone) {
-        const phoneLink = contact.phone.replace(/\s+/g, '');
+      if (contact.call) {
+        const phoneLink = contact.call.replace(/\s+/g, '');
         contactCells.push(`
-          <td class="wh-stack wh-stack-pad" style="padding:8px 0; vertical-align:top; width:33%; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
+          <td class="wh-stack wh-stack-pad" style="padding:8px 0; vertical-align:top; width:${contactCellWidth}; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
             <span style="display:block; color:rgba(255,255,255,0.55); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Phone</span>
-            <a href="tel:${phoneLink}" style="color:#ffffff; text-decoration:none; font-weight:600;">${contact.phone}</a>
+            <a href="tel:${phoneLink}" style="color:#ffffff; text-decoration:none; font-weight:600;">${contact.call}</a>
           </td>`);
       }
       if (contact.whatsapp) {
         contactCells.push(`
-          <td class="wh-stack wh-stack-pad" style="padding:8px 0; vertical-align:top; width:33%; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
+          <td class="wh-stack wh-stack-pad" style="padding:8px 0; vertical-align:top; width:${contactCellWidth}; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.5;">
             <span style="display:block; color:rgba(255,255,255,0.55); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">WhatsApp</span>
             <a href="${whatsappLink(contact.whatsapp, b.reference)}" target="_blank" rel="noopener" style="color:#ffffff; text-decoration:none; font-weight:600;">Chat with us →</a>
           </td>`);
@@ -892,16 +956,13 @@
       $('vMyBookingLink').setAttribute('href', myBookingUrl);
       $('vFooterMyBooking').setAttribute('href', myBookingUrl);
 
-      const WB = window.WHEELSO_BOOKING;
-
-      // ─── Directions + meet-&-greet (station-driven via shared content) ───
-      if (WB && WB.getStation) {
-        const station = WB.getStation(b.pickup_station, b.pickup_station_name);
-        if (station && station.mapsUrl) {
+      // ─── Directions + meet-&-greet (station-driven via shared content; station resolved above) ───
+      if (station) {
+        if (station.mapsUrl) {
           $('vPickupDirections').setAttribute('href', station.mapsUrl);
           $('vPickupDirectionsWrap').style.display = '';
         }
-        if (station && station.meetGreet) {
+        if (station.meetGreet && WB) {
           const mg = WB.meetGreet;
           $('vMeetGreetTitle').textContent = mg.title;
           $('vMeetGreetBody').textContent = WB.meetGreetBody(station.pointType);

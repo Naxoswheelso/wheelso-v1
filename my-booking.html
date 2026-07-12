@@ -319,7 +319,7 @@
       gap: 10px;
       height: 50px;
       background: #25D366;
-      color: #fff;
+      color: #093D5E; /* navy on #25D366 green — white-on-green failed WCAG AA contrast */
       border: none;
       border-radius: 10px;
       font-size: 14px;
@@ -548,6 +548,27 @@
     .mb-meet-ask { font-size: 13px; color: #374151; line-height: 1.55; margin: 0 0 12px; }
     .mb-arrival-ok { display: inline-block; background: #DCFCE7; color: #166534; font-weight: 700; padding: 8px 12px; border-radius: 8px; font-size: 13px; }
     .mb-arrival-missing { display: inline-block; background: #FEF9C3; color: #854D0E; font-weight: 700; padding: 8px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+
+    /* ── Quick contact + location strip (top of booking view) ── */
+    .mb-quick-card { background: #F1F6C2; border: 0.5px solid #CFDD28; }
+    .mb-quick-label { font-size: 11px; font-weight: 700; color: #093D5E; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 3px; }
+    .mb-quick-location { font-size: 15px; font-weight: 800; color: #093D5E; line-height: 1.35; margin: 0; }
+    .mb-quick-meet-note { font-size: 12.5px; color: #374151; line-height: 1.4; margin: 6px 0 0; display: none; }
+    .mb-quick-directions { margin-top: 8px; display: none; }
+    .mb-quick-directions a { font-size: 13px; font-weight: 700; color: #1C5875; text-decoration: none; }
+    .mb-quick-btns { display: flex; gap: 8px; margin-top: 12px; }
+    .mb-quick-btn-call {
+      flex: 1; display: none; align-items: center; justify-content: center; gap: 6px;
+      height: 44px; background: #fff; color: #093D5E; border: 2px solid #093D5E; border-radius: 8px;
+      font-size: 13.5px; font-weight: 700; font-family: var(--font-body, 'Manrope', sans-serif);
+      text-decoration: none;
+    }
+    .mb-quick-btn-wa {
+      flex: 1; display: none; align-items: center; justify-content: center; gap: 6px;
+      height: 44px; background: #25D366; color: #093D5E; border: none; border-radius: 8px;
+      font-size: 13.5px; font-weight: 700; font-family: var(--font-body, 'Manrope', sans-serif);
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -604,6 +625,18 @@
       <div class="mb-status-bar">
         <div class="mb-ref" id="mbRefDisplay"></div>
         <div class="mb-status-badge" id="mbStatusBadge"></div>
+      </div>
+
+      <!-- Quick contact + location strip -->
+      <div class="mb-card mb-quick-card">
+        <p class="mb-quick-label">📍 Pickup point</p>
+        <p class="mb-quick-location" id="mbQuickLocation">—</p>
+        <p class="mb-quick-meet-note" id="mbQuickMeetNote">🪧 Meet &amp; greet — we'll find you there, no office to look for.</p>
+        <p class="mb-quick-directions" id="mbQuickDirectionsWrap"><a id="mbQuickDirections" href="#" target="_blank" rel="noopener">🧭 Get directions</a></p>
+        <div class="mb-quick-btns">
+          <a class="mb-quick-btn-call" id="mbQuickCall" href="#">📞 Call us</a>
+          <a class="mb-quick-btn-wa" id="mbQuickWhatsapp" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
+        </div>
       </div>
 
       <!-- View full voucher -->
@@ -700,22 +733,8 @@
 <script>
 const API_BASE = 'https://wheelso-backend-production.up.railway.app';
 
-// Per-station contact info — keyed by station name (partial match)
-const STATION_CONTACTS = {
-  'athens':  { phone: '+302109249000', whatsapp: '+306983200652', email: 'athens@wheelso.gr' },
-  'mykonos': { phone: '+302289028360', whatsapp: '+306977448607', email: 'mykonos@wheelso.gr' },
-  'paros':   { phone: null,            whatsapp: '+306985077803', email: 'paros@wheelso.gr' },
-  'naxos':   { phone: null,            whatsapp: '+306971578697', email: 'naxos@wheelso.gr' },
-};
-
-function getStationContact(stationName) {
-  if (!stationName) return { phone: null, whatsapp: null, email: 'bookings@wheelso.gr' };
-  const lower = stationName.toLowerCase();
-  for (const [key, contact] of Object.entries(STATION_CONTACTS)) {
-    if (lower.includes(key)) return contact;
-  }
-  return { phone: null, whatsapp: null, email: 'bookings@wheelso.gr' };
-}
+// Station contact data now lives in booking-content.js (window.WHEELSO_BOOKING.getContact) —
+// single source of truth shared with the voucher page and the backend confirmation email.
 
 function formatDatetime(dt) {
   if (!dt) return '—';
@@ -800,6 +819,9 @@ function renderBooking(b) {
   const badge = document.getElementById('mbStatusBadge');
   badge.textContent = b.status.charAt(0).toUpperCase() + b.status.slice(1);
   badge.className = 'mb-status-badge ' + statusBadgeClass(b.status);
+
+  // Quick contact + location strip (near the top, right under status)
+  renderQuickContact(b);
 
   // Trip
   document.getElementById('mbPickupStation').textContent  = b.pickup_station_name  || b.pickup_station;
@@ -1087,17 +1109,66 @@ function renderCancelSection(b) {
   }
 }
 
+// Quick contact + location strip (near the top of the booking view)
+function renderQuickContact(b) {
+  const WB = window.WHEELSO_BOOKING;
+  const station = (WB && WB.getStation) ? WB.getStation(b.pickup_station, b.pickup_station_name) : null;
+  const contact = (WB && WB.getContact)
+    ? WB.getContact(b.pickup_station_name || b.pickup_station)
+    : { call: null, whatsapp: null, email: 'bookings@wheelso.gr', label: 'Wheelso team' };
+
+  document.getElementById('mbQuickLocation').textContent = b.pickup_station_name || b.pickup_station || '—';
+  document.getElementById('mbQuickMeetNote').style.display = (station && station.meetGreet) ? 'block' : 'none';
+
+  const dirWrap = document.getElementById('mbQuickDirectionsWrap');
+  if (station && station.mapsUrl) {
+    document.getElementById('mbQuickDirections').setAttribute('href', station.mapsUrl);
+    dirWrap.style.display = 'block';
+  } else {
+    dirWrap.style.display = 'none';
+  }
+
+  const callBtn = document.getElementById('mbQuickCall');
+  if (contact.call) {
+    callBtn.setAttribute('href', `tel:${contact.call.replace(/\s+/g, '')}`);
+    callBtn.style.display = 'flex';
+  } else {
+    // Reset href too (not just hide) — "Search again" re-renders a different booking on the
+    // same page without a reload, so a stale tel: link from a previous station must not linger.
+    callBtn.setAttribute('href', '#');
+    callBtn.style.display = 'none';
+  }
+
+  const waBtn = document.getElementById('mbQuickWhatsapp');
+  const waMsg = encodeURIComponent(`Hi, I need help with my Wheelso booking ${b.reference}`);
+  if (contact.whatsapp) {
+    const waNum = contact.whatsapp.replace(/[\s+]/g, '');
+    waBtn.setAttribute('href', `https://wa.me/${waNum}?text=${waMsg}`);
+    waBtn.textContent = '💬 WhatsApp';
+    waBtn.style.display = 'flex';
+  } else if (contact.email) {
+    waBtn.setAttribute('href', `mailto:${contact.email}`);
+    waBtn.textContent = '✉️ Email us';
+    waBtn.style.display = 'flex';
+  } else {
+    waBtn.style.display = 'none';
+  }
+}
+
 function renderContactSection(b) {
-  const contact = getStationContact(b.pickup_station_name || b.pickup_station);
+  const WB = window.WHEELSO_BOOKING;
+  const contact = (WB && WB.getContact)
+    ? WB.getContact(b.pickup_station_name || b.pickup_station)
+    : { call: null, whatsapp: null, email: 'bookings@wheelso.gr', label: 'Wheelso team' };
   const ref     = b.reference;
   const name    = b.first_name || '';
   const btns    = document.getElementById('mbContactBtns');
-  const waMsg   = encodeURIComponent(`Hi, I need help with my Wheelso booking ${ref} (${name})`);
+  const waMsg   = encodeURIComponent(`Hi, I need help with my Wheelso booking ${ref}`);
   const emailSubject = encodeURIComponent(`Booking ${ref} — ${name}`);
 
   let html = '';
   if (contact.whatsapp) {
-    const waNum = contact.whatsapp.replace(/\s+/g, '');
+    const waNum = contact.whatsapp.replace(/[\s+]/g, '');
     html += `
       <a class="mb-btn-wa" href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -1105,11 +1176,11 @@ function renderContactSection(b) {
       </a>
     `;
   }
-  if (contact.phone) {
+  if (contact.call) {
     html += `
-      <a class="mb-btn-email" href="tel:${contact.phone.replace(/\s+/g, '')}">
+      <a class="mb-btn-email" href="tel:${contact.call.replace(/\s+/g, '')}">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        Call us — ${contact.phone}
+        Call us — ${contact.call}
       </a>
     `;
   }

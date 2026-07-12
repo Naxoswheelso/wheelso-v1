@@ -117,6 +117,37 @@
     'SKI-PORT':     { label: 'Skiathos Port',                      island: 'SKI', pointType: 'port',    meetGreet: false, mapsUrl: maps('Skiathos Port') }
   };
 
+  // ─── Canonical contact directory (single source of truth — call / WhatsApp / email per island) ───
+  // Reconciled 2026-07 from 3 previously-divergent copies (booking-voucher.html, my-booking.html,
+  // backend src/services/email.js). Keep the backend's STATION_CONTACTS in email.js in sync if a
+  // number ever changes. Paros & Naxos deliberately share one number for both call and WhatsApp.
+  var CONTACTS = {
+    athens:   { call: '+30 210 924 9000', whatsapp: '+30 698 320 0652', email: 'athens@wheelso.gr',   label: 'Athens team' },
+    mykonos:  { call: '+30 228 902 8360', whatsapp: '+30 697 744 8607', email: 'mykonos@wheelso.gr',  label: 'Mykonos team' },
+    paros:    { call: '+30 698 507 7803', whatsapp: '+30 698 507 7803', email: 'paros@wheelso.gr',    label: 'Paros team' },
+    naxos:    { call: '+30 697 157 8697', whatsapp: '+30 697 157 8697', email: 'naxos@wheelso.gr',    label: 'Naxos team' },
+    fallback: { call: null,               whatsapp: null,               email: 'bookings@wheelso.gr', label: 'Wheelso team' }
+  };
+  // Station-CODE prefix (before the first '-') → island key, for codes like 'MYK-AIRPORT'.
+  var CONTACT_CODE_ISLAND = { ATH: 'athens', MYK: 'mykonos', PAR: 'paros', NAX: 'naxos' };
+
+  // getContact(stationNameOrCode) → always returns a usable { call, whatsapp, email, label } object.
+  // Matches either a station CODE ('MYK-AIRPORT', prefix before '-') or a display NAME
+  // ('Mykonos Airport (JMK)', substring match on the island name) — null/unknown-safe → fallback.
+  function getContact(stationNameOrCode) {
+    var s = (stationNameOrCode == null ? '' : String(stationNameOrCode)).trim();
+    if (s) {
+      var codePrefix = s.toUpperCase().split('-')[0].trim();
+      if (CONTACT_CODE_ISLAND[codePrefix]) return CONTACTS[CONTACT_CODE_ISLAND[codePrefix]];
+      var lower = s.toLowerCase();
+      for (var key in CONTACTS) {
+        if (key === 'fallback') continue;
+        if (lower.indexOf(key) !== -1) return CONTACTS[key];
+      }
+    }
+    return CONTACTS.fallback;
+  }
+
   // ─── Meet-&-greet copy (shown when the pickup station has meetGreet=true) ───
   var MEET_GREET = {
     title: "Meet & greet — we'll find you",
@@ -192,8 +223,10 @@
     protection: PROTECTION,
     stations: STATIONS,
     meetGreet: MEET_GREET,
+    contacts: CONTACTS,
     getProtection: getProtection,
     getStation: getStation,
+    getContact: getContact,
     meetGreetBody: meetGreetBody
   };
 })();
