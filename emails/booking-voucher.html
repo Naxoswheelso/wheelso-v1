@@ -355,17 +355,16 @@
                     <td align="right" style="padding:4px 18px 14px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#6b7280;" id="vVat">—</td>
                   </tr>
                   <tr>
-                    <td style="padding:16px 18px; background:#093D5E; border-bottom-left-radius:12px; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#ffffff; letter-spacing:-0.01em;">
+                    <td id="vTotalLabel" style="padding:16px 18px; background:#093D5E; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#ffffff; letter-spacing:-0.01em;">
                       Total
                     </td>
-                    <td align="right" style="padding:16px 18px; background:#093D5E; border-bottom-right-radius:12px; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:22px; font-weight:800; color:#CFDD28; letter-spacing:-0.02em;" id="vTotal">—</td>
+                    <td align="right" style="padding:16px 18px; background:#093D5E; font-family:'Bricolage Grotesque','Manrope',Helvetica,Arial,sans-serif; font-size:22px; font-weight:800; color:#CFDD28; letter-spacing:-0.02em;" id="vTotal">—</td>
                   </tr>
-                </table>
-                <!-- Payment status pill (populated by JS) -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:10px;">
-                  <tr>
-                    <td align="center" id="vPaymentStatusCell"></td>
-                  </tr>
+                  <!-- Payment split (populated by JS) — lives INSIDE this same box, directly under
+                       Total, so it's visually obvious the Total splits into paid-now vs payable-at-desk.
+                       Whichever row renders last carries the box's rounded bottom corners. -->
+                  <tbody id="vPaymentSplitRows">
+                  </tbody>
                 </table>
               </td>
             </tr>
@@ -881,21 +880,39 @@
       $('vVat').textContent = formatPrice(vat);
       $('vTotal').textContent = formatPrice(total);
 
-      // Payment status pill
+      // Payment split — rendered as row(s) directly under Total, INSIDE the same price-breakdown
+      // box (no more detached pill floating below it). Whichever row renders last must carry the
+      // box's rounded bottom corners; Total's own corners are square unless it stays the last row.
       const isFlex = b.rate_type === 'flex';
-      const payCell = $('vPaymentStatusCell');
+      const totalLabelCell = $('vTotalLabel');
+      const totalValueCell = $('vTotal');
+      const splitRows = $('vPaymentSplitRows');
       if (b.status === 'cancelled') {
-        payCell.innerHTML = '';
+        // No split — Total is the last row, keep it rounded (as before).
+        splitRows.innerHTML = '';
+        totalLabelCell.style.borderBottomLeftRadius = '12px';
+        totalValueCell.style.borderBottomRightRadius = '12px';
       } else if (hasDeposit) {
-        payCell.innerHTML = `
-          <span style="display:inline-block; background:#FEF3C7; color:#B45309; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; padding:8px 16px; border-radius:999px;">
-            Paid now ${formatPrice(amountDueNow)}<br>Payable at desk ${formatPrice(balanceAtDesk)}
-          </span>`;
+        totalLabelCell.style.borderBottomLeftRadius = '0';
+        totalValueCell.style.borderBottomRightRadius = '0';
+        splitRows.innerHTML = `
+          <tr>
+            <td style="padding:10px 18px 2px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; color:#0E7C3A;">✓ Paid now — 10% deposit</td>
+            <td align="right" style="padding:10px 18px 2px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#0E7C3A;">${formatPrice(amountDueNow)}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 18px; background:#FEF3C7; border-bottom-left-radius:12px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; color:#B45309;">Payable at desk</td>
+            <td align="right" style="padding:10px 18px; background:#FEF3C7; border-bottom-right-radius:12px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#B45309;">${formatPrice(balanceAtDesk)}</td>
+          </tr>`;
       } else {
-        payCell.innerHTML = `
-          <span style="display:inline-block; background:#e8f5ec; color:#0E7C3A; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; padding:8px 16px; border-radius:999px;">
-            ✓ Paid online · No balance due at pickup
-          </span>`;
+        totalLabelCell.style.borderBottomLeftRadius = '0';
+        totalValueCell.style.borderBottomRightRadius = '0';
+        splitRows.innerHTML = `
+          <tr>
+            <td colspan="2" align="center" style="padding:12px 18px; background:#e8f5ec; border-bottom-left-radius:12px; border-bottom-right-radius:12px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#0E7C3A;">
+              ✓ Paid online in full — nothing to pay at pickup
+            </td>
+          </tr>`;
       }
 
       // Cancellation card
