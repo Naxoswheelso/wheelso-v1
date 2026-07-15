@@ -731,7 +731,9 @@
       const STORAGE_KEY = 'wh-lang';
       const validLangs = ['en', 'el'];
 
-      function applyLang(lang) {
+      // `persist` is opt-out so an anchor can show a language for one pageview
+      // without overwriting the visitor's site-wide preference.
+      function applyLang(lang, persist) {
         if (!validLangs.includes(lang)) lang = 'en';
         document.documentElement.lang = lang;
         document.querySelectorAll('[data-lang-block]').forEach(el => {
@@ -740,7 +742,9 @@
         document.querySelectorAll('.lang-btn').forEach(btn => {
           btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
         });
-        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+        if (persist !== false) {
+          try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+        }
       }
 
       let initial = 'en';
@@ -748,10 +752,12 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved && validLangs.includes(saved)) initial = saved;
       } catch (e) {}
-      // #impressum-el is linked from the /el/ pages and only exists in the
-      // Greek block, so the anchor wins over the stored preference.
-      if (/-el$/.test(location.hash)) initial = 'el';
-      applyLang(initial);
+      // #impressum-el is linked from the /el/ pages and exists only in the
+      // Greek block, so the anchor decides what to show. It must not persist:
+      // this URL gets shared, and an English reader opening it should not have
+      // the whole site silently switch to Greek.
+      const anchorLang = location.hash === '#impressum-el' ? 'el' : null;
+      applyLang(anchorLang || initial, !anchorLang);
 
       // [data-lang-block] targets are `hidden` at parse time, so the browser's
       // initial anchor scroll skips them. Redo it once the block is shown and
@@ -768,7 +774,21 @@
       }
 
       document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+        btn.addEventListener('click', () => {
+          const lang = btn.getAttribute('data-lang');
+          applyLang(lang);
+          // Each language has its own impressum id, so switching language while
+          // parked on one would hide it and strand the reader mid-page. Move to
+          // the counterpart instead.
+          if (location.hash === '#impressum' || location.hash === '#impressum-el') {
+            const id = lang === 'el' ? 'impressum-el' : 'impressum';
+            const target = document.getElementById(id);
+            if (target) {
+              history.replaceState(null, '', '#' + id);
+              target.scrollIntoView({ behavior: 'instant' });
+            }
+          }
+        });
       });
     })();
 
