@@ -614,7 +614,7 @@
           </section>
 
           <!-- Impressum -->
-          <section class="legal-impressum">
+          <section id="impressum-el" class="legal-impressum">
             <h2>Στοιχεία εταιρείας</h2>
             <p>
               <strong>Γεώργιος Μπογδάνης και Σια Ε.Ε.</strong> (δ.τ. <strong>Wheelso</strong>)<br />
@@ -681,19 +681,13 @@
   <div class="footer-imprint">
     <div class="footer-imprint-inner">
       <span data-lang-block="en">
-        © 2026 <strong>Georgios Bogdanis &amp; Co. L.P.</strong> (trading as Wheelso) &nbsp;·&nbsp;
-        Leof. Syngrou 22, 117 42 Athens, Greece &nbsp;·&nbsp;
-        Tax ID (ΑΦΜ): 801074744 · GEMI: 148485501000 &nbsp;·&nbsp;
-        <a href="mailto:hello@wheelso.gr">hello@wheelso.gr</a> &nbsp;·&nbsp;
-        <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">EU ODR Platform</a> &nbsp;·&nbsp;
+        © 2026 <strong>Wheelso</strong> &nbsp;·&nbsp;
+        <a href="terms.html#impressum">Company details</a> &nbsp;·&nbsp;
         <a href="#" onclick="event.preventDefault(); if(window.revisitCkyConsent) window.revisitCkyConsent(); else if(window.CookieYes) window.CookieYes.openPreferenceCenter();">Cookie preferences</a>
       </span>
       <span data-lang-block="el" hidden>
-        © 2026 <strong>Γεώργιος Μπογδάνης και Σια Ε.Ε.</strong> (δ.τ. Wheelso) &nbsp;·&nbsp;
-        Λεωφ. Συγγρού 22, 117 42 Αθήνα &nbsp;·&nbsp;
-        ΑΦΜ: 801074744 · ΓΕΜΗ: 148485501000 &nbsp;·&nbsp;
-        <a href="mailto:hello@wheelso.gr">hello@wheelso.gr</a> &nbsp;·&nbsp;
-        <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">Πλατφόρμα ΗΕΔ ΕΕ</a> &nbsp;·&nbsp;
+        © 2026 <strong>Wheelso</strong> &nbsp;·&nbsp;
+        <a href="terms.html#impressum-el">Εταιρικά στοιχεία</a> &nbsp;·&nbsp;
         <a href="#" onclick="event.preventDefault(); if(window.revisitCkyConsent) window.revisitCkyConsent(); else if(window.CookieYes) window.CookieYes.openPreferenceCenter();">Προτιμήσεις cookies</a>
       </span>
     </div>
@@ -754,7 +748,24 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved && validLangs.includes(saved)) initial = saved;
       } catch (e) {}
+      // #impressum-el is linked from the /el/ pages and only exists in the
+      // Greek block, so the anchor wins over the stored preference.
+      if (/-el$/.test(location.hash)) initial = 'el';
       applyLang(initial);
+
+      // [data-lang-block] targets are `hidden` at parse time, so the browser's
+      // initial anchor scroll skips them. Redo it once the block is shown and
+      // the layout has settled. `instant` is required: the page sets
+      // scroll-behavior:smooth, and a smooth scroll started here is silently
+      // cancelled during load.
+      if (location.hash) {
+        window.addEventListener('load', () => {
+          try {
+            const target = document.querySelector(location.hash);
+            if (target) target.scrollIntoView({ behavior: 'instant' });
+          } catch (e) {}
+        });
+      }
 
       document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
