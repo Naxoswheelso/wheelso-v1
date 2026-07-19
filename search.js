@@ -740,7 +740,14 @@ const DEFAULT_PROTECTION_PACKAGES = [
 
 let PROTECTION_PACKAGES = DEFAULT_PROTECTION_PACKAGES.slice();
 
+// Per-category cache of API-loaded packages, so re-opening a category renders the
+// correct prices instantly (no flash of the hardcoded defaults). Failures are NOT
+// cached, so a transient error retries next time.
+const PROTECTION_CACHE = {};
+
 async function loadProtectionForCategory(category) {
+  const cacheKey = (category || '').toLowerCase();
+  if (PROTECTION_CACHE[cacheKey]) { PROTECTION_PACKAGES = PROTECTION_CACHE[cacheKey]; return; }
   try {
     const res = await apiGet(`/api/protection?category=${encodeURIComponent(category)}`);
     const data = Array.isArray(res) ? res : (res.packages || []);
@@ -780,6 +787,7 @@ async function loadProtectionForCategory(category) {
       PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => !['smart','all_inclusive','all','none'].includes(p.id));
       const order = { no_extra: 0, basic: 1, full: 2 };
       PROTECTION_PACKAGES.sort((a, b) => (order[a.id] ?? 99) - (order[b.id] ?? 99));
+      PROTECTION_CACHE[cacheKey] = PROTECTION_PACKAGES;
       return;
     }
   } catch (err) {
@@ -869,8 +877,6 @@ async function openProtectionPage(v, days, rate) {
   protectionPage.hidden = false;
   document.body.classList.add('protection-open');
   protectionPage.scrollTop = 0;
-  renderProtectionGrid();
-  updateProtectionTotal();
 
   if (overviewCancellation) {
     const cancelText = v.admin_upon_request
@@ -881,6 +887,10 @@ async function openProtectionPage(v, days, rate) {
     overviewCancellation.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${cancelText}`;
   }
 
+  // Load protection BEFORE the first render so the card never flashes the hardcoded
+  // defaults and then "changes price". Show a skeleton only when we actually have to
+  // wait (first, uncached open for this category).
+  if (!PROTECTION_CACHE[(v.category || '').toLowerCase()]) renderProtectionSkeleton();
   await loadProtectionForCategory(v.category);
   if (!PROTECTION_PACKAGES.find(p => p.id === currentProtection.selected)) {
     currentProtection.selected = PROTECTION_PACKAGES[0]?.id || 'basic';
@@ -896,6 +906,22 @@ async function openProtectionPage(v, days, rate) {
 function closeProtectionPage() {
   protectionPage.hidden = true;
   document.body.classList.remove('protection-open');
+}
+
+// Placeholder cards shown while the (uncached) protection fetch is in flight, so the
+// user never sees the hardcoded default prices flash before the real ones load.
+function renderProtectionSkeleton() {
+  const ghost = `
+    <div class="protection-card" style="pointer-events:none;animation:pulse 1.2s ease-in-out infinite;">
+      <div style="height:13px;width:42%;background:#e2e8f0;border-radius:6px;margin-bottom:18px;"></div>
+      <div style="height:54px;width:100%;background:#f1f5f9;border-radius:12px;margin-bottom:18px;"></div>
+      <div style="height:12px;width:82%;background:#e8edf3;border-radius:6px;margin-bottom:10px;"></div>
+      <div style="height:12px;width:72%;background:#e8edf3;border-radius:6px;margin-bottom:10px;"></div>
+      <div style="height:12px;width:64%;background:#e8edf3;border-radius:6px;margin-bottom:24px;"></div>
+      <div style="height:22px;width:38%;background:#e2e8f0;border-radius:6px;"></div>
+    </div>`;
+  protectionGrid.innerHTML = ghost + ghost + ghost;
+  if (protectionTotal) protectionTotal.textContent = '…';
 }
 
 function renderProtectionGrid() {
