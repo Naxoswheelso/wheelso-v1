@@ -122,6 +122,7 @@
     prot_ifDamage:        { en: 'If damage occurs', el: 'Σε περίπτωση ζημιάς' },
     prot_risk_full:       { en: 'You cover full repair cost', el: 'Καλύπτετε το πλήρες κόστος επισκευής' },
     prot_risk_800:        { en: 'You pay up to €800',         el: 'Πληρώνετε έως €800' },
+    prot_risk_upto:       { en: 'You pay up to €{amount}',    el: 'Πληρώνετε έως €{amount}' },
     prot_risk_nothing:    { en: 'You pay nothing',            el: 'Δεν πληρώνετε τίποτα' },
     prot_tooltip_tpl:     { en: 'Third Party Liability — covers damage to other vehicles or people, but not your rental car.',
                             el: 'Αστική Ευθύνη προς Τρίτους — καλύπτει ζημιές σε άλλα οχήματα ή άτομα, αλλά όχι το ενοικιαζόμενο όχημά σας.' },

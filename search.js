@@ -759,13 +759,22 @@ async function loadProtectionForCategory(category) {
             features = normalizeFeatures(raw);
           } catch(e) {}
         }
-        let excess = p.excess != null ? t('prot_excess_upto', { amount: p.excess }) : (def.excess || '—');
-        let excessClass = def.excessClass || 'warning';
-        if (Number(p.excess) === 0) { excess = t('prot_excess_zero'); excessClass = 'good'; }
-        if (price === 0) { excess = def.excess || t('prot_excess_full'); excessClass = 'danger'; }
+        // "If damage occurs" risk text — derived from the DB excess so the card reflects
+        // the per-category admin value. (Was hardcoded to "€800" via def.riskValue, which
+        // ignored the real excess in the DB.) Display-only: does NOT affect price/charge.
+        let riskValue, riskClass;
+        if (price === 0) {
+          riskValue = t('prot_risk_full');    riskClass = 'bad';   // no protection → full repair cost
+        } else if (Number(p.excess) === 0) {
+          riskValue = t('prot_risk_nothing'); riskClass = 'good';  // zero excess → pay nothing
+        } else if (p.excess != null) {
+          riskValue = t('prot_risk_upto', { amount: p.excess }); riskClass = 'mid'; // reduced excess (from DB)
+        } else {
+          riskValue = def.riskValue || '—';   riskClass = def.riskClass || 'mid';   // fallback
+        }
         const trueCount = Object.values(features).filter(Boolean).length;
         const derivedCoverage = def.coverage != null ? def.coverage : (code === 'no_extra' ? 1 : code === 'basic' ? 2 : code === 'full' ? 3 : Math.min(3, Math.max(1, Math.ceil(trueCount * 3 / 4))));
-        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', tag: def.tag || null, tagTooltip: def.tagTooltip || null, riskLabel: def.riskLabel || t('prot_ifDamage'), riskValue: def.riskValue || '—', riskClass: def.riskClass || 'mid', pricePerDay: price, recommended: !!p.recommended || def.recommended || false, footnote: def.footnote || null, features };
+        return { id: code, name: p.name || def.name || code, coverage: derivedCoverage, eyebrow: def.eyebrow || '', tag: def.tag || null, tagTooltip: def.tagTooltip || null, riskLabel: def.riskLabel || t('prot_ifDamage'), riskValue, riskClass, pricePerDay: price, recommended: !!p.recommended || def.recommended || false, footnote: def.footnote || null, features };
       });
       // Filter out legacy packages, sort
       PROTECTION_PACKAGES = PROTECTION_PACKAGES.filter(p => !['smart','all_inclusive','all','none'].includes(p.id));
