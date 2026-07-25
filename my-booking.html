@@ -1028,7 +1028,7 @@ function renderPaymentStatus(b) {
     const balance = total - deposit;
     card.innerHTML = `
       <div class="mb-card-title">Payment</div>
-      <div class="mb-pay-row"><span>Deposit paid online</span><span class="mb-pay-badge mb-pay-paid">Paid</span><span><strong>${formatPrice(deposit)}</strong></span></div>
+      <div class="mb-pay-row"><span>Prepayment paid online</span><span class="mb-pay-badge mb-pay-paid">Paid</span><span><strong>${formatPrice(deposit)}</strong></span></div>
       <div class="mb-pay-row"><span>Balance due at pick-up</span><span class="mb-pay-badge mb-pay-due">At counter</span><span><strong>${formatPrice(balance)}</strong></span></div>
       <div class="mb-pay-row mb-pay-total"><span>Total</span><span><strong>${formatPrice(total)}</strong></span></div>
     `;
@@ -1067,7 +1067,7 @@ function renderCancelSection(b) {
     if (b.can_cancel) {
       card.innerHTML = `
         <div class="mb-card-title">Cancel booking</div>
-        <p class="mb-cancel-info">You can cancel anytime before pick-up. Your booking deposit of <strong>${formatPrice(deposit)}</strong> is <strong style="color:#B45309;">non-refundable</strong>. No further charges will apply.</p>
+        <p class="mb-cancel-info">You can cancel anytime before pick-up. Your prepayment of <strong>${formatPrice(deposit)}</strong> is <strong style="color:#B45309;">non-refundable</strong>. No further charges will apply.</p>
         <button class="mb-btn-cancel" id="mbCancelBtn" type="button">Cancel this booking</button>
       `;
       document.getElementById('mbCancelBtn').addEventListener('click', () => {

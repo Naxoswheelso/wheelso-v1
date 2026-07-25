@@ -897,7 +897,7 @@
         totalValueCell.style.borderBottomRightRadius = '0';
         splitRows.innerHTML = `
           <tr>
-            <td style="padding:10px 18px 2px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; color:#0E7C3A;">✓ Paid now — 10% deposit</td>
+            <td style="padding:10px 18px 2px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; color:#0E7C3A;">✓ Paid now — 10% prepayment</td>
             <td align="right" style="padding:10px 18px 2px; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#0E7C3A;">${formatPrice(amountDueNow)}</td>
           </tr>
           <tr>
@@ -922,7 +922,7 @@
         const deposit = total * 0.10;
         $('vCancellationLabel').innerHTML = '🔓 Cancellation — Pay Later rate';
         $('vCancellationHeadline').textContent = 'Cancel any time before pickup.';
-        $('vCancellationDetail').innerHTML = `Your ${formatPrice(deposit)} deposit is <strong style="color:#B45309;">non-refundable</strong>; no further amount will be charged. Cancel via <a href="${PUBLIC_BASE}/my-booking.html?ref=${encodeURIComponent(b.reference)}&email=${encodeURIComponent(customerEmail)}" style="color:#1C5875; font-weight:600;">My Booking</a> or contact your pick-up station — see contact details below.`;
+        $('vCancellationDetail').innerHTML = `Your ${formatPrice(deposit)} prepayment is <strong style="color:#B45309;">non-refundable</strong>; no further amount will be charged. Cancel via <a href="${PUBLIC_BASE}/my-booking.html?ref=${encodeURIComponent(b.reference)}&email=${encodeURIComponent(customerEmail)}" style="color:#1C5875; font-weight:600;">My Booking</a> or contact your pick-up station — see contact details below.`;
       } else {
         // Best Price
         const pickup = new Date(b.pickup_datetime);
