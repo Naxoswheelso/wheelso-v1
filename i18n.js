@@ -144,8 +144,10 @@
     // ---- extras (JS defaults; backend may override name/description) ----
     ex_perDay:            { en: '€{price} / day',          el: '€{price} / ημέρα' },
     ex_perDayItem:        { en: '€{price} / day per item', el: '€{price} / ημέρα ανά τεμάχιο' },
+    // Shown instead of "€0.00 / day" for extras priced at 0 in the extras table.
+    ex_free:              { en: 'Free',                    el: 'Δωρεάν' },
     ex_name_additional:   { en: 'Additional driver', el: 'Επιπλέον οδηγός' },
-    ex_price_additional:  { en: '€6.66 / day per driver', el: '€6.66 / ημέρα ανά οδηγό' },
+    ex_price_additional:  { en: 'Free', el: 'Δωρεάν' },
     ex_summary_additional:{ en: 'Share the wheel with a friend or partner.', el: 'Μοιραστείτε το τιμόνι με φίλο ή σύντροφο.' },
     ex_details_additional:{ en: "Planning to swap drivers during the trip? Add anyone you trust behind the wheel. They'll just need to bring a valid driving licence to the desk when you collect the car.",
                             el: 'Σκοπεύετε να εναλλάσσεστε οδηγοί στο ταξίδι; Προσθέστε όποιον εμπιστεύεστε στο τιμόνι. Αρκεί να φέρει έγκυρο δίπλωμα οδήγησης στο γραφείο κατά την παραλαβή.' },

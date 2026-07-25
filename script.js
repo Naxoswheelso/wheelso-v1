@@ -1029,8 +1029,8 @@ const DEFAULT_EXTRAS = [
   {
     id: 'additional-driver',
     name: 'Additional driver',
-    priceLabel: '€6.66 / day per driver',
-    pricePerDay: 6.66,
+    priceLabel: 'Free',
+    pricePerDay: 0,
     perUnit: false,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
     summary: 'Share the wheel with a friend or partner.',
@@ -1049,8 +1049,8 @@ const DEFAULT_EXTRAS = [
   {
     id: 'child-seat',
     name: 'Child seat (4-7 years)',
-    priceLabel: '€5 / day',
-    pricePerDay: 5,
+    priceLabel: 'Free',
+    pricePerDay: 0,
     perUnit: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>',
     summary: 'Forward-facing seat for kids 4-7 years old (15-25kg).',
@@ -1059,8 +1059,8 @@ const DEFAULT_EXTRAS = [
   {
     id: 'baby-seat',
     name: 'Baby seat (0-3 years)',
-    priceLabel: '€5 / day',
-    pricePerDay: 5,
+    priceLabel: 'Free',
+    pricePerDay: 0,
     perUnit: true,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 11h.01M15 11h.01M8 16s1.5 2 4 2 4-2 4-2"/></svg>',
     summary: 'Rear-facing seat for infants and toddlers (0-13kg).',
@@ -1101,9 +1101,12 @@ function mapBackendExtraToFrontend(e) {
   return {
     id,
     name: e.name || def.name || id,
-    priceLabel: perUnit
-      ? `€${price.toFixed(2)} / day per item`
-      : `€${price.toFixed(2)} / day`,
+    // price 0 → "Free"; "€0.00 / day" reads like a bug and undersells a real USP
+    priceLabel: price === 0
+      ? (typeof t === 'function' ? t('ex_free') : 'Free')
+      : (perUnit
+          ? `€${price.toFixed(2)} / day per item`
+          : `€${price.toFixed(2)} / day`),
     pricePerDay: price,
     perUnit,
     maxQty: e.max_qty || 4,
