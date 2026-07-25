@@ -84,6 +84,32 @@
   }
   </script>
 
+  <!-- Schema.org: FAQPage (deposit questions) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is there a security deposit or a hold on my credit card?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Wheelso takes no security deposit and places no pre-authorisation hold — €0 is blocked on your card, for every car category and every protection package, including the zero-excess Full Protection. You only need a valid credit or debit card in the main driver's name at pick-up; it is kept on file solely in case of an excluded-event incident, as set out in our Terms."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the 10% I pay on the Pay Later rate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It is a prepayment towards your rental price, not a security deposit. You pay 10% of the rental online and the remaining 90% at the counter at pick-up. Nothing extra is blocked or held on your card at any point."
+        }
+      }
+    ]
+  }
+  </script>
+
   <!-- Preload hero image for faster LCP -->
   <link rel="preload" as="image" href="/assets/hero.webp" type="image/webp" media="(min-width: 1201px)" />
   <link rel="preload" as="image" href="/assets/hero-1200.webp" type="image/webp" media="(min-width: 769px) and (max-width: 1200px)" />
@@ -405,7 +431,7 @@
                   <span class="modal-option-price" id="modalFlexPriceDay"></span>
                 </span>
               </span>
-              <span class="modal-option-desc">10% deposit now, pay the rest at the counter. Cancel anytime — deposit non-refundable.</span>
+              <span class="modal-option-desc">Pay 10% now as a prepayment, the rest at the counter. Cancel anytime — the 10% is non-refundable.</span>
             </span>
           </label>
         </div>
@@ -714,6 +740,23 @@
           <h3 style="font-size:18px;margin:0 0 6px;"><a href="/car-rental/mykonos/" style="color:#093D5E;text-decoration:none;">Car rental in Mykonos</a></h3>
           <p style="color:#5a6a78;line-height:1.55;margin:0;">Pickup at Mykonos Airport (JMK), the new port, or your hotel — drive to every beach and town at your own pace. <a href="/car-rental/mykonos/" style="color:#093D5E;">See Mykonos cars →</a></p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOME FAQ (deposit questions) ============ -->
+  <section class="home-faq" style="padding:56px 0;background:#f8fafb;">
+    <div class="container">
+      <h2 style="font-size:28px;color:#093D5E;margin:0 0 24px;">Frequently Asked Questions</h2>
+      <div>
+        <details>
+          <summary>Is there a security deposit or a hold on my credit card?</summary>
+          <p>No. Wheelso takes no security deposit and places no pre-authorisation hold — €0 is blocked on your card, for every car category and every protection package, including the zero-excess Full Protection. You only need a valid credit or debit card in the main driver's name at pick-up; it is kept on file solely in case of an excluded-event incident, as set out in our Terms.</p>
+        </details>
+        <details>
+          <summary>What is the 10% I pay on the Pay Later rate?</summary>
+          <p>It is a prepayment towards your rental price, not a security deposit. You pay 10% of the rental online and the remaining 90% at the counter at pick-up. Nothing extra is blocked or held on your card at any point.</p>
+        </details>
       </div>
     </div>
   </section>

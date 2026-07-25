@@ -4719,7 +4719,8 @@ body.breakdown-open { overflow: hidden; }
   border-radius: 10px;
 }
 
-.naxos-faq details {
+.naxos-faq details,
+.home-faq details {
   border: 1px solid #e6edf2;
   border-radius: 10px;
   margin-bottom: 12px;
@@ -4727,13 +4728,15 @@ body.breakdown-open { overflow: hidden; }
   background: #fff;
 }
 
-.naxos-faq summary {
+.naxos-faq summary,
+.home-faq summary {
   font-weight: 600;
   cursor: pointer;
   color: #093D5E;
 }
 
-.naxos-faq details[open] summary {
+.naxos-faq details[open] summary,
+.home-faq details[open] summary {
   margin-bottom: 10px;
 }
 
