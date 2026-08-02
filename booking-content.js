@@ -104,15 +104,25 @@
   function maps(dest) {
     return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dest);
   }
+  // mapsAt(lat, lng) → directions to an EXACT point, for stations where the customer must
+  // reach our office rather than the port/airport it is named after.
+  // Why coordinates and not maps('Wheelso Car Rental - Naxos'): the text form is a Google
+  // SEARCH, and it was landing customers at Naxos/Paros PORT instead of the office (owner
+  // report, Aug 2026 peak). A lat/lng destination cannot be mis-resolved.
+  // Values taken from the owner's own Google Business links (Aug 2026) — they match the
+  // GeoCoordinates in the car-rental/{naxos,paros} landing-page schema.
+  function mapsAt(lat, lng) {
+    return 'https://www.google.com/maps/dir/?api=1&destination=' + lat + '%2C' + lng;
+  }
   var STATIONS = {
     'ATH-AIRPORT':  { label: 'Athens International Airport (ATH)', island: 'ATH', pointType: 'airport', meetGreet: false, mapsUrl: maps('Athens International Airport Eleftherios Venizelos') },
     'ATH-DOWNTOWN': { label: 'Athens Downtown — Syngrou 22',       island: 'ATH', pointType: 'office',  meetGreet: false, mapsUrl: maps('Leoforos Syngrou 22, Athina 11742, Greece') },
     'MYK-AIRPORT':  { label: 'Mykonos Airport (JMK)',              island: 'MYK', pointType: 'airport', meetGreet: true,  mapsUrl: maps('Mykonos National Airport JMK') },
     'MYK-PORT':     { label: 'Mykonos New Port (Tourlos)',         island: 'MYK', pointType: 'port',    meetGreet: true,  mapsUrl: maps('Mykonos New Port Tourlos') },
     'PAR-AIRPORT':  { label: 'Paros National Airport (PAS)',       island: 'PAR', pointType: 'airport', meetGreet: false, mapsUrl: maps('Paros National Airport') },
-    'PAR-PORT':     { label: 'Paros Port (Parikia)',              island: 'PAR', pointType: 'port',    meetGreet: false, mapsUrl: maps('Parikia Port Paros') },
+    'PAR-PORT':     { label: 'Paros Port (Parikia)',              island: 'PAR', pointType: 'port',    meetGreet: false, mapsUrl: mapsAt('37.0853748', '25.1501469') }, // Wheelso Car Rental - Paros (office, NOT the port itself)
     'NAX-AIRPORT':  { label: 'Naxos Island National Airport (JNX)', island: 'NAX', pointType: 'airport', meetGreet: false, mapsUrl: maps('Naxos Island National Airport') },
-    'NAX-PORT':     { label: 'Naxos Port (Chora)',                 island: 'NAX', pointType: 'port',    meetGreet: false, mapsUrl: maps('Naxos Port Chora') },
+    'NAX-PORT':     { label: 'Naxos Port (Chora)',                 island: 'NAX', pointType: 'port',    meetGreet: false, mapsUrl: mapsAt('37.1070914', '25.3794318') }, // Wheelso Car Rental - Naxos (office, NOT the port itself)
     'SKI-AIRPORT':  { label: 'Skiathos Airport (JSI)',             island: 'SKI', pointType: 'airport', meetGreet: false, mapsUrl: maps('Skiathos Island National Airport') },
     'SKI-PORT':     { label: 'Skiathos Port',                      island: 'SKI', pointType: 'port',    meetGreet: false, mapsUrl: maps('Skiathos Port') }
   };
