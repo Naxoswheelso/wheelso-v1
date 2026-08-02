@@ -103,6 +103,31 @@
       font-weight: 700;
     }
 
+    /* ── Action buttons (pick-up strip, trip card, My Booking) ──────────────
+       The LOOK stays inline (this file doubles as an email body, where <style>
+       is unreliable); only the INTERACTION states live here, because a
+       pseudo-class cannot be written as an inline style.
+
+       These rules touch ONLY transform / box-shadow / outline — three
+       properties that no inline style on those anchors sets. That is
+       deliberate: an inline style beats a class selector, so a rule for
+       background or color would silently lose (and the JS writes background
+       and color directly on #vQuickWhatsapp for the "Email us" fallback). */
+    .wh-btn {
+      transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+                  box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .wh-btn:active { transform: scale(0.97); }
+    .wh-btn:focus-visible { outline: 3px solid #1C5875; outline-offset: 3px; }
+    /* Touch devices fire :hover on tap and leave it stuck on, so gate it. */
+    @media (hover: hover) and (pointer: fine) {
+      .wh-btn:hover { box-shadow: 0 4px 14px rgba(9, 61, 94, 0.20); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .wh-btn { transition: none; }
+      .wh-btn:active { transform: none; }
+    }
+
     /* Responsive */
     @media only screen and (max-width: 640px) {
       .wh-container { width: 100% !important; }
@@ -215,7 +240,7 @@
                            box-sizing make inline-block render full-width, same idiom as the
                            call/WhatsApp buttons). .wh-btn-solid handles the print fallback. -->
                       <p style="margin:12px 0 0;">
-                        <a id="vQuickDirections" href="#" target="_blank" rel="noopener" class="wh-btn-solid" aria-label="Get driving directions to the pick-up point" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; font-weight:800; color:#ffffff; text-decoration:none; background:#093D5E; border:2px solid #093D5E; border-radius:10px; padding:15px 12px; line-height:20px;">🧭 Get directions</a>
+                        <a id="vQuickDirections" href="#" target="_blank" rel="noopener" class="wh-btn wh-btn-solid" aria-label="Get driving directions to the pick-up point" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; font-weight:800; color:#ffffff; text-decoration:none; background:#093D5E; border:2px solid #093D5E; border-radius:8px; padding:15px 12px; line-height:20px;">🧭 Get directions</a>
                       </p>
                     </td>
                   </tr>
@@ -224,10 +249,10 @@
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tr>
                           <td class="wh-stack" width="50%" style="padding:0 5px 0 0; vertical-align:top;">
-                            <a id="vQuickCall" href="#" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; color:#093D5E; text-decoration:none; border:2px solid #093D5E; border-radius:8px; padding:15px 8px;">📞 Call us</a>
+                            <a id="vQuickCall" href="#" class="wh-btn" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; color:#093D5E; text-decoration:none; border:2px solid #093D5E; border-radius:8px; padding:15px 8px;">📞 Call us</a>
                           </td>
                           <td class="wh-stack wh-stack-pad" width="50%" style="padding:0 0 0 5px; vertical-align:top;">
-                            <a id="vQuickWhatsapp" href="#" target="_blank" rel="noopener" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; color:#093D5E; text-decoration:none; background:#25D366; border-radius:8px; padding:15px 8px;">💬 WhatsApp</a>
+                            <a id="vQuickWhatsapp" href="#" target="_blank" rel="noopener" class="wh-btn" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13.5px; font-weight:700; color:#093D5E; text-decoration:none; background:#25D366; border-radius:8px; padding:15px 8px;">💬 WhatsApp</a>
                           </td>
                         </tr>
                       </table>
@@ -257,7 +282,7 @@
                       <!-- Secondary instance (the strip above holds the primary): outlined pill,
                            so the trip card stays calm but the target is still a real 44px button. -->
                       <p id="vPickupDirectionsWrap" style="margin:4px 0 0; display:none;">
-                        <a id="vPickupDirections" href="#" target="_blank" rel="noopener" aria-label="Get driving directions to the pick-up point" style="display:block; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#093D5E; text-decoration:none; border:2px solid #093D5E; border-radius:8px; padding:12px 8px; line-height:20px;">🧭 Get directions</a>
+                        <a id="vPickupDirections" href="#" target="_blank" rel="noopener" class="wh-btn" aria-label="Get driving directions to the pick-up point" style="display:block; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#093D5E; text-decoration:none; border:2px solid #093D5E; border-radius:8px; padding:12px 8px; line-height:20px;">🧭 Get directions</a>
                       </p>
                     </td>
                     <td class="wh-no-print" style="padding:18px 0; vertical-align:middle; width:10%; text-align:center;">
@@ -548,7 +573,7 @@
                       <p style="margin:0 0 14px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; color:#374151; line-height:1.55;">
                         Or open your booking directly on your phone — modify, cancel or check status anytime.
                       </p>
-                      <a id="vMyBookingLink" href="#" style="display:inline-block; background:#CFDD28; color:#093D5E; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; text-decoration:none; padding:10px 18px; border-radius:999px;">
+                      <a id="vMyBookingLink" href="#" class="wh-btn" style="display:inline-block; background:#CFDD28; color:#093D5E; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; text-decoration:none; padding:10px 18px; border-radius:999px;">
                         Open My Booking →
                       </a>
                     </td>
