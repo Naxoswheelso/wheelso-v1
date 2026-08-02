@@ -119,6 +119,10 @@
       body { background: #fff !important; }
       .wh-no-print { display: none !important; }
       .wh-shadow   { box-shadow: none !important; }
+      /* Browsers drop background colours when printing — a solid navy button would print as
+         white-on-white and vanish. Flip it to the outlined variant (the 2px navy border is
+         already on the element) so it stays legible on paper. */
+      .wh-btn-solid { background: #ffffff !important; color: #093D5E !important; }
     }
   </style>
 </head>
@@ -204,8 +208,14 @@
                       <p style="margin:0 0 3px 0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:11px; font-weight:700; color:#093D5E; letter-spacing:0.08em; text-transform:uppercase;">📍 Pickup point</p>
                       <p id="vQuickLocation" style="margin:0; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; font-weight:800; color:#093D5E; line-height:1.35;">—</p>
                       <p id="vQuickMeetNote" style="margin:4px 0 0; display:none; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:12.5px; color:#374151; line-height:1.4;">🪧 Meet &amp; greet — we'll find you there, no office to look for.</p>
-                      <p style="margin:8px 0 0;">
-                        <a id="vQuickDirections" href="#" target="_blank" rel="noopener" style="display:none; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#1C5875; text-decoration:none;">🧭 Get directions</a>
+                      <!-- Primary action of this strip: a full-width solid navy button, deliberately
+                           heavier than the outlined "Call us" / green WhatsApp pair below it.
+                           Was a 13px text link and customers were missing it. Keeps the
+                           display:none → JS display:'inline-block' contract (width:100% +
+                           box-sizing make inline-block render full-width, same idiom as the
+                           call/WhatsApp buttons). .wh-btn-solid handles the print fallback. -->
+                      <p style="margin:12px 0 0;">
+                        <a id="vQuickDirections" href="#" target="_blank" rel="noopener" class="wh-btn-solid" aria-label="Get driving directions to the pick-up point" style="display:none; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:15px; font-weight:800; color:#ffffff; text-decoration:none; background:#093D5E; border:2px solid #093D5E; border-radius:10px; padding:15px 12px; line-height:20px;">🧭 Get directions</a>
                       </p>
                     </td>
                   </tr>
@@ -244,8 +254,10 @@
                         <span id="vPickupDate">—</span><br />
                         <strong style="color:#093D5E;" id="vPickupTime">—</strong>
                       </p>
-                      <p id="vPickupDirectionsWrap" style="margin:0; display:none;">
-                        <a id="vPickupDirections" href="#" target="_blank" rel="noopener" style="font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#1C5875; text-decoration:none;">🧭 Get directions</a>
+                      <!-- Secondary instance (the strip above holds the primary): outlined pill,
+                           so the trip card stays calm but the target is still a real 44px button. -->
+                      <p id="vPickupDirectionsWrap" style="margin:4px 0 0; display:none;">
+                        <a id="vPickupDirections" href="#" target="_blank" rel="noopener" aria-label="Get driving directions to the pick-up point" style="display:block; box-sizing:border-box; width:100%; text-align:center; font-family:'Manrope',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; color:#093D5E; text-decoration:none; border:2px solid #093D5E; border-radius:8px; padding:12px 8px; line-height:20px;">🧭 Get directions</a>
                       </p>
                     </td>
                     <td class="wh-no-print" style="padding:18px 0; vertical-align:middle; width:10%; text-align:center;">
