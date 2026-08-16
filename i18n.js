@@ -292,7 +292,14 @@
     cofNotChargedYet:    { en: "You won't be charged until we confirm your booking",
                            el: 'Δεν θα χρεωθείτε μέχρι να επιβεβαιώσουμε την κράτηση' },
     cofNotChargedYetFlex:{ en: 'Charged only when we confirm · €{amount} balance at the desk',
-                           el: 'Χρέωση μόνο με την επιβεβαίωση · €{amount} υπόλοιπο στο γραφείο' }
+                           el: 'Χρέωση μόνο με την επιβεβαίωση · €{amount} υπόλοιπο στο γραφείο' },
+    // ---- availability lost mid-session (stop sale set after the search ran) ----
+    // Results live in memory; a car can sell out or be stopped while the customer is still
+    // choosing. Never show the raw API code ("stop_sale") — say what happened and what to do.
+    noLongerAvailable:   { en: 'Sorry — this car is no longer available for your dates. Someone may have just booked it, or we had to withdraw it. Please pick another car.',
+                           el: 'Λυπούμαστε — αυτό το αυτοκίνητο δεν είναι πλέον διαθέσιμο για τις ημερομηνίες σας. Μπορεί μόλις να κρατήθηκε ή να χρειάστηκε να το αποσύρουμε. Παρακαλούμε επιλέξτε άλλο αυτοκίνητο.' },
+    datesNotAvailable:   { en: 'Sorry — we cannot accept bookings for this location and these dates any more. Please try different dates or another location.',
+                           el: 'Λυπούμαστε — δεν μπορούμε πλέον να δεχτούμε κρατήσεις για αυτό το σημείο και αυτές τις ημερομηνίες. Δοκιμάστε άλλες ημερομηνίες ή άλλο σημείο παραλαβής.' }
   };
 
   function t(key, vars) {

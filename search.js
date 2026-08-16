@@ -1255,8 +1255,41 @@ function getPromoDiscount() {
   return promoState.applied ? promoState.discountAmount : 0;
 }
 
+// Results are fetched once and then live in memory for the whole session — a stop sale set
+// (or a car sold out) AFTER the search still shows as bookable, and the customer only finds
+// out when the server refuses the booking on the very last click. Re-ask the availability
+// endpoint before the driver form: same call the results page makes, so a car that is gone
+// from it is gone for these dates. Fail-OPEN on a network error — mirrors the backend gate,
+// a hiccup must not block a legitimate booking (the server re-checks anyway).
+async function isSelectedCarStillAvailable(carCode) {
+  if (!carCode || !searchCtx.pickup || !searchCtx.from || !searchCtx.to) return true;
+  try {
+    const result = await apiPost('/api/', {
+      pickup_station: frontendValueToStationCode(searchCtx.pickup),
+      return_station: searchCtx.return
+        ? frontendValueToStationCode(searchCtx.return)
+        : frontendValueToStationCode(searchCtx.pickup),
+      pickup_datetime: `${searchCtx.from}T${searchCtx.fromTime}:00`,
+      return_datetime: `${searchCtx.to}T${searchCtx.toTime}:00`,
+    });
+    const cars = Array.isArray(result) ? result : (result.cars || []);
+    return cars.some(c => (c.code || c.car_code) === carCode);
+  } catch (err) {
+    console.warn('[Wheelso] Availability re-check failed — letting the booking through:', err.message);
+    return true;
+  }
+}
+
 async function openDriverPage() {
   if (!driverPage) return;
+
+  const selectedCode = currentProtection?.vehicle?.code;
+  if (!(await isSelectedCarStillAvailable(selectedCode))) {
+    alert(t('noLongerAvailable'));
+    window.location.reload(); // back to a fresh search — the in-memory results are stale
+    return;
+  }
+
   const timing = checkPickupTiming();
   await ensurePromoChecked(timing.afterHoursFee);
   populateDriverSummary();
@@ -1678,7 +1711,15 @@ async function submitBooking(obj, timing) {
       driverContinueBtn.textContent = originalText;
       return;
     }
-    alert(`Sorry, we couldn't complete your booking:\n\n${err.message}\n\nPlease try again or contact us.`);
+    if (err.data?.error === 'stop_sale') {
+      // Server-side availability gate. err.message is the raw code ("stop_sale") because
+      // apiPost surfaces `error`, so never show it — the customer gets plain language and a
+      // fresh search, since whatever is left in memory is out of date by definition.
+      alert(t(err.data.message?.includes('location') ? 'datesNotAvailable' : 'noLongerAvailable'));
+      window.location.reload();
+      return;
+    }
+    alert(`Sorry, we couldn't complete your booking:\n\n${err.data?.message || err.message}\n\nPlease try again or contact us.`);
     driverContinueBtn.disabled = false;
     driverContinueBtn.textContent = originalText;
   }
