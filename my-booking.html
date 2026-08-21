@@ -520,9 +520,17 @@
     .mb-car-photo { width: 72px; height: 54px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #EFF6FF; display: none; }
     .mb-car-specs { font-size: 12px; color: #6B7280; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; }
 
-    /* ── Directions ── */
+    /* ── Directions (trip card) ── outlined full-width button, same as the voucher's trip card.
+       Was a 13px text link; customers kept asking for directions because nobody noticed it. */
     .mb-directions { margin-top: 14px; padding-top: 14px; border-top: 1px solid #F3F4F6; }
-    .mb-directions a { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #1C5875; text-decoration: none; }
+    .mb-directions a {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 8px;
+      background: #fff; color: #093D5E; border: 2px solid #093D5E; border-radius: 8px;
+      font-size: 13.5px; font-weight: 700; text-decoration: none; transition: opacity 0.15s;
+    }
+    .mb-directions a:hover { opacity: 0.85; }
+    .mb-directions a:focus-visible { outline: 3px solid #CFDD28; outline-offset: 2px; }
 
     /* ── Generic info list (what to bring / good to know) ── */
     .mb-info-item { display: flex; gap: 10px; padding: 7px 0; font-size: 13.5px; color: #374151; line-height: 1.5; }
@@ -554,8 +562,20 @@
     .mb-quick-label { font-size: 11px; font-weight: 700; color: #093D5E; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 3px; }
     .mb-quick-location { font-size: 15px; font-weight: 800; color: #093D5E; line-height: 1.35; margin: 0; }
     .mb-quick-meet-note { font-size: 12.5px; color: #374151; line-height: 1.4; margin: 6px 0 0; display: none; }
-    .mb-quick-directions { margin-top: 8px; display: none; }
-    .mb-quick-directions a { font-size: 13px; font-weight: 700; color: #1C5875; text-decoration: none; }
+    /* Primary action of the strip: solid navy full-width button, deliberately heavier than the
+       outlined Call us / green WhatsApp pair below. Was a 13px text link sitting right above two
+       real buttons and customers missed it. Same treatment as the voucher (#vQuickDirections) and
+       the confirmation email — keep the three in sync. JS toggles the wrapper's display. */
+    .mb-quick-directions { margin-top: 12px; display: none; }
+    .mb-quick-directions a {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; box-sizing: border-box; min-height: 50px; padding: 14px 12px;
+      background: #093D5E; color: #fff; border: 2px solid #093D5E; border-radius: 8px;
+      font-size: 15px; font-weight: 800; font-family: var(--font-body, 'Manrope', sans-serif);
+      text-decoration: none; transition: opacity 0.15s;
+    }
+    .mb-quick-directions a:hover { opacity: 0.9; }
+    .mb-quick-directions a:focus-visible { outline: 3px solid #CFDD28; outline-offset: 2px; }
     .mb-quick-btns { display: flex; gap: 8px; margin-top: 12px; }
     .mb-quick-btn-call {
       flex: 1; display: none; align-items: center; justify-content: center; gap: 6px;
@@ -632,7 +652,7 @@
         <p class="mb-quick-label">📍 Pickup point</p>
         <p class="mb-quick-location" id="mbQuickLocation">—</p>
         <p class="mb-quick-meet-note" id="mbQuickMeetNote">🪧 Meet &amp; greet — we'll find you there, no office to look for.</p>
-        <p class="mb-quick-directions" id="mbQuickDirectionsWrap"><a id="mbQuickDirections" href="#" target="_blank" rel="noopener">🧭 Get directions</a></p>
+        <p class="mb-quick-directions" id="mbQuickDirectionsWrap"><a id="mbQuickDirections" href="#" target="_blank" rel="noopener" aria-label="Get driving directions to the pick-up point">🧭 Get directions</a></p>
         <div class="mb-quick-btns">
           <a class="mb-quick-btn-call" id="mbQuickCall" href="#">📞 Call us</a>
           <a class="mb-quick-btn-wa" id="mbQuickWhatsapp" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
@@ -677,7 +697,7 @@
           </div>
         </div>
         <div class="mb-directions" id="mbDirectionsWrap" style="display:none;">
-          <a id="mbDirections" href="#" target="_blank" rel="noopener">🧭 Get directions to pick-up</a>
+          <a id="mbDirections" href="#" target="_blank" rel="noopener" aria-label="Get driving directions to the pick-up point">🧭 Get directions to pick-up</a>
         </div>
       </div>
 
