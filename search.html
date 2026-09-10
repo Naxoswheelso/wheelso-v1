@@ -588,8 +588,13 @@
 
               <div class="form-field">
                 <label for="email">Email <span class="req">*</span></label>
-                <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" />
+                <input type="email" id="email" name="email" required autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="you@example.com" />
                 <span class="form-hint">We'll send the confirmation and receipt to this email.</span>
+              </div>
+
+              <div class="form-field">
+                <label for="emailConfirm">Confirm email <span class="req">*</span></label>
+                <input type="email" id="emailConfirm" name="emailConfirm" required autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" />
               </div>
 
               <div class="form-row">
@@ -610,6 +615,29 @@
                 <div class="form-field form-field-phone">
                   <label for="phone">Phone <span class="req">*</span></label>
                   <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="6912345678" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="driverAgeExact">Driver's age <span class="optional">(optional)</span></label>
+                  <input type="text" id="driverAgeExact" name="driverAgeExact" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" />
+                </div>
+                <div class="form-field">
+                  <label for="passengers">People travelling <span class="optional">(optional)</span></label>
+                  <select id="passengers" name="passengers">
+                    <option value="">—</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                  </select>
+                  <span class="form-hint">Including the driver</span>
                 </div>
               </div>
 
@@ -879,9 +907,9 @@
   </div>
   </footer>
 
-  <script src="/i18n.js"></script>
+  <script src="/i18n.js?v=20260910"></script>
   <script src="country-codes.js"></script>
-  <script src="search.js"></script>
+  <script src="search.js?v=20260910"></script>
   <script>
     // Language switcher with localStorage persistence (toggles [data-lang-block] elements; main booking copy is currently English-only)
     (function () {
