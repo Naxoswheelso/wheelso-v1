@@ -1840,7 +1840,14 @@ function initCountryCombo() {
     close();
   });
   document.addEventListener('click', (e) => { if (!combo.contains(e.target)) close(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) close(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hidden) {
+      // Marks this Escape as handled, so the driver page's own Escape listener (registered later,
+      // it checks defaultPrevented) closes only the picker, not the whole driver page.
+      e.preventDefault();
+      close();
+    }
+  });
 }
 initCountryCombo();
 
@@ -1941,8 +1948,9 @@ function emailsMatch(a, b) {
 
 // One inline message per field: <p class="form-error" id="<inputId>Error" role="alert">, created on
 // first use right after the input (or after the .form-hint that directly follows it), reused after.
-// anchorEl (optional) puts a newly created message right after that element instead: for a control
-// that sits inside its own positioned wrapper, such as the country-code picker.
+// anchorEl (optional) puts a newly created message right after that element instead, e.g. the
+// country-code picker puts it inside its own wrapper, above the dropdown panel.
+// The field points at its message with aria-describedby while the message is shown.
 function setFieldError(inputEl, message, anchorEl) {
   if (!inputEl) return;
   const errId = `${inputEl.id}Error`;
@@ -1966,6 +1974,7 @@ function setFieldError(inputEl, message, anchorEl) {
   err.hidden = false;
   inputEl.classList.add('invalid');
   inputEl.setAttribute('aria-invalid', 'true');
+  inputEl.setAttribute('aria-describedby', errId);
 }
 
 function clearFieldError(inputEl) {
@@ -1977,6 +1986,7 @@ function clearFieldError(inputEl) {
   }
   inputEl.classList.remove('invalid');
   inputEl.removeAttribute('aria-invalid');
+  if (inputEl.getAttribute('aria-describedby') === `${inputEl.id}Error`) inputEl.removeAttribute('aria-describedby');
 }
 // ─── end driver form field helpers ───
 
@@ -1999,12 +2009,13 @@ function validateDriverForm() {
 
   // Country code is mandatory (no silent +30 default). Browsers autofill name, email and phone but
   // never this custom picker, so an autofilled form arrives here without it: say so in words and
-  // keep going, so every other field error shows in the same attempt. The message goes after
-  // #countryCombo, not inside it, so the absolutely positioned panel stays right under the toggle.
+  // keep going, so every other field error shows in the same attempt. The message goes after the
+  // hidden #country input, i.e. inside the position:relative #countryCombo: the wrapper grows by the
+  // message, so the absolutely positioned panel (top: 100% + 4px) opens below it instead of covering it.
   const countryHidden = document.getElementById('country');
   const countryToggle = document.getElementById('countryComboToggle');
   if (countryHidden && !countryHidden.value) {
-    setFieldError(countryToggle, t('countryCodeRequired'), document.getElementById('countryCombo'));
+    setFieldError(countryToggle, t('countryCodeRequired'), countryHidden);
     valid = false;
   } else {
     clearFieldError(countryToggle);
@@ -2059,9 +2070,7 @@ function validateDriverForm() {
     valid = false;
     if (checkboxError) {
       checkboxError.hidden = false;
-      checkboxError.textContent = !ageOK
-        ? 'Please confirm you are 21 or older and hold a valid driving licence.'
-        : 'Please read and agree to the rental terms and privacy policy.';
+      checkboxError.textContent = t(!ageOK ? 'checkboxAgeRequired' : 'checkboxTermsRequired');
       if (fieldsValid) checkboxError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else if (fieldsValid) {
       const el = document.getElementById(!ageOK ? 'ageConfirm' : 'termsAgree');
@@ -2076,9 +2085,10 @@ function validateDriverForm() {
     firstInvalid?.focus();
     // When the country picker is the first invalid field, open it so the list and its search box
     // are right there. Deferred: the Continue click is still bubbling, and the picker's document
-    // click listener would close a panel opened now (that click lands outside #countryCombo).
+    // click listener closes the panel (that click lands outside #countryCombo), also one that was
+    // already open, so the open state is checked only after that listener has run.
     const countryPanel = document.getElementById('countryComboPanel');
-    if (firstInvalid && firstInvalid.id === 'countryComboToggle' && countryPanel && countryPanel.hidden) {
+    if (firstInvalid && firstInvalid.id === 'countryComboToggle' && countryPanel) {
       setTimeout(() => { if (countryPanel.hidden) firstInvalid.click(); }, 0);
     }
   }
@@ -2276,7 +2286,8 @@ async function loadAvailabilityPrices() {
 })();
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && driverPage && !driverPage.hidden) closeDriverPage();
+  // defaultPrevented: this Escape already closed the country-code picker (see initCountryCombo).
+  if (e.key === 'Escape' && !e.defaultPrevented && driverPage && !driverPage.hidden) closeDriverPage();
 });
 
 // ============================================

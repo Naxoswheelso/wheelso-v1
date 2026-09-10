@@ -574,6 +574,8 @@
             <h2 class="driver-section-title">Στοιχεία οδηγού</h2>
             <p class="driver-section-sub">Θα στείλουμε εδώ την επιβεβαίωση κράτησης. Βεβαιωθείτε ότι όλα ταιριάζουν με το δίπλωμα οδήγησης.</p>
 
+            <!-- action must not look like a search URL: Chrome skips Autofill when it matches /search.html (kUrlSearchActionRe).
+                 Never submitted natively: search.js always calls preventDefault on submit. Keep in sync with search.html. -->
             <form id="driverForm" class="driver-form" action="/booking-details" method="post" novalidate>
               <div class="form-row">
                 <div class="form-field">

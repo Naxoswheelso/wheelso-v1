@@ -300,13 +300,17 @@
                            el: 'Λυπούμαστε — αυτό το αυτοκίνητο δεν είναι πλέον διαθέσιμο για τις ημερομηνίες σας. Μπορεί μόλις να κρατήθηκε ή να χρειάστηκε να το αποσύρουμε. Παρακαλούμε επιλέξτε άλλο αυτοκίνητο.' },
     datesNotAvailable:   { en: 'Sorry — we cannot accept bookings for this location and these dates any more. Please try different dates or another location.',
                            el: 'Λυπούμαστε — δεν μπορούμε πλέον να δεχτούμε κρατήσεις για αυτό το σημείο και αυτές τις ημερομηνίες. Δοκιμάστε άλλες ημερομηνίες ή άλλο σημείο παραλαβής.' },
-    // ---- driver form inline errors (confirm email + optional exact age + mandatory country code; shown by search.js) ----
+    // ---- driver form inline errors (confirm email + optional exact age + mandatory country code + the two checkboxes; shown by search.js) ----
     emailMismatch:       { en: "The two email addresses don't match.",
                            el: 'Τα δύο email δεν ταιριάζουν.' },
     ageInvalid:          { en: 'Rental is available for drivers aged 21–75. Please check the age or leave it empty.',
                            el: 'Η ενοικίαση επιτρέπεται για οδηγούς 21–75 ετών. Ελέγξτε την ηλικία ή αφήστε το πεδίο κενό.' },
     countryCodeRequired: { en: 'Please choose your country code.',
-                           el: 'Επιλέξτε κωδικό χώρας.' }
+                           el: 'Επιλέξτε κωδικό χώρας.' },
+    checkboxAgeRequired: { en: 'Please confirm you are 21 or older and hold a valid driving licence.',
+                           el: 'Επιβεβαιώστε ότι είστε 21 ετών ή άνω και έχετε έγκυρο δίπλωμα οδήγησης.' },
+    checkboxTermsRequired: { en: 'Please read and agree to the rental terms and privacy policy.',
+                             el: 'Διαβάστε και αποδεχτείτε τους όρους ενοικίασης και την πολιτική απορρήτου.' }
   };
 
   function t(key, vars) {
