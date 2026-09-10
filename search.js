@@ -1349,7 +1349,7 @@ async function openDriverPage() {
 
   // Trigger autofill: briefly show then focus first empty field
   requestAnimationFrame(() => {
-    const firstEmpty = ['firstName', 'lastName', 'email', 'phone']
+    const firstEmpty = ['firstName', 'lastName', 'email', 'emailConfirm', 'phone']
       .map(id => document.getElementById(id))
       .find(el => el && !el.value.trim());
     firstEmpty?.focus();
@@ -1725,25 +1725,45 @@ async function submitBooking(obj, timing) {
   }
 }
 
+// The ONE booking continuation. Reached from the form's submit event (the click below calls
+// requestSubmit) or straight from the click in browsers without requestSubmit. It re-validates on
+// every call: no "already validated" state survives a cancelled on-request popup, an API error or a
+// trip back to the extras page. Top-level on purpose — both callers look it up by name.
+function handleDriverSubmit() {
+  if (!driverContinueBtn || driverContinueBtn.disabled) return; // a booking request is already in flight
+  if (!validateDriverForm()) return;
+
+  const timing = checkPickupTiming();
+  if (!timing.ok) {
+    alert(timing.warning);
+    return;
+  }
+
+  const data = new FormData(driverForm);
+  const obj = Object.fromEntries(data);
+  const isUponRequest = !!currentProtection.vehicle?.admin_upon_request;
+
+  if (isUponRequest) {
+    showOnRequestConfirmPopup(() => submitBooking(obj, timing));
+    return;
+  }
+  submitBooking(obj, timing);
+}
+
 if (driverContinueBtn) {
-  driverContinueBtn.addEventListener('click', async () => {
-    if (!validateDriverForm()) return;
+  driverContinueBtn.addEventListener('click', () => {
+    // #driverContinue stays type="button", outside the form. requestSubmit() fires a real submit
+    // event, in the hope that browsers then offer to save the details (unproven, see spec §7).
+    // Never the form's own submit() method: it skips the submit event and navigates away.
+    if (typeof driverForm?.requestSubmit === 'function') driverForm.requestSubmit();
+    else handleDriverSubmit();
+  });
+}
 
-    const timing = checkPickupTiming();
-    if (!timing.ok) {
-      alert(timing.warning);
-      return;
-    }
-
-    const data = new FormData(driverForm);
-    const obj = Object.fromEntries(data);
-    const isUponRequest = !!currentProtection.vehicle?.admin_upon_request;
-
-    if (isUponRequest) {
-      showOnRequestConfirmPopup(() => submitBooking(obj, timing));
-      return;
-    }
-    submitBooking(obj, timing);
+if (driverForm) {
+  driverForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleDriverSubmit();
   });
 }
 
@@ -1867,6 +1887,8 @@ function buildBookingPayload(formObj, afterHoursFee = 0) {
     promo_discount_amount: getPromoDiscount() || null,
     promo_code: searchCtx.promo || null,
     driver_age: searchCtx.age || null,
+    driver_age_exact: parseAgeInput(formObj.driverAgeExact).value,
+    passengers: parsePassengersInput(formObj.passengers),
     flight_ferry: formObj.flight || null,
     notes: formObj.notes || null,
     extras_json: extrasArr,
@@ -1891,6 +1913,66 @@ function showFdwDowngradeNotice() {
   el.style.display = 'block';
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
+// ─── Driver form field helpers ───
+// Used by validateDriverForm, the form's input listener and buildBookingPayload. Every helper
+// tolerates a missing element: an old cached search.html without the new fields must still book.
+
+// Exact driver age (optional). Empty is fine; otherwise exactly two digits within 21–75.
+// `value` is null whenever `valid` is false.
+function parseAgeInput(raw) {
+  if (raw === '' || raw === undefined || raw === null) return { value: null, valid: true };
+  const s = String(raw);
+  if (!/^\d{2}$/.test(s)) return { value: null, valid: false };
+  const n = Number(s);
+  return n >= 21 && n <= 75 ? { value: n, valid: true } : { value: null, valid: false };
+}
+
+// People travelling (optional select): '1'…'9' → number, anything else → null.
+function parsePassengersInput(raw) {
+  const s = raw === undefined || raw === null ? '' : String(raw);
+  return /^[1-9]$/.test(s) ? Number(s) : null;
+}
+
+function emailsMatch(a, b) {
+  const norm = (v) => String(v === undefined || v === null ? '' : v).trim().toLowerCase();
+  return norm(a) === norm(b);
+}
+
+// One inline message per field: <p class="form-error" id="<inputId>Error" role="alert">, created on
+// first use right after the input (or after the .form-hint that directly follows it), reused after.
+function setFieldError(inputEl, message) {
+  if (!inputEl) return;
+  const errId = `${inputEl.id}Error`;
+  let err = document.getElementById(errId);
+  if (!err) {
+    err = document.createElement('p');
+    err.id = errId;
+    err.className = 'form-error';
+    err.setAttribute('role', 'alert');
+    let anchor = inputEl;
+    while (anchor.nextElementSibling && anchor.nextElementSibling.classList.contains('form-hint')) {
+      anchor = anchor.nextElementSibling;
+    }
+    anchor.insertAdjacentElement('afterend', err);
+  }
+  err.textContent = message;
+  err.hidden = false;
+  inputEl.classList.add('invalid');
+  inputEl.setAttribute('aria-invalid', 'true');
+}
+
+function clearFieldError(inputEl) {
+  if (!inputEl) return;
+  const err = document.getElementById(`${inputEl.id}Error`);
+  if (err) {
+    err.hidden = true;
+    err.textContent = '';
+  }
+  inputEl.classList.remove('invalid');
+  inputEl.removeAttribute('aria-invalid');
+}
+// ─── end driver form field helpers ───
 
 function validateDriverForm() {
   let valid = true;
@@ -1917,7 +1999,16 @@ function validateDriverForm() {
     return false;
   }
 
-  const required = ['firstName', 'lastName', 'email', 'phone'];
+  // Messages left from an earlier attempt are hidden here and shown again below if the value is
+  // still wrong. Both elements may be missing (old cached HTML) — the helpers accept null.
+  const emailConfirmEl = document.getElementById('emailConfirm');
+  const driverAgeExactEl = document.getElementById('driverAgeExact');
+  clearFieldError(emailConfirmEl);
+  clearFieldError(driverAgeExactEl);
+
+  const required = emailConfirmEl
+    ? ['firstName', 'lastName', 'email', 'emailConfirm', 'phone']
+    : ['firstName', 'lastName', 'email', 'phone'];
   required.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1933,21 +2024,39 @@ function validateDriverForm() {
     }
   });
 
+  // Confirm email: compared only when both are filled (an empty one is already marked above).
+  const emailEl = document.getElementById('email');
+  if (emailEl && emailConfirmEl && emailEl.value.trim() && emailConfirmEl.value.trim()
+    && !emailsMatch(emailEl.value, emailConfirmEl.value)) {
+    setFieldError(emailConfirmEl, t('emailMismatch'));
+    valid = false;
+  }
+
+  // Exact driver age is optional: empty passes, anything else must be two digits within 21–75.
+  if (driverAgeExactEl && !parseAgeInput(driverAgeExactEl.value).valid) {
+    setFieldError(driverAgeExactEl, t('ageInvalid'));
+    valid = false;
+  }
+
   const ageOK = document.getElementById('ageConfirm')?.checked;
   const termsOK = document.getElementById('termsAgree')?.checked;
   if (!ageOK || !termsOK) {
+    // The checkbox message is always shown, but it takes the scroll only when every field above is
+    // fine. Otherwise the first invalid field wins (below), so a field error is never left
+    // off-screen while the page scrolls down to the checkboxes.
+    const fieldsValid = valid;
     valid = false;
     if (checkboxError) {
       checkboxError.hidden = false;
       checkboxError.textContent = !ageOK
         ? 'Please confirm you are 21 or older and hold a valid driving licence.'
         : 'Please read and agree to the rental terms and privacy policy.';
-      checkboxError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
+      if (fieldsValid) checkboxError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (fieldsValid) {
       const el = document.getElementById(!ageOK ? 'ageConfirm' : 'termsAgree');
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    return false;
+    if (fieldsValid) return false;
   }
 
   if (!valid) {
@@ -1972,6 +2081,14 @@ if (driverForm) {
 
   driverForm.addEventListener('input', (e) => {
     if (e.target.classList.contains('invalid')) e.target.classList.remove('invalid');
+    // Editing either email hides the mismatch message (it sits under #emailConfirm); editing the
+    // age hides the age message. Every submit re-validates anyway.
+    if (e.target.id === 'email' || e.target.id === 'emailConfirm') {
+      const mismatchShown = document.getElementById('emailConfirmError')?.hidden === false;
+      if (mismatchShown) clearFieldError(document.getElementById('emailConfirm'));
+    } else if (e.target.id === 'driverAgeExact') {
+      clearFieldError(e.target);
+    }
   });
 
   ['ageConfirm', 'termsAgree'].forEach(id => {
