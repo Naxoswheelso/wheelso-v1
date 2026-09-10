@@ -1803,7 +1803,7 @@ function initCountryCombo() {
     hidden.value = c.dial;
     valueEl.textContent = `${isoToFlag(c.iso)} ${c.dial}`;
     valueEl.classList.remove('country-combo-placeholder');
-    toggle.classList.remove('invalid');
+    clearFieldError(toggle); // red outline + the "choose your country code" message
   }
   // No default selection — start empty so the customer must pick their own country
   // (the old +30 default was silently kept, mislabeling foreign numbers as Greek).
@@ -1941,7 +1941,9 @@ function emailsMatch(a, b) {
 
 // One inline message per field: <p class="form-error" id="<inputId>Error" role="alert">, created on
 // first use right after the input (or after the .form-hint that directly follows it), reused after.
-function setFieldError(inputEl, message) {
+// anchorEl (optional) puts a newly created message right after that element instead: for a control
+// that sits inside its own positioned wrapper, such as the country-code picker.
+function setFieldError(inputEl, message, anchorEl) {
   if (!inputEl) return;
   const errId = `${inputEl.id}Error`;
   let err = document.getElementById(errId);
@@ -1951,8 +1953,12 @@ function setFieldError(inputEl, message) {
     err.className = 'form-error';
     err.setAttribute('role', 'alert');
     let anchor = inputEl;
-    while (anchor.nextElementSibling && anchor.nextElementSibling.classList.contains('form-hint')) {
-      anchor = anchor.nextElementSibling;
+    if (anchorEl) {
+      anchor = anchorEl;
+    } else {
+      while (anchor.nextElementSibling && anchor.nextElementSibling.classList.contains('form-hint')) {
+        anchor = anchor.nextElementSibling;
+      }
     }
     anchor.insertAdjacentElement('afterend', err);
   }
@@ -1991,12 +1997,17 @@ function validateDriverForm() {
     return false;
   }
 
-  // Country code is now mandatory (no silent +30 default) — block submit if unset.
+  // Country code is mandatory (no silent +30 default). Browsers autofill name, email and phone but
+  // never this custom picker, so an autofilled form arrives here without it: say so in words and
+  // keep going, so every other field error shows in the same attempt. The message goes after
+  // #countryCombo, not inside it, so the absolutely positioned panel stays right under the toggle.
   const countryHidden = document.getElementById('country');
+  const countryToggle = document.getElementById('countryComboToggle');
   if (countryHidden && !countryHidden.value) {
-    document.getElementById('countryComboToggle')?.classList.add('invalid');
-    document.getElementById('countryCombo')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return false;
+    setFieldError(countryToggle, t('countryCodeRequired'), document.getElementById('countryCombo'));
+    valid = false;
+  } else {
+    clearFieldError(countryToggle);
   }
 
   // Messages left from an earlier attempt are hidden here and shown again below if the value is
@@ -2063,6 +2074,13 @@ function validateDriverForm() {
     const firstInvalid = driverForm.querySelector('.invalid');
     firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     firstInvalid?.focus();
+    // When the country picker is the first invalid field, open it so the list and its search box
+    // are right there. Deferred: the Continue click is still bubbling, and the picker's document
+    // click listener would close a panel opened now (that click lands outside #countryCombo).
+    const countryPanel = document.getElementById('countryComboPanel');
+    if (firstInvalid && firstInvalid.id === 'countryComboToggle' && countryPanel && countryPanel.hidden) {
+      setTimeout(() => { if (countryPanel.hidden) firstInvalid.click(); }, 0);
+    }
   }
   return valid;
 }
