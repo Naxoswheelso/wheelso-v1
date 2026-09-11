@@ -1846,6 +1846,7 @@ function initCountryCombo() {
       // it checks defaultPrevented) closes only the picker, not the whole driver page.
       e.preventDefault();
       close();
+      toggle.focus();
     }
   });
 }

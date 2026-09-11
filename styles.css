@@ -3486,6 +3486,7 @@ body.breakdown-open { overflow: hidden; }
 
 /* Searchable country-code combobox (booking driver form) */
 .country-combo { position: relative; }
+.country-combo > .form-error { margin-top: 6px; }
 .country-combo-toggle {
   width: 100%;
   display: flex;
